@@ -27,7 +27,6 @@ export class BTVehicleActorSheet extends ActorSheet {
   /** @override */
   get template() {
     return `systems/a-time-of-war/templates/actor/actor-vehicle-sheet.hbs`;
-    //return `systems/boilerplate/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
 
   /* -------------------------------------------- */

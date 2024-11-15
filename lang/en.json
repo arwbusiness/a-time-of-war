@@ -1,13 +1,5 @@
 {
   "BT": {
-    "Ability": {
-      "Str": { "long": "Strength", "abbr": "str" },
-      "Con": { "long": "Constitution", "abbr": "con" },
-      "Dex": { "long": "Dexterity", "abbr": "dex" },
-      "Int": { "long": "Intelligence", "abbr": "int" },
-      "Wis": { "long": "Wisdom", "abbr": "wis" },
-      "Cha": { "long": "Charisma", "abbr": "cha" }
-    },
     "SheetLabels": {
       "PersonActor": "Character Sheet",
       "PersonItem": "Item Sheet",
@@ -15,19 +7,22 @@
       "VehicleItem": "Vehicle Item Sheet",
       "Property": "Property Sheet"
     },
-    "Item": {
-      "Spell": {
-        "SpellLVL": "Level {level} Spells",
-        "AddLVL": "Add LVL {level}"
-      }
-    },
     "Effect": {
       "Source": "Source",
       "Toggle": "Toggle Effect",
       "Temporary": "Temporary Effects",
       "Passive": "Passive Effects",
       "Inactive": "Inactive Effects"
-    }
+    },
+	"Status": {
+		"stunned": "Stunned",
+		"bleeding": "Bleeding",
+		"knockdown": "Knocked Down",
+		"unconscious": "Unconscious",
+		"dead": "Dead",
+		"destroyed": "Destroyed",
+		"incapacitated": "Incapacitated"
+	}
   },
 
   "TYPES": {

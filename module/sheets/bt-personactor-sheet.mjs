@@ -34,9 +34,6 @@ export class BTPersonActorSheet extends ActorSheet {
 	  default:
 	    return `systems/a-time-of-war/templates/actor/actor-pc-sheet.hbs`;
 	}
-	  
-    //return `systems/a-time-of-war/templates/actor/actor-pc-sheet.hbs`;
-    //return `systems/boilerplate/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
 
   /* -------------------------------------------- */
