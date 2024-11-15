@@ -2,72 +2,244 @@
   "Actor": {
     "types": ["pc", "npc", "vehicle"],
     "templates": {
-      "base": {
-        "health": {
-          "value": 10,
-          "min": 0,
-          "max": 10
+      "person": {
+        "details": {
+          "gender": "",
+          "age": 0,
+          "build": "",
+          "biography": "",
         },
-        "power": {
-          "value": 5,
+        "damage": {
+          "value": 0,
           "min": 0,
-          "max": 5
+          "max": 20,
         },
-        "biography": ""
+        "fatigue": {
+          "value": 0,
+          "min": 0,
+          "max": 20,
+          "fragments": 0,
+        },
+        "mp": {
+          "walk": 1,
+          "run": 1,
+          "sprint": 1,
+          "jump": 1,
+          "climb": 1,
+          "swim": 1,
+          "crawl": 1,
+        }
       }
     },
-    "character": {
-      "templates": ["base"],
-      "attributes": {
-        "level": {
-          "value": 1
-        }
+    "vehicle": {
+      "type": "",
+      "tonnage": 0,
+      "pilot": "",
+      "details": {
+        "name": "",
+        "manufacturer": "",
+        "factory": "",
+        "production_year": 2500,
+        "class": "",
+        "chassis": "",
+        "armour": "",
+        "engine": "",
+        "communications": "",
+        "targeting": "",
       },
-      "abilities": {
-        "str": {
-          "value": 10
-        },
-        "dex": {
-          "value": 10
-        },
-        "con": {
-          "value": 10
-        },
-        "int": {
-          "value": 10
-        },
-        "wis": {
-          "value": 10
-        },
-        "cha": {
-          "value": 10
-        }
+      "stats": {
+        "cost": 0,
+        "bv": 0,
+      },
+      "pilot_skills": {
+        "gunnery": 4,
+        "piloting": 3,
+        "perception": 3,
+        "sensorops": 3,
+        "computers": 3,
+        "comms": 3,
+      },
+      "mp": {
+        "walk": 0,
+        "run": 0,
+        "jump": 0,
       }
     },
     "npc": {
-      "templates": ["base"],
-      "cr": 0
-    }
-  },
-  "Item": {
-    "types": ["item", "feature", "spell"],
-    "templates": {
-      "base": {
-        "description": ""
+      "templates": ["person"],
+      "healthmax": 8,
+      "fatiguemax": 8,
+      "general_skill": 0,
+      "custom_skills": {},
+    },
+    "pc": {
+      "templates": ["person"],
+      "luck": {
+        "value": 1,
+        "min": 1,
+        "max": 10,
+      },
+      "advancement": {
+        "xp_total": 0,
+        "xp_spent": 0,
+        "xp_unspent": 0,
+      },
+      "attributes": {
+        "str": { "level": 0, "xp": 0, },
+        "bod": { "level": 0, "xp": 0, },
+        "rfl": { "level": 0, "xp": 0, },
+        "dex": { "level": 0, "xp": 0, },
+        "wil": { "level": 0, "xp": 0, },
+        "int": { "level": 0, "xp": 0, },
+        "cha": { "level": 0, "xp": 0, },
+        "edg": { "level": 0, "xp": 0, },
+      },
+      "skills": {
+        "acrobatics": { "xp": 0, "level": -1, "link": "" },
+        "climbing": { "xp": 0, "level": -1, "link": "" },
+        "navigation_air": { "xp": 0, "level": -1, "link": "" },
+        "navigation_ground": { "xp": 0, "level": -1, "link": "" },
+        "navigation_kfjump": { "xp": 0, "level": -1, "link": "" },
+        "navigation_sea": { "xp": 0, "level": -1, "link": "" },
+        "navigation_space": { "xp": 0, "level": -1, "link": "" },
+        "perception": { "xp": 0, "level": -1, "link": "" },
+        "running": { "xp": 0, "level": -1, "link": "" },
+        "stealth": { "xp": 0, "level": -1, "link": "" },
+        "swimming": { "xp": 0, "level": -1, "link": "" },
+        "tracking": { "xp": 0, "level": -1, "link": "" },
+        "zero_g_operations": { "xp": 0, "level": -1, "link": "" },
+        "artillery": { "xp": 0, "level": -1, "link": "" },
+        "comms_conventional": { "xp": 0, "level": -1, "link": "" },
+        "comms_hpg": { "xp": 0, "level": -1, "link": "" },
+        "comms_blackbox": { "xp": 0, "level": -1, "link": "" },
+        "driving_ground": { "xp": 0, "level": -1, "link": "" },
+        "driving_rail": { "xp": 0, "level": -1, "link": "" },
+        "driving_sea": { "xp": 0, "level": -1, "link": "" },
+        "piloting_aerospace": { "xp": 0, "level": -1, "link": "" },
+        "piloting_air": { "xp": 0, "level": -1, "link": "" },
+        "piloting_battlesuit": { "xp": 0, "level": -1, "link": "" },
+        "piloting_mech": { "xp": 0, "level": -1, "link": "" },
+        "piloting_protomech": { "xp": 0, "level": -1, "link": "" },
+        "piloting_spacecraft": { "xp": 0, "level": -1, "link": "" },
+        "sensorops": { "xp": 0, "level": -1, "link": "" },
+        "tech_aeronautics": { "xp": 0, "level": -1, "link": "" },
+        "tech_cybernetics": { "xp": 0, "level": -1, "link": "" },
+        "tech_electronic": { "xp": 0, "level": -1, "link": "" },
+        "tech_jets": { "xp": 0, "level": -1, "link": "" },
+        "tech_mechanical": { "xp": 0, "level": -1, "link": "" },
+        "tech_myomer": { "xp": 0, "level": -1, "link": "" },
+        "tech_nuclear": { "xp": 0, "level": -1, "link": "" },
+        "tech_weapons": { "xp": 0, "level": -1, "link": "" },
+        "archery": { "xp": 0, "level": -1, "link": "" },
+        "demolitions": { "xp": 0, "level": -1, "link": "" },
+        "escape_artist": { "xp": 0, "level": -1, "link": "" },
+        "martial_arts": { "xp": 0, "level": -1, "link": "" },
+        "medtech_general": { "xp": 0, "level": -1, "link": "" },
+        "medtech_veterinary": { "xp": 0, "level": -1, "link": "" },
+        "melee_weapons": { "xp": 0, "level": -1, "link": "" },
+        "small_arms": { "xp": 0, "level": -1, "link": "" },
+        "strategy": { "xp": 0, "level": -1, "link": "" },
+        "support_weapons": { "xp": 0, "level": -1, "link": "" },
+        "surgery": { "xp": 0, "level": -1, "link": "" },
+        "tactics_infantry": { "xp": 0, "level": -1, "link": "" },
+        "tactics_land": { "xp": 0, "level": -1, "link": "" },
+        "tactics_sea": { "xp": 0, "level": -1, "link": "" },
+        "tactics_air": { "xp": 0, "level": -1, "link": "" },
+        "tactics_space": { "xp": 0, "level": -1, "link": "" },
+        "thrown_weapons": { "xp": 0, "level": -1, "link": "" },
+        "carouse": { "xp": 0, "level": -1, "link": "" },
+        "deception": { "xp": 0, "level": -1, "link": "" },
+        "impersonation": { "xp": 0, "level": -1, "link": "" },
+        "intimidation": { "xp": 0, "level": -1, "link": "" },
+        "seduction": { "xp": 0, "level": -1, "link": "" },
+        "animal_handling": { "xp": 0, "level": -1, "link": "" },
+        "disguise": { "xp": 0, "level": -1, "link": "" },
+        "interrogation": { "xp": 0, "level": -1, "link": "" },
+        "leadership": { "xp": 0, "level": -1, "link": "" },
+        "negotiation": { "xp": 0, "level": -1, "link": "" },
+        "pickpocket": { "xp": 0, "level": -1, "link": "" },
+        "sleightofhand": { "xp": 0, "level": -1, "link": "" },
+        "quickdraw": { "xp": 0, "level": -1, "link": "" },
+        "training": { "xp": 0, "level": -1, "link": "" },
+        "administration": { "xp": 0, "level": -1, "link": "" },
+        "appraisal": { "xp": 0, "level": -1, "link": "" },
+        "computers": { "xp": 0, "level": -1, "link": "" },
+        "cryptography": { "xp": 0, "level": -1, "link": "" },
+        "forgery": { "xp": 0, "level": -1, "link": "" },
+        "investigation": { "xp": 0, "level": -1, "link": "" },
+        "science": { "xp": 0, "level": -1, "link": "" },
+        "security_systems": { "xp": 0, "level": -1, "link": "" },
+        "art": {},
+        "career": {},
+        "interest": {},
+        "language": {
+          "english": { "xp": 0, "level": -1, "link": "" },
+        },
+        "protocol": {},
+        "survival": {},
+        "streetwise": {},
       }
     },
-    "item": {
-      "templates": ["base"],
-      "quantity": 1,
-      "weight": 0,
-      "formula": "d20 + @str.mod + ceil(@lvl / 2)"
+  },
+  "Item": {
+    "types": ["weapon", "armour", "equipment", "vehicle_weapon", "vehicle_equipment", "property"],
+    "templates": {
+      "base": {
+        "description": "",
+        "model": "",
+        "ref": "",
+        "stats": {
+          "type": "",
+          "cost": 0,
+          "tonnage": 0.0,
+          "tech": "C",
+          "av": "D",
+        }
+      },
+      "vehiclebase": {
+        "description": "",
+        "model": "",
+        "ref": "TM, pg. 147",
+        "stats": {
+          "type": "",
+          "cost": 50,
+          "tonnage": 0.5,
+          "slots": 1,
+          "tech": "C",
+          "av": "D",
+          "bv": 0,
+        },
+      }
     },
-    "feature": {
-      "templates": ["base"]
-    },
-    "spell": {
+    "weapon": {
       "templates": ["base"],
-      "spellLevel": 1
+      
+    },
+    "armour": {
+      "templates": ["base"],
+      
+    },
+    "equipment": {
+      "templates": ["base"],
+      
+    },
+    "property": {
+      "description": "",
+      
+    },
+    "vehicle_weapon": {
+      "templates": ["vehiclebase"],
+      "profile": {
+        "heat": 0,
+        "damage": 0,
+        "r_min": 0,
+        "r_sht": 1,
+        "r_med": 2,
+        "r_lng": 3,
+      }
+    },
+    "vehicle_equipment": {
+      "templates": ["vehiclebase"],
     }
   }
 }

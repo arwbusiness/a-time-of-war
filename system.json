@@ -1,7 +1,7 @@
 {
   "id": "a-time-of-war",
   "title": "BattleTech: A Time of War",
-  "description": "Unofficial BattleTech: A Time of War system.",
+  "description": "Unofficial BattleTech: A Time of War roleplaying system.",
   "authors": [
     {
       "name": "MemeVampire",
@@ -20,7 +20,7 @@
       "thumbnail": "systems/a-time-of-war/assets/setup.png"
     }
   ],
-  "version": "1.0.3",
+  "version": "1.0.4",
   "compatibility": {
     "minimum": "11",
     "verified": "11.315"
@@ -34,13 +34,48 @@
       "path": "lang/en.json"
     }
   ],
-  "packs": [],
+  "packs": [
+    {
+      "name": "weapons",
+      "label": "Weapons",
+      "type": "Item"
+    },
+    {
+      "name": "armour",
+      "label": "Armour",
+      "type": "Item"
+    },
+    {
+      "name": "equipment",
+      "label": "Equipment",
+      "type": "Item"
+    },
+    {
+      "name": "vehicles_basic",
+      "label": "Vehicles (Basic)",
+      "type": "Item"
+    },
+    {
+      "name": "vehicle_weapon",
+      "label": "Vehicle Weapons",
+      "type": "Item"
+    },
+    {
+      "name": "vehicle_equipment",
+      "label": "Vehicle Equipment",
+      "type": "Item"
+    },
+    {
+      "name": "npcs_basic",
+      "label": "NPCs (Basic)",
+      "type": "Actor"
+    }
+  ],
   "packFolders": [],
   "socket": false,
   "manifest": "https://raw.githubusercontent.com/arwbusiness/a-time-of-war/main/system.json",
   "download": "https://github.com/arwbusiness/a-time-of-war/releases/latest/download/a-time-of-war.zip",
   "background": "systems/a-time-of-war/assets/setup.png",
   "gridDistance": 1,
-  "gridUnits": "m",
-  "primaryTokenAttribute": "health"
+  "gridUnits": "m"
 }
