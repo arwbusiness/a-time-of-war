@@ -7,18 +7,18 @@
           "gender": "",
           "age": 0,
           "build": "",
-          "biography": "",
+          "biography": ""
         },
         "damage": {
           "value": 0,
           "min": 0,
-          "max": 20,
+          "max": 20
         },
         "fatigue": {
           "value": 0,
           "min": 0,
           "max": 20,
-          "fragments": 0,
+          "fragments": 0
         },
         "mp": {
           "walk": 1,
@@ -27,7 +27,7 @@
           "jump": 1,
           "climb": 1,
           "swim": 1,
-          "crawl": 1,
+          "crawl": 1
         }
       }
     },
@@ -45,11 +45,11 @@
         "armour": "",
         "engine": "",
         "communications": "",
-        "targeting": "",
+        "targeting": ""
       },
       "stats": {
         "cost": 0,
-        "bv": 0,
+        "bv": 0
       },
       "pilot_skills": {
         "gunnery": 4,
@@ -57,12 +57,12 @@
         "perception": 3,
         "sensorops": 3,
         "computers": 3,
-        "comms": 3,
+        "comms": 3
       },
       "mp": {
         "walk": 0,
         "run": 0,
-        "jump": 0,
+        "jump": 0
       }
     },
     "npc": {
@@ -70,29 +70,29 @@
       "healthmax": 8,
       "fatiguemax": 8,
       "general_skill": 0,
-      "custom_skills": {},
+      "custom_skills": {}
     },
     "pc": {
       "templates": ["person"],
       "luck": {
         "value": 1,
         "min": 1,
-        "max": 10,
+        "max": 10
       },
       "advancement": {
         "xp_total": 0,
         "xp_spent": 0,
-        "xp_unspent": 0,
+        "xp_unspent": 0
       },
       "attributes": {
-        "str": { "level": 0, "xp": 0, },
-        "bod": { "level": 0, "xp": 0, },
-        "rfl": { "level": 0, "xp": 0, },
-        "dex": { "level": 0, "xp": 0, },
-        "wil": { "level": 0, "xp": 0, },
-        "int": { "level": 0, "xp": 0, },
-        "cha": { "level": 0, "xp": 0, },
-        "edg": { "level": 0, "xp": 0, },
+        "str": { "level": 0, "xp": 0 },
+        "bod": { "level": 0, "xp": 0 },
+        "rfl": { "level": 0, "xp": 0 },
+        "dex": { "level": 0, "xp": 0 },
+        "wil": { "level": 0, "xp": 0 },
+        "int": { "level": 0, "xp": 0 },
+        "cha": { "level": 0, "xp": 0 },
+        "edg": { "level": 0, "xp": 0 }
       },
       "skills": {
         "acrobatics": { "xp": 0, "level": -1, "link": "" },
@@ -173,13 +173,13 @@
         "career": {},
         "interest": {},
         "language": {
-          "english": { "xp": 0, "level": -1, "link": "" },
+          "english": { "xp": 0, "level": -1, "link": "" }
         },
         "protocol": {},
         "survival": {},
-        "streetwise": {},
+        "streetwise": {}
       }
-    },
+    }
   },
   "Item": {
     "types": ["weapon", "armour", "equipment", "vehicle_weapon", "vehicle_equipment", "property"],
@@ -193,7 +193,7 @@
           "cost": 0,
           "tonnage": 0.0,
           "tech": "C",
-          "av": "D",
+          "av": "D"
         }
       },
       "vehiclebase": {
@@ -207,25 +207,21 @@
           "slots": 1,
           "tech": "C",
           "av": "D",
-          "bv": 0,
-        },
+          "bv": 0
+        }
       }
     },
     "weapon": {
-      "templates": ["base"],
-      
+      "templates": ["base"]
     },
     "armour": {
-      "templates": ["base"],
-      
+      "templates": ["base"]
     },
     "equipment": {
-      "templates": ["base"],
-      
+      "templates": ["base"]
     },
     "property": {
-      "description": "",
-      
+      "description": ""
     },
     "vehicle_weapon": {
       "templates": ["vehiclebase"],
@@ -235,11 +231,11 @@
         "r_min": 0,
         "r_sht": 1,
         "r_med": 2,
-        "r_lng": 3,
+        "r_lng": 3
       }
     },
     "vehicle_equipment": {
-      "templates": ["vehiclebase"],
+      "templates": ["vehiclebase"]
     }
   }
 }
