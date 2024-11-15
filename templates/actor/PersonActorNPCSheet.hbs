@@ -1,76 +1,156 @@
 <form class="{{cssClass}} {{actor.type}} flexcol" autocomplete="off">
 
   {{!-- Sheet Header --}}
-  <header class="sheet-header">
-    <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
-    <div class="header-fields">
-      <h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
-      {{!-- The grid classes are defined in scss/global/_grid.scss. To use,
-      use both the "grid" and "grid-Ncol" class where "N" can be any number
-      from 1 to 12 and will create that number of columns.  --}}
-      <div class="resources grid grid-3col">
+	<header class="sheet-header">
+		<img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
+		<div class="header-fields">
+			<h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+			{{!-- The grid classes are defined in scss/global/_grid.scss. To use,
+			use both the "grid" and "grid-Ncol" class where "N" can be any number
+			from 1 to 12 and will create that number of columns.  --}}
+			<div class="resources grid grid-2col">
 
-        {{!-- "flex-group-center" is also defined in the _grid.scss file
-        and it will add a small amount of padding, a border, and will
-        center all of its child elements content and text. --}}
-        <div class="resource flex-group-center">
+				{{!-- "flex-group-center" is also defined in the _grid.scss file
+				and it will add a small amount of padding, a border, and will
+				center all of its child elements content and text. --}}
+				<div class="resource flex-group-center">
+					<label for="system.gender" class="resource-label">Gender Identity: </label>
+					<div class="resource flexrow flex-center flex-between">
+						<input type="text" name="system.gender" placeholder="" value="{{system.gender}}"/>
+					</div>
+				</div>
+
+				<div class="resource flex-group-center">
+					<label for="system.damage.value" class="resource-label">Damage</label>
+					<div class="resource flexrow flex-center flex-between">
+						<input type="number" name="system.damage.value" value="{{system.damage.value}}"/>
+						<span> / </span>
+						<label for="system.damage.max">{{system.damage.max}}</label>
+					</div>
+				</div>
+
+			</div>
+			<div class="resources grid grid-2col">
+				
+				<div class="resource flex-group-center">
+					<label for="system.build" class="resource-label">Build: </label>
+					<div class="resource flexrow flex-center flex-between">
+						<input type="text" name="system.build" placeholder="" value="{{system.build}}"/>
+					</div>
+				</div>
+
+				<div class="resource flex-group-center">
+					<label for="system.fatigue.value" class="resource-label">Fatigue</label>
+					<div class="resource flexrow flex-center flex-between">
+						<input type="number" name="system.fatigue.value" value="{{system.fatigue.value}}"/>
+						<span> / </span>
+						<label for="system.fatigue.max">{{system.fatigue.max}}</label>
+					</div>
+				</div>
+				
+			</div>
+			<div class="resources grid grid-2col">
+				
+				<div class="resource flex-group-center">
+					<label for="system.age" class="resource-label">Age: </label>
+					<div class="resource flexrow flex-center flex-between">
+						<input type="text" name="system.age" placeholder="20" value="{{system.age}}"/>
+					</div>
+				</div>
+
+				<div class="resource flex-group-center">
+					<label for="system.fatigue.value" class="resource-label">Luck</label>
+					<div class="resource flexrow flex-center flex-between">
+						<input type="number" name="system.luck.value" value="{{system.luck.value}}"/>
+						<span> / </span>
+						<label for="system.luck.max">{{system.luck.max}}</label>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+	</header>
+        <!--<div class="resource flex-group-center">
           <label for="system.health.value" class="resource-label">Health</label>
           <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number"/>
-            <span> / </span>
-            <input type="text" name="system.health.max" value="{{system.health.max}}" data-dtype="Number"/>
+          <input type="text" name="system.health.value" value="{{system.health.value}}" data-dtype="Number"/>
+          <span> / </span>
+          <input type="text" name="system.health.max" value="{{system.health.max}}" data-dtype="Number"/>
           </div>
-        </div>
-
-        <div class="resource flex-group-center">
-          <label for="system.power.value" class="resource-label">Power</label>
-          <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.power.value" value="{{system.power.value}}" data-dtype="Number"/>
-            <span> / </span>
-            <input type="text" name="system.power.max" value="{{system.power.max}}" data-dtype="Number"/>
-          </div>
-        </div>
-
-        <div class="resource flex-group-center">
-          <label for="system.cr" class="resource-label">CR / XP</label>
-          <div class="resource-content flexrow flex-center flex-between">
-            <input type="text" name="system.cr" value="{{system.cr}}" data-dtype="Number"/>
-            <span> / </span>
-            <input type="text" disabled="true" name="system.xp" value="{{system.xp}}" data-dtype="Number"/>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </header>
+        </div>-->
 
   {{!-- Sheet Tab Navigation --}}
   <nav class="sheet-tabs tabs" data-group="primary">
     {{!-- Default tab is specified in actor-sheet.mjs --}}
-    <a class="item" data-tab="description">Description</a>
-    <a class="item" data-tab="items">Items</a>
-    <a class="item" data-tab="effects">Effects</a>
+	
+    <a class="item" data-tab="gameplay">Gameplay</a>
+    <a class="item" data-tab="character">Character</a>
+    <a class="item" data-tab="equipment">Equipment</a>
+	{{#if (eq data.type "pc")}}
+	<a class="item" data-tab="progression">Progression</a>
+	{{/if}}
+    <a class="item" data-tab="options">Options</a>
+	
   </nav>
 
   {{!-- Sheet Body --}}
   <section class="sheet-body">
 
-    {{!-- Biography Tab --}}
-    <div class="tab biography" data-group="primary" data-tab="description">
+    <!--{{!-- Owned Features Tab --}}
+    <div class="tab features" data-group="primary" data-tab="features">
+      <section class="grid grid-3col">
+        <aside class="sidebar">
+
+          {{!-- The grid classes are defined in scss/global/_grid.scss. To use,
+          use both the "grid" and "grid-Ncol" class where "N" can be any number
+          from 1 to 12 and will create that number of columns.  --}}
+          <div class="abilities flexcol">
+            {{#each system.abilities as |ability key|}}
+            <div class="ability flexrow flex-group-center">
+              <label for="system.abilities.{{key}}.value" class="resource-label rollable flexlarge align-left" data-roll="d20+@abilities.{{key}}.mod" data-label="{{localize (lookup @root.config.abilities key)}}">{{localize (lookup @root.config.abilities key)}}</label>
+              <input type="text" name="system.abilities.{{key}}.value" value="{{ability.value}}" data-dtype="Number"/>
+              <span class="ability-mod rollable" data-roll="d20+@abilities.{{key}}.mod" data-label="{{localize (lookup @root.config.abilities key)}}">{{numberFormat ability.mod decimals=0 sign=true}}</span>
+            </div>
+            {{/each}}
+          </div>
+        </aside>
+
+        {{!-- For the main features list, span the right two columns --}}
+        <section class="main grid-span-2">
+          {{!-- This is a Handlebars partial. They're stored in the `/parts` folder next to this sheet, and defined in module/helpers/templates.mjs --}}
+          {{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPC.hbs"}}
+        </section>
+
+      </section>
+    </div>-->
+
+	
+	<div class="tab gameplay" data-group="primary" data-tab="gameplay">
+	{{#if (eq data.type "pc")}}
+		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPC.hbs"}}
+	{{else if (eq data.type "npc")}}
+		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayNPC.hbs"}}
+	{{/if}}
+	</div>
+	
+    <div class="tab character" data-group="primary" data-tab="character">
       {{!-- Editors must receive enriched text data from getData to properly handle rolls --}}
       {{editor enrichedBiography target="system.biography" engine="prosemirror" button=true editable=editable}}
     </div>
 
-    {{!-- Owned Items Tab --}}
-    <div class="tab items" data-group="primary" data-tab="items">
-       {{> "systems/a-time-of-war/templates/actor/parts/actor-items.hbs"}}
+    <div class="tab equipment" data-group="primary" data-tab="equipment">
+       {{> "systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs"}}
     </div>
 
-    {{!-- Active Effects Tab --}}
-    <div class="tab effects flexcol" data-group="primary" data-tab="effects">
-      {{> "systems/a-time-of-war/templates/actor/parts/actor-effects.hbs"}}
+	{{#if (eq data.type "pc")}}
+    <div class="tab progression" data-group="primary" data-tab="progression">
+      {{> "systems/a-time-of-war/templates/actor/parts/PersonActorProgression.hbs"}}
+    </div>
+	{{/if}}
+
+    <div class="tab options flexcol" data-group="primary" data-tab="options">
+      {{> "systems/a-time-of-war/templates/actor/parts/PersonActorOptions.hbs"}}
     </div>
 
   </section>
 </form>
-

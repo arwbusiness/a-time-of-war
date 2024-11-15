@@ -5,8 +5,12 @@
  */
 export const preloadHandlebarsTemplates = async function () {
 	return loadTemplates([
-		'systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs',
 		'systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPC.hbs',
+		'systems/a-time-of-war/templates/actor/parts/PersonActorGameplayNPC.hbs',
+		//'systems/a-time-of-war/templates/actor/parts/PersonActorCharacter.hbs',
+		'systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs',
+		'systems/a-time-of-war/templates/actor/parts/PersonActorProgression.hbs',
+		'systems/a-time-of-war/templates/actor/parts/PersonActorOptions.hbs',
 		/*
 		// Actor partials.
 		'systems/a-time-of-war/templates/actor/parts/actor-features.hbs',
