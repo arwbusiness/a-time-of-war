@@ -18,7 +18,7 @@ export class BTPersonActorSheet extends ActorSheet {
         {
           navSelector: '.sheet-tabs',
           contentSelector: '.sheet-body',
-          initial: 'features',
+          initial: 'gameplay',
         },
       ],
     });
@@ -29,10 +29,10 @@ export class BTPersonActorSheet extends ActorSheet {
     const data = this.document.toObject(false);
     switch(data.type) {
 	  case 'npc':
-	    return `systems/a-time-of-war/templates/actor/actor-npc-sheet.hbs`;
+	    return `systems/a-time-of-war/templates/actor/PersonActorNPCSheet.hbs`;
 	  case 'pc':
 	  default:
-	    return `systems/a-time-of-war/templates/actor/actor-pc-sheet.hbs`;
+	    return `systems/a-time-of-war/templates/actor/PersonActorPCSheet.hbs`;
 	}
   }
 

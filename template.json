@@ -31,40 +31,6 @@
         }
       }
     },
-    "vehicle": {
-      "type": "",
-      "tonnage": 0,
-      "pilot": "",
-      "details": {
-        "name": "",
-        "manufacturer": "",
-        "factory": "",
-        "production_year": 2500,
-        "class": "",
-        "chassis": "",
-        "armour": "",
-        "engine": "",
-        "communications": "",
-        "targeting": ""
-      },
-      "stats": {
-        "cost": 0,
-        "bv": 0
-      },
-      "pilot_skills": {
-        "gunnery": 4,
-        "piloting": 3,
-        "perception": 3,
-        "sensorops": 3,
-        "computers": 3,
-        "comms": 3
-      },
-      "mp": {
-        "walk": 0,
-        "run": 0,
-        "jump": 0
-      }
-    },
     "npc": {
       "templates": ["person"],
       "healthmax": 8,
@@ -178,6 +144,40 @@
         "protocol": {},
         "survival": {},
         "streetwise": {}
+      }
+    },
+    "vehicle": {
+      "type": "",
+      "tonnage": 0,
+      "pilot": "",
+      "details": {
+        "name": "",
+        "manufacturer": "",
+        "factory": "",
+        "production_year": 2500,
+        "class": "",
+        "chassis": "",
+        "armour": "",
+        "engine": "",
+        "communications": "",
+        "targeting": ""
+      },
+      "stats": {
+        "cost": 0,
+        "bv": 0
+      },
+      "pilot_skills": {
+        "gunnery": 4,
+        "piloting": 3,
+        "perception": 3,
+        "sensorops": 3,
+        "computers": 3,
+        "comms": 3
+      },
+      "mp": {
+        "walk": 0,
+        "run": 0,
+        "jump": 0
       }
     }
   },
