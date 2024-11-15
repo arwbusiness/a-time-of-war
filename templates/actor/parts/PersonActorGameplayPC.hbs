@@ -1,10 +1,10 @@
 <div class="attributes" style="width:100%">
 	<h4 style="align:center">Attributes</h4>
 	<div class="grid grid-8col">
-		{{#each attributes as | attribute |}}
+		{{#each attributes}}
 			<div class="attribute flex-group-center">
-				<label for="system.attributes.{{attribute}}.level" class="resource-label">{{toUpperCase attribute}}</label>
-				<span>{{attribute.level}}</span>
+				<label for="system.attributes.{{this}}.level" class="resource-label">{{toUpperCase this}}</label>
+				<span>{{this.level}}</span>
 			</div>
 		{{/each}}
 	</div>
