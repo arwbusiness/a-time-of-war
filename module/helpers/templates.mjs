@@ -4,13 +4,17 @@
  * @return {Promise}
  */
 export const preloadHandlebarsTemplates = async function () {
-  return loadTemplates([
-    // Actor partials.
-    'systems/a-time-of-war/templates/actor/parts/actor-features.hbs',
-    'systems/a-time-of-war/templates/actor/parts/actor-items.hbs',
-    'systems/a-time-of-war/templates/actor/parts/actor-spells.hbs',
-    'systems/a-time-of-war/templates/actor/parts/actor-effects.hbs',
-    // Item partials
-    'systems/a-time-of-war/templates/item/parts/item-effects.hbs',
-  ]);
+	return loadTemplates([
+		'systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs',
+		'systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPC.hbs',
+		/*
+		// Actor partials.
+		'systems/a-time-of-war/templates/actor/parts/actor-features.hbs',
+		'systems/a-time-of-war/templates/actor/parts/actor-items.hbs',
+		'systems/a-time-of-war/templates/actor/parts/actor-spells.hbs',
+		'systems/a-time-of-war/templates/actor/parts/actor-effects.hbs',
+		// Item partials
+		'systems/a-time-of-war/templates/item/parts/item-effects.hbs',
+		*/
+	]);
 };
