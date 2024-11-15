@@ -58,13 +58,15 @@ export class BTPersonActorSheet extends ActorSheet {
 
     // Prepare character data and items.
     if (actorData.type == 'pc') {
-      this._prepareItems(context);
-      this._prepareCharacterData(context);
+		this._preparePCData(context);
+      //this._prepareItems(context);
+      //this._prepareCharacterData(context);
     }
 
     // Prepare NPC data and items.
     if (actorData.type == 'npc') {
-      this._prepareItems(context);
+		this._prepareNPCData(context);
+      //this._prepareItems(context);
     }
 
     // Enrich biography info for display
@@ -84,11 +86,11 @@ export class BTPersonActorSheet extends ActorSheet {
     );
 
     // Prepare active effects
-    context.effects = prepareActiveEffectCategories(
+    /*context.effects = prepareActiveEffectCategories(
       // A generator that returns all effects stored on the actor
       // as well as any items
       this.actor.allApplicableEffects()
-    );
+    );*/
 
     return context;
   }
@@ -98,7 +100,17 @@ export class BTPersonActorSheet extends ActorSheet {
    *
    * @param {object} context The context object to mutate
    */
-  _prepareCharacterData(context) {
+  _preparePCData(context) {
+    // This is where you can enrich character-specific editor fields
+    // or setup anything else that's specific to this type
+  }
+
+  /**
+   * Character-specific context modifications
+   *
+   * @param {object} context The context object to mutate
+   */
+  _prepareNPCData(context) {
     // This is where you can enrich character-specific editor fields
     // or setup anything else that's specific to this type
   }
