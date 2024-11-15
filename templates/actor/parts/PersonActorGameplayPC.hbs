@@ -1,33 +1,19 @@
-<div class="attributes" style="width:100%">
-	<h4 style="align:center">Attributes</h4>
-	{{#each system.attributes as |attribute key|}}
-		<div class="ability flexrow flex-group-center">
-			<label for="system.attributes.{{key}}.value" class="resource-label rollable flexlarge align-left" data-label="system.attributes.{{key}}">{{attribute key}}</label>
-			|||||
-			{{attribute}}
-			|
-			{{key}}
-			|
-			{{attribute.name}}
-			|
-			{{key.name}}
-			|
-			{{key.value}}
-			|||||||
-			<span id="system.attributes.{{key}}.value">{{attribute.value}}</span>
-		</div>
-	{{/each}}
-	<div class="grid grid-8col">
-		STRENGTH PEOPLE
-		<div class="attribute flex-group-center">
-			<label for="system.attributes.str.level" class="resource-label">{{system.attributes.str}}</label> {{system.attributes.str.level}} 
-		</div>
-		<div class="attribute flex-group-center">
-			<label for="system.attributes.bod.level" class="resource-label">{{system.attributes.bod}}</label> {{system.attributes.bod.level}} 
-		</div>
-		<div class="attribute flex-group-center">
-			<label for="system.attributes.rfl.level" class="resource-label">{{system.attributes.rfl}}</label> {{system.attributes.rfl.level}} 
-		</div>
-	</div>
-	STRENGTH ASONFAONSFO
+<div class="attributes" style="width:100%; border:10px;">
+	<h4 style="float:center">Attributes</h4>
+	<table>
+		<tr>
+			{{#each system.attributes as |attribute key|}}
+			<th>
+				<label for="system.attributes.{{key}}.value" class="resource-label rollable flexlarge align-left" data-label="system.attributes.{{key}}">{{toUpperCase key}}</label>
+			</th>
+			{{/each}}
+		</tr>
+		<tr>
+			{{#each system.attributes as |attribute key|}}
+			<td>
+				<div class="align-center" id="system.attributes.{{key}}.value">{{attribute.level}}</div>
+			</td>
+			{{/each}}
+		</tr>
+	</table>
 </div>
