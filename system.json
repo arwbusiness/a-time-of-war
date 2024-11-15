@@ -1,0 +1,46 @@
+{
+  "id": "a-time-of-war",
+  "title": "BattleTech: A Time of War",
+  "description": "Unofficial BattleTech: A Time of War system.",
+  "authors": [
+    {
+      "name": "MemeVampire",
+      "discord": "Meme Vampire"
+    }
+  ],
+  "url": "https://github.com/arwbusiness/a-time-of-war",
+  "license": "LICENSE.txt",
+  "readme": "README.md",
+  "bugs": "a",
+  "changelog": "CHANGELOG.md",
+  "media": [
+    {
+      "type": "setup",
+      "url": "systems/a-time-of-war/assets/setup.png",
+      "thumbnail": "systems/a-time-of-war/assets/setup.png"
+    }
+  ],
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "11.315"
+  },
+  "esmodules": ["module/a-time-of-war.mjs"],
+  "styles": ["css/a-time-of-war.css"],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "packs": [],
+  "packFolders": [],
+  "socket": false,
+  "manifest": "https://raw.githubusercontent.com/arwbusiness/a-time-of-war/main/system.json",
+  "download": "https://github.com/arwbusiness/a-time-of-war/releases/latest/download/a-time-of-war.zip",
+  "background": "systems/a-time-of-war/assets/setup.png",
+  "gridDistance": 1,
+  "gridUnits": "m",
+  "primaryTokenAttribute": "health"
+}
