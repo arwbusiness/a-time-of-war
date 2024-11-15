@@ -1,10 +1,10 @@
-export const BOILERPLATE = {};
+export const BT = {};
 
 /**
  * The set of Ability Scores used within the system.
  * @type {Object}
  */
-BOILERPLATE.abilities = {
+BT.abilities = {
   str: 'BOILERPLATE.Ability.Str.long',
   dex: 'BOILERPLATE.Ability.Dex.long',
   con: 'BOILERPLATE.Ability.Con.long',
@@ -13,7 +13,7 @@ BOILERPLATE.abilities = {
   cha: 'BOILERPLATE.Ability.Cha.long',
 };
 
-BOILERPLATE.abilityAbbreviations = {
+BT.abilityAbbreviations = {
   str: 'BOILERPLATE.Ability.Str.abbr',
   dex: 'BOILERPLATE.Ability.Dex.abbr',
   con: 'BOILERPLATE.Ability.Con.abbr',

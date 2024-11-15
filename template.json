@@ -1,6 +1,6 @@
 {
   "Actor": {
-    "types": ["character", "npc"],
+    "types": ["pc", "npc", "vehicle"],
     "templates": {
       "base": {
         "health": {

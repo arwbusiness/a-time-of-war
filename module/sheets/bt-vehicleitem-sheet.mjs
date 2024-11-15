@@ -7,11 +7,11 @@ import {
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
  */
-export class BoilerplateItemSheet extends ItemSheet {
+export class BTVehicleItemSheet extends ItemSheet {
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ['boilerplate', 'sheet', 'item'],
+      classes: ['bt', 'sheet', 'item'],
       width: 520,
       height: 480,
       tabs: [
@@ -26,13 +26,13 @@ export class BoilerplateItemSheet extends ItemSheet {
 
   /** @override */
   get template() {
-    const path = 'systems/boilerplate/templates/item';
+    const path = 'systems/a-time-of-war/templates/item';
     // Return a single sheet for all item types.
-    // return `${path}/item-sheet.hbs`;
+    return `${path}/item-sheet.hbs`;
 
     // Alternatively, you could use the following return statement to do a
     // unique item sheet by type, like `weapon-sheet.hbs`.
-    return `${path}/item-${this.item.type}-sheet.hbs`;
+    //return `${path}/bt-${this.item.type}-sheet.hbs`;
   }
 
   /* -------------------------------------------- */
@@ -43,7 +43,7 @@ export class BoilerplateItemSheet extends ItemSheet {
     const context = super.getData();
 
     // Use a safe clone of the item data for further operations.
-    const itemData = this.document.toObject(false);
+    const actorData = this.document.toObject(false);
 
     // Enrich description info for display
     // Enrichment turns text like `[[/r 1d20]]` into buttons
@@ -60,13 +60,22 @@ export class BoilerplateItemSheet extends ItemSheet {
         relativeTo: this.item,
       }
     );
+	
+	if(actorData.type == 'vehicle_weapon')
+	{
+		
+	}
+	else if(actorData.type == 'vehicle_equipment')
+	{
+		
+	}
 
     // Add the item's data to context.data for easier access, as well as flags.
-    context.system = itemData.system;
-    context.flags = itemData.flags;
+    context.system = actorData.system;
+    context.flags = actorData.flags;
 
     // Adding a pointer to CONFIG.BOILERPLATE
-    context.config = CONFIG.BOILERPLATE;
+    context.config = CONFIG.BT;
 
     // Prepare active effects for easier access
     context.effects = prepareActiveEffectCategories(this.item.effects);

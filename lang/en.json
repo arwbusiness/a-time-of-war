@@ -1,5 +1,5 @@
 {
-  "BOILERPLATE": {
+  "BT": {
     "Ability": {
       "Str": { "long": "Strength", "abbr": "str" },
       "Con": { "long": "Constitution", "abbr": "con" },
@@ -9,8 +9,11 @@
       "Cha": { "long": "Charisma", "abbr": "cha" }
     },
     "SheetLabels": {
-      "Actor": "Boilerplate Actor Sheet",
-      "Item": "Boilerplate Item Sheet"
+      "PersonActor": "Character Sheet",
+      "PersonItem": "Item Sheet",
+      "VehicleActor": "Vehicle Sheet",
+      "VehicleItem": "Vehicle Item Sheet",
+      "Property": "Property Sheet"
     },
     "Item": {
       "Spell": {
@@ -29,13 +32,17 @@
 
   "TYPES": {
     "Actor": {
-      "character": "BOOGLEBLAST",
-      "npc": "NPC"
+      "pc": "Player Character",
+      "npc": "NPC",
+	  "vehicle": "Vehicle"
     },
     "Item": {
-      "item": "Item",
-      "feature": "Feature",
-      "spell": "Spell"
+      "weapon": "Weapon",
+      "armour": "Armour",
+      "equipment": "Equipment",
+      "property": "Property",
+      "vehicle_weapon": "Vehicle Weapon",
+      "vehicle_equipment": "Vehicle Equipment"
     }
   }
 }

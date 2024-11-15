@@ -1,12 +1,16 @@
 // Import document classes.
-import { BoilerplateActor } from './documents/actor.mjs';
-import { BoilerplateItem } from './documents/item.mjs';
+import { BTActor } from './documents/actor.mjs';
+import { BTItem } from './documents/item.mjs';
 // Import sheet classes.
-import { BoilerplateActorSheet } from './sheets/actor-sheet.mjs';
-import { BoilerplateItemSheet } from './sheets/item-sheet.mjs';
+import { BTPersonActorSheet } from './sheets/bt-personactor-sheet.mjs';
+import { BTVehicleActorSheet } from './sheets/bt-vehicleactor-sheet.mjs';
+import { BTPersonItemSheet } from './sheets/bt-personitem-sheet.mjs';
+import { BTVehicleItemSheet } from './sheets/bt-vehicleitem-sheet.mjs';
+import { BTPropertySheet } from './sheets/bt-property-sheet.mjs';
+
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
-import { BOILERPLATE } from './helpers/config.mjs';
+import { BT } from './helpers/config.mjs';
 
 /* -------------------------------------------- */
 /*  Init Hook                                   */
@@ -15,27 +19,27 @@ import { BOILERPLATE } from './helpers/config.mjs';
 Hooks.once('init', function () {
   // Add utility classes to the global game object so that they're more easily
   // accessible in global contexts.
-  game.boilerplate = {
-    BoilerplateActor,
-    BoilerplateItem,
+  game.bt = {
+    BTActor,
+    BTItem,
     rollItemMacro,
   };
 
   // Add custom constants for configuration.
-  CONFIG.BOILERPLATE = BOILERPLATE;
+  CONFIG.BT = BT;
 
   /**
    * Set an initiative formula for the system
    * @type {String}
    */
   CONFIG.Combat.initiative = {
-    formula: '1d20 + @abilities.dex.mod',
-    decimals: 2,
+    formula: '2d6'//,
+    //decimals: 0,
   };
 
   // Define custom Document classes
-  CONFIG.Actor.documentClass = BoilerplateActor;
-  CONFIG.Item.documentClass = BoilerplateItem;
+  CONFIG.Actor.documentClass = BTActor;
+  CONFIG.Item.documentClass = BTItem;
 
   // Active Effects are never copied to the Actor,
   // but will still apply to the Actor from within the Item
@@ -44,14 +48,32 @@ Hooks.once('init', function () {
 
   // Register sheet application classes
   Actors.unregisterSheet('core', ActorSheet);
-  Actors.registerSheet('boilerplate', BoilerplateActorSheet, {
+  Actors.registerSheet('bt', BTPersonActorSheet, {
+    types: ["pc", "npc"],
     makeDefault: true,
-    label: 'BOILERPLATE.SheetLabels.Actor',
+    label: 'BT.SheetLabels.PersonActor', //found in lang/en.json
+  });
+  Actors.registerSheet('bt', BTVehicleActorSheet, {
+    types: ["vehicle"],
+    makeDefault: true,
+    label: 'BT.SheetLabels.VehicleActor',
   });
   Items.unregisterSheet('core', ItemSheet);
-  Items.registerSheet('boilerplate', BoilerplateItemSheet, {
+  Items.registerSheet('bt', BTPersonItemSheet, {
+    types: ["weapon", "armour", "equipment"],
     makeDefault: true,
-    label: 'BOILERPLATE.SheetLabels.Item',
+    label: 'BT.SheetLabels.PersonItem',
+  });
+  Items.unregisterSheet('core', ItemSheet);
+  Items.registerSheet('bt', BTVehicleItemSheet, {
+    types: ["vehicle_weapon", "vehicle_equipment"],
+    makeDefault: true,
+    label: 'BT.SheetLabels.VehicleItem',
+  });
+  Items.registerSheet('bt', BTPropertySheet, {
+    types: ["property"],
+    makeDefault: true,
+    label: 'BT.SheetLabels.Property',
   });
 
   // Preload Handlebars templates.
@@ -99,7 +121,7 @@ async function createItemMacro(data, slot) {
   const item = await Item.fromDropData(data);
 
   // Create the macro command using the uuid.
-  const command = `game.boilerplate.rollItemMacro("${data.uuid}");`;
+  const command = `game.bt.rollItemMacro("${data.uuid}");`;
   let macro = game.macros.find(
     (m) => m.name === item.name && m.command === command
   );
@@ -109,7 +131,7 @@ async function createItemMacro(data, slot) {
       type: 'script',
       img: item.img,
       command: command,
-      flags: { 'boilerplate.itemMacro': true },
+      flags: { 'bt.itemMacro': true },
     });
   }
   game.user.assignHotbarMacro(macro, slot);

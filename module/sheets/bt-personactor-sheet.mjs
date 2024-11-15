@@ -7,11 +7,11 @@ import {
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
  */
-export class BoilerplateActorSheet extends ActorSheet {
+export class BTPersonActorSheet extends ActorSheet {
   /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ['boilerplate', 'sheet', 'actor'],
+      classes: ['bt', 'sheet', 'actor', 'person'],
       width: 600,
       height: 600,
       tabs: [
@@ -26,7 +26,17 @@ export class BoilerplateActorSheet extends ActorSheet {
 
   /** @override */
   get template() {
-    return `systems/boilerplate/templates/actor/actor-${this.actor.type}-sheet.hbs`;
+    const data = this.document.toObject(false);
+    switch(data.type) {
+	  case 'npc':
+	    return `systems/a-time-of-war/templates/actor/actor-npc-sheet.hbs`;
+	  case 'pc':
+	  default:
+	    return `systems/a-time-of-war/templates/actor/actor-pc-sheet.hbs`;
+	}
+	  
+    //return `systems/a-time-of-war/templates/actor/actor-pc-sheet.hbs`;
+    //return `systems/boilerplate/templates/actor/actor-${this.actor.type}-sheet.hbs`;
   }
 
   /* -------------------------------------------- */
@@ -47,10 +57,10 @@ export class BoilerplateActorSheet extends ActorSheet {
     context.flags = actorData.flags;
 
     // Adding a pointer to CONFIG.BOILERPLATE
-    context.config = CONFIG.BOILERPLATE;
+    context.config = CONFIG.BT;
 
     // Prepare character data and items.
-    if (actorData.type == 'character') {
+    if (actorData.type == 'pc') {
       this._prepareItems(context);
       this._prepareCharacterData(context);
     }

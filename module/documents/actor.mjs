@@ -2,7 +2,7 @@
  * Extend the base Actor document by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
  */
-export class BoilerplateActor extends Actor {
+export class BTActor extends Actor {
   /** @override */
   prepareData() {
     // Prepare data for the actor. Calling the super version of this executes
@@ -30,19 +30,20 @@ export class BoilerplateActor extends Actor {
   prepareDerivedData() {
     const actorData = this;
     const systemData = actorData.system;
-    const flags = actorData.flags.boilerplate || {};
+    const flags = actorData.flags.bt || {};
 
     // Make separate methods for each Actor type (character, npc, etc.) to keep
     // things organized.
-    this._prepareCharacterData(actorData);
+    this._preparePcData(actorData);
     this._prepareNpcData(actorData);
+    this._prepareVehicleData(actorData);
   }
 
   /**
    * Prepare Character type specific data
    */
-  _prepareCharacterData(actorData) {
-    if (actorData.type !== 'character') return;
+  _preparePcData(actorData) {
+    if (actorData.type !== 'pc') return;
 
     // Make modifications to data here. For example:
     const systemData = actorData.system;
@@ -66,6 +67,17 @@ export class BoilerplateActor extends Actor {
   }
 
   /**
+   * Prepare NPC type specific data.
+   */
+  _prepareVehicleData(actorData) {
+    if (actorData.type !== 'vehicle') return;
+
+    // Make modifications to data here. For example:
+    const systemData = actorData.system;
+    systemData.xp = systemData.cr * systemData.cr * 100;
+  }
+
+  /**
    * Override getRollData() that's supplied to rolls.
    */
   getRollData() {
@@ -73,8 +85,9 @@ export class BoilerplateActor extends Actor {
     const data = { ...this.system };
 
     // Prepare character roll data.
-    this._getCharacterRollData(data);
+    this._getPcRollData(data);
     this._getNpcRollData(data);
+    this._getVehicleRollData(data);
 
     return data;
   }
@@ -82,8 +95,8 @@ export class BoilerplateActor extends Actor {
   /**
    * Prepare character roll data.
    */
-  _getCharacterRollData(data) {
-    if (this.type !== 'character') return;
+  _getPcRollData(data) {
+    if (this.type !== 'pc') return;
 
     // Copy the ability scores to the top level, so that rolls can use
     // formulas like `@str.mod + 4`.
@@ -106,5 +119,14 @@ export class BoilerplateActor extends Actor {
     if (this.type !== 'npc') return;
 
     // Process additional NPC data here.
+  }
+
+  /**
+   * Prepare Vehicle roll data.
+   */
+  _getVehicleRollData(data) {
+    if (this.type !== 'vehicle') return;
+
+    // Process additional Vehicle data here.
   }
 }

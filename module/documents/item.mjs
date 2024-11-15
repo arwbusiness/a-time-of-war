@@ -2,7 +2,7 @@
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
  */
-export class BoilerplateItem extends Item {
+export class BTItem extends Item {
   /**
    * Augment the basic Item data model with additional dynamic data.
    */
@@ -10,6 +10,31 @@ export class BoilerplateItem extends Item {
     // As with the actor class, items are documents that can have their data
     // preparation methods overridden (such as prepareBaseData()).
     super.prepareData();
+	
+	const itemData = this;
+	
+	switch(itemData.type) {
+		case "weapon":
+			
+			break;
+		case "armour":
+			
+			break;
+		case "equipment":
+			
+			break;
+		case "vehicle_weapon":
+			
+			break;
+		case "vehicle_equipment":
+			
+			break;
+		case "property":
+			
+			break;
+		default:
+			break;
+	}
   }
 
   /**
@@ -25,6 +50,13 @@ export class BoilerplateItem extends Item {
 
     // If present, add the actor's roll data
     rollData.actor = this.actor.getRollData();
+	
+	/*this._getWeaponRollData(rollData);
+	this._getArmourRollData(rollData);
+	this._getEquipmentRollData(rollData);
+	this._getVehicleWeaponRollData(rollData);
+	this._getVehicleEquipmentRollData(rollData);
+	this._getPropertyRollData(rollData);*/
 
     return rollData;
   }
