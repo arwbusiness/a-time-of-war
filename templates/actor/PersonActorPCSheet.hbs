@@ -86,7 +86,7 @@
     <a class="item" data-tab="gameplay">Gameplay</a>
     <a class="item" data-tab="character">Character</a>
     <a class="item" data-tab="equipment">Equipment</a>
-	{{#if eq data.type "pc"}}
+	{{#if (eq data.type "pc")}}
 	<a class="item" data-tab="progression">Progression</a>
 	{{/if}}
     <a class="item" data-tab="options">Options</a>
@@ -126,9 +126,9 @@
 
 	
 	<div class="tab gameplay" data-group="primary" data-tab="gameplay">
-	{{#if eq data.type "pc"}}
+	{{#if (eq data.type "pc")}}
 		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPC.hbs"}}
-	{{else if eq data.type "npc"}}
+	{{else if (eq data.type "npc")}}
 		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayNPC.hbs"}}
 	{{/if}}
 	</div>
@@ -142,7 +142,7 @@
        {{> "systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs"}}
     </div>
 
-	{{#if eq data.type "pc"}}
+	{{#if (eq data.type "pc")}}
     <div class="tab progression" data-group="primary" data-tab="progression">
       {{> "systems/a-time-of-war/templates/actor/parts/PersonActorProgression.hbs"}}
     </div>

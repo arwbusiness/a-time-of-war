@@ -93,9 +93,12 @@ Handlebars.registerHelper('toUpperCase', function (str) {
 	return str.toUpperCase();
 });
 
-Handlebars.registerHelper('if eq', function(arg1, arg2) {
-	return arg1.equals(arg2);
-});
+Handlebars.registerHelper('eq', (a, b) => a == b)
+
+/*Handlebars.registerHelper('ifEqual', function (a, b, options) {
+    if (a == b) { return options.fn(this); }
+    return options.inverse(this);
+});*/
 
 /* -------------------------------------------- */
 /*  Ready Hook                                  */
