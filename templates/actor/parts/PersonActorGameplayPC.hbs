@@ -1,5 +1,11 @@
 <div class="attributes" style="width:100%">
 	<h4 style="align:center">Attributes</h4>
+	{{#each system.attributes as |attribute key|}}
+		<div class="ability flexrow flex-group-center">
+			<label for="system.attributes.{{key}}.value" class="resource-label rollable flexlarge align-left" data-label="{{localize (lookup @root.config.attributes key)}}">{{attribute key)}}</label>
+			<input type="text" name="system.attributes.{{key}}.value" value="{{attribute.value}}" data-dtype="Number"/>
+		</div>
+	{{/each}}
 	<div class="grid grid-8col">
 		STRENGTH PEOPLE
 		<div class="attribute flex-group-center">
@@ -11,24 +17,8 @@
 		<div class="attribute flex-group-center">
 			<label for="system.attributes.rfl.level" class="resource-label">{{system.attributes.rfl}}</label> {{system.attributes.rfl.level}} 
 		</div>
-		<!--{{#each attributes as |attribute id|}}
-		<li class="item flexrow" data-item-id="{{attribute._id}}">
-			<div class='item-name flexrow'>
-				<div class='item-image'>
-					<a class='rollable' data-roll-type='item'>
-						<img
-						src='assets/setup.png'
-						title='{{attribute}}'
-						width='24'
-						height='24'
-						/>
-					</a>
-				</div>
-				<h4>{{attribute.name}}</h4> {{attribute.level}}
-			</div>
-		</li>
-		{{/each}}-->
 	</div>
+	STRENGTH ASONFAONSFO
 </div>
 
 <!--<ol class='items-list'>

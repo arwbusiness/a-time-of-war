@@ -22,6 +22,9 @@
 		"dead": "Dead",
 		"destroyed": "Destroyed",
 		"incapacitated": "Incapacitated"
+	},
+	"Attributes": {
+		
 	}
   },
 
