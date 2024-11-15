@@ -29,7 +29,7 @@
 
   "TYPES": {
     "Actor": {
-      "character": "Character",
+      "character": "BOOGLEBLAST",
       "npc": "NPC"
     },
     "Item": {
