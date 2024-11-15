@@ -23,7 +23,7 @@
   "version": "1.0.7",
   "compatibility": {
     "minimum": "11",
-    "verified": "11.315"
+    "verified": "12"
   },
   "esmodules": ["module/a-time-of-war.mjs"],
   "styles": ["css/a-time-of-war.css"],
