@@ -1,0 +1,33 @@
+<div class="dice-roll bt-roll">
+	<div class="dice-result">
+	
+		{{#if flavor}}
+		<h4 class="dice-total flavor">{{flavor}}</h4>
+		{{/if}}
+		
+		{{#if targetName}}
+		<h4 class="dice-total formula target">Target: {{target}}</h4>
+		{{/if}}
+		
+		{{#if formula}}
+		<h4 class="dice-total formula">{{formula}}</h4>
+		{{/if}
+		
+		{{#if tooltip}} {{{tooltip}}} {{/if}}
+		
+		{{#if result}}
+        <h4 class="dice-total result">
+			{{result}}
+        </h4>
+        {{/if}}
+		
+        {{#if text}}
+            <span class="text">{{text}}</span>
+        {{/if}}
+		
+		<h4 class="dice-total margin">
+			{{margin successOrFail}}: {{margin}}
+		</h4>
+		
+	</div>
+</div>

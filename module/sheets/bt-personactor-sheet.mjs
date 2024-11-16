@@ -241,35 +241,233 @@ export class BTPersonActorSheet extends ActorSheet {
     return await Item.create(itemData, { parent: this.actor });
   }
 
-  /**
-   * Handle clickable rolls.
-   * @param {Event} event   The originating click event
-   * @private
-   */
-  _onRoll(event) {
-    event.preventDefault();
-    const element = event.currentTarget;
-    const dataset = element.dataset;
+	/**
+	* Handle clickable rolls.
+	* @param {Event} event   The originating click event
+	* @private
+	*/
+	_onRoll(event) {
+		event.preventDefault();
+		const element = event.currentTarget;
+		const dataset = element.dataset;
 
-    // Handle item rolls.
-    if (dataset.rollType) {
-      if (dataset.rollType == 'item') {
-        const itemId = element.closest('.item').dataset.itemId;
-        const item = this.actor.items.get(itemId);
-        if (item) return item.roll();
-      }
-    }
-
-    // Handle rolls that supply the formula directly.
-    if (dataset.roll) {
-      let label = dataset.label ? `[ability] ${dataset.label}` : '';
-      let roll = new Roll(dataset.roll, this.actor.getRollData());
-      roll.toMessage({
-        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        flavor: label,
-        rollMode: game.settings.get('core', 'rollMode'),
-      });
-      return roll;
-    }
-  }
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		const rollData = actorData.getRollData();
+		const rollType = dataset.rolltype;
+		
+		if(rollType == "skill")
+			console.log(systemData.skills[dataset.label]);
+		
+		switch(rollType) {
+			case "attribute":
+				return this.RollAttribute(element, dataset, actorData, systemData, rollData);
+			case "skill":
+				return this.RollSkill(element, dataset, actorData, systemData, rollData);
+			default:
+				console.error("RollType " + rollType + " not recognised!");
+				return null;
+		}
+	}
+	
+	GetAttributeMod(level) {
+		if(level == 0)
+			return -4;
+		else if(level == 1)
+			return -2;
+		else if(level == 2 || level == 3)
+			return -1;
+		else if(level >= 4 && level <= 6)
+			return 0;
+		else if(level >= 7 && level <= 9)
+			return 1;
+		else if(level == 10)
+			return 2;
+		else if(level >= 11) //Attribute/3 rounding down, max +5
+			return Math.min(5, Math.floor(level/3));
+	}
+	
+	GetLinkMod(linkText, systemData) {
+		let link = 0;
+		
+		console.log("GetLinkMod - linkText: " + linkText);
+		console.log("twoAttributes: " + linkText.length > 1);
+		//Are there two linked attributes?
+		if(linkText.length > 1) {
+			let linkA = this.GetAttributeMod(systemData.attributes[linkText[0]].level);
+			let linkB = this.GetAttributeMod(systemData.attributes[linkText[1]].level);
+			link += linkA + linkB;
+		}
+		else {
+			console.log("Attribute is " + systemData.attributes[linkText]);
+			console.log("Level: " + systemData.attributes[linkText].level);
+			link += this.GetAttributeMod(systemData.attributes[linkText].level);
+		}
+		
+		return link;
+	}
+	
+	RollAttribute(element, dataset, actorData, systemData, rollData) {
+		//Figure out the link modifier.
+		const linkText = dataset.link.split("+");
+		/*	? dataset.link.split("+")
+			: (rollType == "skill"
+				? systemData.skills[dataset.label].link.split("+")
+				: null);*/
+		console.log("LinkText: " + linkText);
+		const link = this.GetLinkMod(linkText, systemData);
+		
+		//Set the base TN
+		let tn = 7;
+		const twoAttributes = linkText.length > 1;
+		if(twoAttributes) {
+			tn = 18;
+		}
+		else {
+			tn = 12;
+		}
+			
+		const formula = "2d6+" + link;// + " >= " + tn;
+		let roll = new Roll(formula, rollData);
+		
+		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
+		let margin = "+0";
+		if(roll.total > tn) {
+			margin = "+" + Math.ceil((roll.total - tn)/2);
+		}
+		else if(roll.total < tn) {
+			margin = "-" + Math.floor((roll.total - tn)/2);
+		}
+			
+		roll.toMessage({
+			speaker: ChatMessage.getSpeaker({ actor: actorData }),
+			flavor: "Rolling " + dataset.label + ":",
+			rollMode: game.settings.get('core', 'rollMode'),
+			margin:margin,
+			tn:tn,
+			isSuccess:roll.total >= tn,
+			successOrFail:margin < 0 ? "fail" : "success",
+			content: renderTemplate("systems/a-time-of-war/templates/roll/roll.html")
+		});
+		
+		return roll;
+	}
+	
+	RollSkill(element, dataset, actorData, systemData, rollData) {
+		const skill = dataset.label;
+		
+		const link = systemData.skills[skill].link;
+		const tn = systemData.skills[skill].tn;
+		
+		console.log("skill link: " + link);
+		console.log("tn: " + tn);
+		
+		const level = systemData.skills[skill].level;
+		
+		console.log("Level: " + level);
+		
+		const formula = "2d6+" + this.GetLinkMod(link.split("+"), systemData) + level;// + " >= " + tn;
+		let roll = new Roll(formula, rollData);
+		
+		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
+		let margin = "+0";
+		if(roll.total > tn) {
+			margin = "+" + Math.ceil((roll.total - tn)/2);
+		}
+		else if(roll.total < tn) {
+			margin = "-" + Math.floor((roll.total - tn)/2);
+		}
+		
+		roll.toMessage({
+			speaker: ChatMessage.getSpeaker({ actor: actorData }),
+			flavor: "Rolling " + skill + ":",
+			rollMode: game.settings.get('core', 'rollMode'),
+			margin:margin,
+			tn:tn,
+			isSuccess:roll.total >= tn,
+			successOrFail:margin < 0 ? "fail" : "success",
+			content: renderTemplate("systems/a-time-of-war/templates/roll/roll.html")
+		});
+		
+		return roll;
+	}
 }
+
+
+//Make the rollable stuff rollable
+/*$(document).ready(function() {
+	//const actorData = this;
+	//const systemData = actorData.system;
+	const selector = '.rollable';
+	const rollData = actorData.getRollData();
+	
+	//Alter the selector and add classes if you need different roll types.
+	$(document).("click", selector, a => {
+		a.preventDefault();
+		
+		//Get the TN from the data-tn attribute.
+		const tn = a.dataset.tn;
+		//Get the mod.
+		const mod = 1;//systemData.attributes[systemData.attributes.indexOf(a.dataset.link)].level;
+		//remember to add injury modifiers here
+		
+		//Make the roll 
+		const formula = (mod != null && mod != 0
+			? (mod > 0 ? "+" + mod : "-" + mod)
+			: "") + "+2d6>=" + tn;
+		const roll = new Roll(formula, rollData);
+		
+		//Generate a system.preRoll Hook.
+		if (Hooks.call("system.preRoll", roll) === false)
+			return;
+		
+		//Evaluate the roll after the preRoll Hook.
+		roll.evaluate({async: false});
+		
+		//Calculate MOS or MOF.
+		let margin = roll.total == tn
+			? "+0"
+			: (roll.total > tn ? "+" : "-") + roll.total;
+			
+		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
+		let margin = "+0";
+		if(roll.total > tn) {
+			margin = "+" + Math.ceil((roll.total - tn)/2);
+		}
+		else if(roll.total < tn) {
+			margin = "-" + Math.floor((roll.total - tn)/2);
+		}
+		
+		temp = {
+			flavor:"ROLL",
+			tooltip:await roll.getTooltip(),
+			formula:formula,
+			result:roll.total,
+			isSuccess:roll.total >= tn,
+			margin:margin,
+			successOrFail:margin < 0 ? "fail" : "success"
+		};
+		
+		const rollMsgData = {
+			user: game.user.id,
+			speaker: {
+				actor: actor?.id || null,
+				token: actor?.token?.id || null,
+				alias: actor?.name || null
+			},
+			type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+			rolls:[roll],
+			content: await renderTemplate("systems/a-time-of-war/templates/roll/roll.html", temp),
+			sound: CONFIG.sounds.dice
+		}
+		
+		const rMode = game.settings.get("core", "rollMode");
+		const msgData = ChatMessage.applyRollMode(rollMsgData, rMode);
+		
+		await ChatMessage.create(msgData, {
+			rollMode:rMode
+		});
+		
+		//await roll.toMessage({flavor: ""});
+	});
+});*/

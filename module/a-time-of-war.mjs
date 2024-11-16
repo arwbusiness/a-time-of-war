@@ -174,3 +174,7 @@ function rollItemMacro(itemUuid) {
     item.roll();
   });
 }
+
+function roll() {
+	
+}

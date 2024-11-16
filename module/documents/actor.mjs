@@ -49,10 +49,10 @@ export class BTActor extends Actor {
     const systemData = actorData.system;
 
     // Loop through ability scores, and add their modifiers to our sheet output.
-    for (let [key, ability] of Object.entries(systemData.abilities)) {
+    /*for (let [key, ability] of Object.entries(systemData.abilities)) {
       // Calculate the modifier using d20 rules.
       ability.mod = Math.floor((ability.value - 10) / 2);
-    }
+    }*/
   }
 
   /**
@@ -63,7 +63,8 @@ export class BTActor extends Actor {
 
     // Make modifications to data here. For example:
     const systemData = actorData.system;
-    systemData.xp = systemData.cr * systemData.cr * 100;
+	
+    //systemData.xp = systemData.cr * systemData.cr * 100;
   }
 
   /**
@@ -74,7 +75,8 @@ export class BTActor extends Actor {
 
     // Make modifications to data here. For example:
     const systemData = actorData.system;
-    systemData.xp = systemData.cr * systemData.cr * 100;
+    
+	//systemData.xp = systemData.cr * systemData.cr * 100;
   }
 
   /**

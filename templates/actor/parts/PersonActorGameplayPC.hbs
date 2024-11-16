@@ -1,19 +1,39 @@
 <div class="attributes" style="width:100%; border:10px;">
+
 	<h4 style="float:center">Attributes</h4>
 	<table>
 		<tr>
 			{{#each system.attributes as |attribute key|}}
 			<th>
-				<label for="system.attributes.{{key}}.value" class="resource-label rollable flexlarge align-left" data-label="system.attributes.{{key}}">{{toUpperCase key}}</label>
+				<label for="system.attributes.{{key}}.level" class="resource-label rollable align-left" data-rolltype="attribute" data-tn="12" data-link="{{key}}" data-label="{{toUpperCase key}}">{{toUpperCase key}}</label>
 			</th>
 			{{/each}}
 		</tr>
 		<tr>
 			{{#each system.attributes as |attribute key|}}
 			<td>
-				<div class="align-center" id="system.attributes.{{key}}.value">{{attribute.level}}</div>
+				<div class="align-center" id="system.attributes.{{key}}.level">{{attribute.level}}</div>
 			</td>
 			{{/each}}
 		</tr>
 	</table>
+	
+	<h4 style="float:center">Skills</h4>
+	<table>
+		<tr>
+			{{#each system.skills as |skill key|}}
+			<th>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}">{{key}}</label>
+			</th>
+			{{/each}}
+		</tr>
+		<tr>
+			{{#each system.skills as |skill key|}}
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+			</td>
+			{{/each}}
+		</tr>
+	</table>
+
 </div>
