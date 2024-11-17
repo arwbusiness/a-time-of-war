@@ -49,10 +49,7 @@ export class BTActor extends Actor {
 		const systemData = actorData.system;
 		this.CalculateSkillLevels(actorData, systemData);
 		
-		console.log("TRYING TO ADD CUSTOM SKILL NOW");
 		this.AddCustomSkill(systemData, "art", "painting", "dex", "");
-		
-		//systemData.skills.climbing.tn = Math.random()*10;
 	}
 	
 	CalculateSkillLevels(actorData, systemData) {
@@ -60,7 +57,7 @@ export class BTActor extends Actor {
 		const tieredSkills = ["computers", "martial_arts", "melee_weapons", "pickpocket", "sleightofhand", "quickdraw", "art", "interest"];
 		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
 		
-		for(var i = 0; i <= skills.length; i++) {
+		for(var i = 0; i <= skills.length-1; i++) {
 			
 			let name = skills[i][0];
 			let data = Object.entries(skills[i][1]);
@@ -84,7 +81,6 @@ export class BTActor extends Actor {
 			let type = data.type;
 			
 			//What's the Link Modifier?
-			console.log(data.link);
 			let linkText = data.link.toString().split("+");
 			const linkA = systemData.attributes[linkText[0]].mod;
 			const linkB = linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0;
@@ -105,48 +101,17 @@ export class BTActor extends Actor {
 	}
 	
 	AddCustomSkill(systemData, baseSkill, skillName, linkA, linkB) {
-		console.log("REACHED CUSTOM SKILL CALL");
+		const skills = Object.entries(systemData.skills);
 		const skill = {
-			name: baseSkill + "/" + skillName,
-			xp: 0,
-			mod: 0,
-			level: -1,
-			link: linkA + linkB != "" ? "+" + linkB : "",
-			tn: 7,
-			type: "SB",
-			custom: true
+				xp: 0,
+				mod: 0,
+				level: -1,
+				link: linkA + (linkB != "" ? ("+" + linkB) : ""),
+				tn: 7,
+				type: "SB"
 		}
+		systemData.skills[baseSkill][skillName] = skill;
 		
-		console.error(systemData.skills[baseSkill]);
-		
-		switch(baseSkill) {
-			case "art":
-				systemData.skills.art.push(skill);
-				break;
-			case "career":
-				systemData.skills.career.push(skill);
-				break;
-			case "interest":
-				systemData.skills.interest.push(skill);
-				break;
-			case "language":
-				systemData.skills.language.push(skill);
-				break;
-			case "protocol":
-				systemData.skills.protocol.push(skill);
-				break;
-			case "survival":
-				systemData.skills.survival.push(skill);
-				break;
-			case "streetwise":
-				systemData.skills.streetwise.push(skill);
-				break;
-			default:
-				console.error("Base skill " + baseSkill + " not found!");
-				return null;
-		}
-		
-		console.log(systemData.skills.art);
 	}
 	
 	CalcSL(xp) {

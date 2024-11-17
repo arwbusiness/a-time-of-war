@@ -20,7 +20,7 @@
       "thumbnail": "systems/a-time-of-war/assets/setup.png"
     }
   ],
-  "version": "1.0.12",
+  "version": "1.0.13",
   "compatibility": {
     "minimum": "11",
     "verified": "12"

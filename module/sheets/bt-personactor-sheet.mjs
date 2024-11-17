@@ -284,17 +284,17 @@ export class BTPersonActorSheet extends ActorSheet {
 			return Math.min(5, Math.floor(level/3));
 	}
 	
-	GetLinkMod(linkText, systemData) {
+	GetLinkMod(linkText, systemData, level = false) {
 		let link = 0;
 		
 		//Are there two linked attributes?
 		if(linkText.length > 1) {
-			let linkA = this.GetAttributeMod(systemData.attributes[linkText[0]].level);
-			let linkB = this.GetAttributeMod(systemData.attributes[linkText[1]].level);
+			let linkA = !level ? this.GetAttributeMod(systemData.attributes[linkText[0]].level) : systemData.attributes[linkText[0]].level;
+			let linkB = !level ? this.GetAttributeMod(systemData.attributes[linkText[1]].level) : systemData.attributes[linkText[1]].level;
 			link += linkA + linkB;
 		}
 		else {
-			link += this.GetAttributeMod(systemData.attributes[linkText].level);
+			link += !level ? this.GetAttributeMod(systemData.attributes[linkText].level) : systemData.attributes[linkText].level;
 		}
 		
 		return link;
@@ -303,46 +303,53 @@ export class BTPersonActorSheet extends ActorSheet {
 	async RollAttribute(element, dataset, actorData, systemData, rollData) {
 		//Figure out the link modifier.
 		const linkText = dataset.link.split("+");
-		const link = this.GetLinkMod(linkText, systemData);
+		const link = this.GetLinkMod(linkText, systemData, true);
 		
 		//Set the base TN
 		let tn = 7;
 		const twoAttributes = linkText.length > 1;
-		if(twoAttributes) {
+		if(twoAttributes)
 			tn = 18;
-		}
-		else {
+		else
 			tn = 12;
-		}
 			
 		const formula = "{2d6+" + link + "}cs>=" + tn;
 		let roll = await new Roll(formula, rollData).evaluate();
 		
+		const results = roll.dice[0].results;
+		const dice1 = results[0].result;
+		const dice2 = results[1].result;
+		const dice3 = results[2] != null && results[2] != undefined ? results[2].result : "";
+		const droppedDie = Math.min(dice1,dice2,dice3) == dice1 ? 1 : Math.min(dice2,dice3) ? 2 : 3;
+		
+		const total = (dice3 ? dice1+dice2+dice3-Math.min(dice1,dice2,dice3) : dice1+dice2)+link;
+		
 		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
 		let margin = "+0";
-		if(roll.total > tn) {
-			margin = "+" + Math.ceil((roll.total - tn)/2);
+		if(total > tn) {
+			margin = "+" + Math.ceil((total - tn)/2);
 		}
-		else if(roll.total < tn) {
-			margin = Math.floor((roll.total - tn)/2);
+		else if(total < tn) {
+			margin = Math.floor((total - tn)/2);
 		}
-		
-		const results = roll.dice[0].results;
-		console.log(roll.dice[0].results);
 		
 		const flavor = "Rolling " + dataset.label + ":";
 		let msgData = {
 			name: dataset.label,
-			dice1: results[0].result,
-			dice2: results[1].result,
-			dice3: results[2] ? results[2].result : "",
-			speaker: actorData.name,//ChatMessage.getSpeaker({ actor: actorData }),
+			dice1: dice1,
+			dice2: dice2,
+			dice3: dice3,
+			droppedDie: droppedDie,
+			rollMod: link == 0 ? "+0" : link,
+			speaker: actorData.name,
 			flavor: flavor,
 			margin: margin,
 			tn: tn,
 			isSuccess: roll.total >= tn,
 			successOrFail: margin < 0 ? "fail" : "success",
-			rollType: "attribute"
+			rollType: "attribute",
+			result: total,
+			img: actorData.img
 		};
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
 		
@@ -360,39 +367,75 @@ export class BTPersonActorSheet extends ActorSheet {
 		const baseSkill = dataset.baseskill;
 		
 		const skill = baseSkill == undefined ? systemData.skills[name] : systemData.skills[baseSkill][name];
-		const link = skill.link;
-		const tn = skill.tn;
 		const level = skill.level;
+		const isTrained = level > -1;
+		const link = skill.link;
+		const tn = isTrained ? skill.tn : (link.toString().includes("+") ? 18 : 12);
 		const actionType = skill.type;
 		
-		const formula = "{2d6+" + this.GetLinkMod(link.split("+"), systemData) + level + "}cs>=" + tn;
+		const rollMod = this.GetLinkMod(link.split("+"), systemData, !isTrained) + (isTrained ? level : 0);
+		const formula = "{2d6+" + rollMod + "}cs>=" + tn;
+		console.log(formula);
 		let roll = await new Roll(formula, rollData).evaluate();
+		
+		const results = roll.dice[0].results;
+		const dice1 = results[0].result;
+		const dice2 = results[1].result;
+		const dice3 = results[2] != null && results[2] != undefined ? results[2].result : "";
+		const droppedDie = Math.min(dice1,dice2,dice3) == dice1 ? 1 : Math.min(dice2,dice3) ? 2 : 3;
+		
+		const total = (dice3 ? dice1+dice2+dice3-Math.min(dice1,dice2,dice3) : dice1+dice2) + rollMod;
+		//keeps highest 2 by default but there's probably a negative trait that makes you roll 3 keep the two lowest, so I should account for that.
 		
 		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
 		let margin = "+0";
-		if(roll.total > tn) {
-			margin = "+" + Math.ceil((roll.total - tn)/2);
+		if(total > tn) {
+			margin = "+" + Math.ceil((total - tn)/2);
 		}
-		else if(roll.total < tn) {
-			margin = Math.floor((roll.total - tn)/2);
+		else if(total < tn) {
+			margin = Math.floor((total - tn)/2);
 		}
 		
-		const results = roll.dice[0].results;
+		/*let skillName = "";
+		switch(dataset.label) {
+			case "acrobatics_freefall":
+				skillName = "Acrobatics/FreeFall";
+				break;
+			case "acrobatics_gymnastics":
+				skillName = "Acrobatics/Gymnastics";
+				break;
+			case "acrobatics_gymnastics":
+				skillName = "Acrobatics/Gymnastics";
+				break;
+			default:
+				skillName = dataset.label;
+				break;
+		}
+		*/
+		/*if(baseSkill != undefined)
+			skillName = baseSkill + "/" + dataset.label;
+		else
+			skillName = dataset.label;*/
 		
-		const flavor = "Rolling " + dataset.label + ":";
+		const flavor = "Rolling " + (baseSkill == undefined ? dataset.label : baseSkill + "/" + dataset.label) + (!isTrained ? " (Untrained)" : "") + ":";
+		
 		let msgData = {
 			name: dataset.label,
 			dice1: results[0].result,
 			dice2: results[1].result,
 			dice3: results[2] ? results[2].result : "",
-			speaker: actorData.name,//ChatMessage.getSpeaker({ actor: actorData }),
+			droppedDie: droppedDie,
+			rollMod: rollMod == 0 ? "+0" : rollMod,
+			speaker: actorData.name,
 			flavor: flavor,
 			margin: margin,
 			tn: tn,
 			isSuccess: roll.total >= tn,
-			successOrFail: margin < 0 ? "fail" : "success",
+			successOrFail: margin < 0 ? "FAILED" : "SUCCESS",
 			actionType: actionType,
-			rollType: "skill"
+			rollType: "skill",
+			result: total,
+			img: actorData.img
 		};
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
 		

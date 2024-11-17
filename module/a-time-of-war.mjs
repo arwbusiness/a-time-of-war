@@ -107,7 +107,11 @@ Handlebars.registerHelper('in', function(key, ...list) {
 });
 //toLowerCaseNested 
 
-Handlebars.registerHelper('eq', (a, b) => a == b)
+Handlebars.registerHelper('eq', (a, b) => a == b);
+Handlebars.registerHelper('le', (a, b) => a <= b);
+Handlebars.registerHelper('lt', (a, b) => a < b);
+Handlebars.registerHelper('ge', (a, b) => a >= b);
+Handlebars.registerHelper('gt', (a, b) => a > b);
 
 /*Handlebars.registerHelper('ifEqual', function (a, b, options) {
     if (a == b) { return options.fn(this); }

@@ -1,6 +1,6 @@
 <div class="attributes" style="width:100%; border:10px;">
 
-	<h4 style="float:center">Attributes</h4>
+	<h3 style="float:center">Attributes</h3>
 	<table>
 		<tr>
 			{{#each system.attributes as |attribute key|}}
@@ -18,7 +18,7 @@
 		</tr>
 	</table>
 	
-	<h4 style="float:center">Skills</h4>
+	<h3 style="float:center">Skills</h3>
 	<table>
 		<tr>
 			<th>
@@ -54,9 +54,9 @@
 		{{/each}}
 	</table>
 	<!-- Custom skill tables -->
-	<h4 style="float:center">Art</h4>
+	<h3 style="float:center; font-size:16px !important;">Arts</h3>
 	<table>
-		<tr>
+		<!--<tr>
 			<th>
 				<span>Skill</span>
 			</th>
@@ -69,11 +69,11 @@
 			<th>
 				<span>TN</span>
 			</th>
-		</tr>
+		</tr>-->
 		{{#each system.skills.art as |skill key|}}
 		<tr>
 			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="art">{{key}}</label>
+				<label for="system.skills.art.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="art">{{key}}</label>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
@@ -86,11 +86,17 @@
 			</td>
 		</tr>
 		{{/each}}
+		<tr>
+			<td>
+				<input type="text" oninput="AddNewSkill()">
+				<label for="createNewArt" class="resource-label align-left" data-rolltype="skill" data-label="createNewArt" data-baseskill="art">
+			</td>
+		</tr>
 	</table>
 	
-	<h4 style="float:center">Careers</h4>
+	<h3 style="float:center; font-size:16px !important;">Careers</h3>
 	<table>
-		<tr>
+		<!--<tr>
 			<th>
 				<span>Skill</span>
 			</th>
@@ -103,11 +109,11 @@
 			<th>
 				<span>TN</span>
 			</th>
-		</tr>
+		</tr>-->
 		{{#each system.skills.career as |skill key|}}
 		<tr>
 			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="career">{{key}}</label>
+				<label for="system.skills.career.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="career">{{key}}</label>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
@@ -122,9 +128,9 @@
 		{{/each}}
 	</table>
 	
-	<h4 style="float:center">Interests</h4>
+	<h3 style="float:center; font-size:16px !important;">Interests</h3>
 	<table>
-		<tr>
+		<!--<tr>
 			<th>
 				<span>Skill</span>
 			</th>
@@ -137,11 +143,11 @@
 			<th>
 				<span>TN</span>
 			</th>
-		</tr>
+		</tr>-->
 		{{#each system.skills.interest as |skill key|}}
 		<tr>
 			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="interest">{{key}}</label>
+				<label for="system.skills.interest.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="interest">{{key}}</label>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
@@ -156,9 +162,9 @@
 		{{/each}}
 	</table>
 		
-	<h4 style="float:center">Languages</h4>
+	<h3 style="float:center; font-size:16px !important;">Languages</h3>
 	<table>
-		<tr>
+		<!--<tr>
 			<th>
 				<span>Skill</span>
 			</th>
@@ -171,11 +177,11 @@
 			<th>
 				<span>TN</span>
 			</th>
-		</tr>
+		</tr>-->
 		{{#each system.skills.language as |skill key|}}
 		<tr>
 			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="language">{{key}}</label>
+				<label for="system.skills.language.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="language">{{key}}</label>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
@@ -190,9 +196,9 @@
 		{{/each}}
 	</table>
 		
-	<h4 style="float:center">Protocols</h4>
+	<h3 style="float:center; font-size:16px !important;">Protocols</h3>
 	<table>
-		<tr>
+		<!--<tr>
 			<th>
 				<span>Skill</span>
 			</th>
@@ -205,11 +211,11 @@
 			<th>
 				<span>TN</span>
 			</th>
-		</tr>
+		</tr>-->
 		{{#each system.skills.protocol as |skill key|}}
 		<tr>
 			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="protocol">{{key}}</label>
+				<label for="system.skills.protocol.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="protocol">{{key}}</label>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
@@ -224,9 +230,9 @@
 		{{/each}}
 	</table>
 		
-	<h4 style="float:center">Science</h4>
+	<h3 style="float:center; font-size:16px !important;">Sciences</h3>
 	<table>
-		<tr>
+		<!--<tr>
 			<th>
 				<span>Skill</span>
 			</th>
@@ -239,11 +245,11 @@
 			<th>
 				<span>TN</span>
 			</th>
-		</tr>
+		</tr>-->
 		{{#each system.skills.science as |skill key|}}
 		<tr>
 			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="science">{{key}}</label>
+				<label for="system.skills.science.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="science">{{key}}</label>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
@@ -258,9 +264,9 @@
 		{{/each}}
 	</table>
 		
-	<h4 style="float:center">Streetwise</h4>
+	<h3 style="float:center; font-size:16px !important;">Streetwise</h3>
 	<table>
-		<tr>
+		<!--<tr>
 			<th>
 				<span>Skill</span>
 			</th>
@@ -273,11 +279,11 @@
 			<th>
 				<span>TN</span>
 			</th>
-		</tr>
+		</tr>-->
 		{{#each system.skills.streetwise as |skill key|}}
 		<tr>
 			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="streetwise">{{key}}</label>
+				<label for="system.skills.streetwise.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="streetwise">{{key}}</label>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
@@ -292,9 +298,9 @@
 		{{/each}}
 	</table>
 		
-	<h4 style="float:center">Survival</h4>
+	<h3 style="float:center; font-size:16px !important;">Survival</h3>
 	<table>
-		<tr>
+		<!--<tr>
 			<th>
 				<span>Skill</span>
 			</th>
@@ -307,11 +313,11 @@
 			<th>
 				<span>TN</span>
 			</th>
-		</tr>
+		</tr>-->
 		{{#each system.skills.survival as |skill key|}}
 		<tr>
 			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="survival">{{key}}</label>
+				<label for="system.skills.survival.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="survival">{{key}}</label>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>

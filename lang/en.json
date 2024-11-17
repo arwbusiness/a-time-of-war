@@ -23,8 +23,23 @@
 		"destroyed": "Destroyed",
 		"incapacitated": "Incapacitated"
 	},
-	"Attributes": {
-		
+	"BTActor": {
+		"pc": {
+			"attributes": {
+				"str": "STR",
+				"bod": "BOD",
+				"rfl": "RFL",
+				"dex": "DEX",
+				"wil": "WIL",
+				"int": "INT",
+				"cha": "CHA",
+				"edg": "EDG"
+			},
+			"skills": {
+				"acrobatics_freefall": "Acrobatics/FreeFall",
+				"acrobatics_gymnastics": "Acrobatics/Gymnastics"
+			}
+		}
 	}
   },
 
