@@ -1,0 +1,59 @@
+<div class="bt-roll">
+	<div style="height:20px">
+		<h3>{{speaker}}</h3>
+	</div>
+	<span style="font-weight:italic; font-size:11.5px">{{flavor}}</span>
+	<br>
+		<div class="chatDice">
+			{{#if (eq dice1 "6")}}<div style="color:green">{{/if}}
+			{{#if (eq dice1 "1")}}<div style="color:red">{{/if}}
+			{{dice1}}
+			{{#if (eq dice1 "6")}}</div>{{else if (eq dice1 "1")}}</div>{{/if}}
+		</div>
+		<div class="chatDice">
+			{{#if (eq dice2 "6")}}<div style="color:green">{{/if}}
+			{{#if (eq dice2 "1")}}<div style="color:red">{{/if}}
+			{{dice2}}
+			{{#if (eq dice2 "6")}}</div>{{else if (eq dice2 "1")}}</div>{{/if}}
+		</div>
+		{{#if dice3}}
+			<div class="chatDice">
+				{{#if (eq dice3 "6")}}<div style="color:green">{{/if}}
+				{{#if (eq dice3 "1")}}<div style="color:red">{{/if}}
+				{{dice3}}
+				{{#if (eq dice3 "6")}}</div>{{else if (eq dice3 "1")}}</div>{{/if}}
+			</div>
+		{{/if}}
+		<div class="chatTN">
+			TN: {{tn}}{{#if (eq rollType "skill")}}/{{actionType}}{{/if}}
+		</div>
+	<br><br>
+	<div>
+		thing1
+	</div>
+	<div>
+		thing2
+	</div>
+
+	<br/>
+	
+	<div class="">
+		{{name}}
+		<br/>
+		{{roll}}
+		<br/>
+		{{speaker}}
+		<br/>
+		{{flavor}}
+		<br/>
+		{{margin}}
+		<br/>
+		{{tn}}
+		<br/>
+		{{isSuccess}}
+		<br/>
+		{{successOrFail}}
+		<br/>
+		{{actionType}}
+	</div>
+</div>

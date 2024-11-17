@@ -21,19 +21,309 @@
 	<h4 style="float:center">Skills</h4>
 	<table>
 		<tr>
-			{{#each system.skills as |skill key|}}
 			<th>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}">{{key}}</label>
+				<span>Skill</span>
 			</th>
-			{{/each}}
+			<th>
+				<span>Link</span>
+			</th>
+			<th>
+				<span>Level</span>
+			</th>
+			<th>
+				<span>TN</span>
+			</th>
 		</tr>
+		{{#each system.skills as |skill key|}}
+		{{#unless (in key 'art' 'career' 'interest' 'language' 'protocol' 'science' 'streetwise' 'survival')}}
 		<tr>
-			{{#each system.skills as |skill key|}}
+			<td>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}">{{key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
 			</td>
-			{{/each}}
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+			</td>
 		</tr>
+		{{/unless}}
+		{{/each}}
+	</table>
+	<!-- Custom skill tables -->
+	<h4 style="float:center">Art</h4>
+	<table>
+		<tr>
+			<th>
+				<span>Skill</span>
+			</th>
+			<th>
+				<span>Link</span>
+			</th>
+			<th>
+				<span>Level</span>
+			</th>
+			<th>
+				<span>TN</span>
+			</th>
+		</tr>
+		{{#each system.skills.art as |skill key|}}
+		<tr>
+			<td>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="art">{{key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+			</td>
+		</tr>
+		{{/each}}
+	</table>
+	
+	<h4 style="float:center">Careers</h4>
+	<table>
+		<tr>
+			<th>
+				<span>Skill</span>
+			</th>
+			<th>
+				<span>Link</span>
+			</th>
+			<th>
+				<span>Level</span>
+			</th>
+			<th>
+				<span>TN</span>
+			</th>
+		</tr>
+		{{#each system.skills.career as |skill key|}}
+		<tr>
+			<td>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="career">{{key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+			</td>
+		</tr>
+		{{/each}}
+	</table>
+	
+	<h4 style="float:center">Interests</h4>
+	<table>
+		<tr>
+			<th>
+				<span>Skill</span>
+			</th>
+			<th>
+				<span>Link</span>
+			</th>
+			<th>
+				<span>Level</span>
+			</th>
+			<th>
+				<span>TN</span>
+			</th>
+		</tr>
+		{{#each system.skills.interest as |skill key|}}
+		<tr>
+			<td>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="interest">{{key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+			</td>
+		</tr>
+		{{/each}}
+	</table>
+		
+	<h4 style="float:center">Languages</h4>
+	<table>
+		<tr>
+			<th>
+				<span>Skill</span>
+			</th>
+			<th>
+				<span>Link</span>
+			</th>
+			<th>
+				<span>Level</span>
+			</th>
+			<th>
+				<span>TN</span>
+			</th>
+		</tr>
+		{{#each system.skills.language as |skill key|}}
+		<tr>
+			<td>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="language">{{key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+			</td>
+		</tr>
+		{{/each}}
+	</table>
+		
+	<h4 style="float:center">Protocols</h4>
+	<table>
+		<tr>
+			<th>
+				<span>Skill</span>
+			</th>
+			<th>
+				<span>Link</span>
+			</th>
+			<th>
+				<span>Level</span>
+			</th>
+			<th>
+				<span>TN</span>
+			</th>
+		</tr>
+		{{#each system.skills.protocol as |skill key|}}
+		<tr>
+			<td>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="protocol">{{key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+			</td>
+		</tr>
+		{{/each}}
+	</table>
+		
+	<h4 style="float:center">Science</h4>
+	<table>
+		<tr>
+			<th>
+				<span>Skill</span>
+			</th>
+			<th>
+				<span>Link</span>
+			</th>
+			<th>
+				<span>Level</span>
+			</th>
+			<th>
+				<span>TN</span>
+			</th>
+		</tr>
+		{{#each system.skills.science as |skill key|}}
+		<tr>
+			<td>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="science">{{key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+			</td>
+		</tr>
+		{{/each}}
+	</table>
+		
+	<h4 style="float:center">Streetwise</h4>
+	<table>
+		<tr>
+			<th>
+				<span>Skill</span>
+			</th>
+			<th>
+				<span>Link</span>
+			</th>
+			<th>
+				<span>Level</span>
+			</th>
+			<th>
+				<span>TN</span>
+			</th>
+		</tr>
+		{{#each system.skills.streetwise as |skill key|}}
+		<tr>
+			<td>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="streetwise">{{key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+			</td>
+		</tr>
+		{{/each}}
+	</table>
+		
+	<h4 style="float:center">Survival</h4>
+	<table>
+		<tr>
+			<th>
+				<span>Skill</span>
+			</th>
+			<th>
+				<span>Link</span>
+			</th>
+			<th>
+				<span>Level</span>
+			</th>
+			<th>
+				<span>TN</span>
+			</th>
+		</tr>
+		{{#each system.skills.survival as |skill key|}}
+		<tr>
+			<td>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="survival">{{key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+			</td>
+		</tr>
+		{{/each}}
 	</table>
 
 </div>

@@ -27,6 +27,7 @@ Hooks.once('init', function () {
 
   // Add custom constants for configuration.
   CONFIG.BT = BT;
+  Roll.CHAT_TEMPLATE = "systems/a-time-of-war/templates/roll/roll.hbs";
 
   /**
    * Set an initiative formula for the system
@@ -85,13 +86,26 @@ Hooks.once('init', function () {
 /* -------------------------------------------- */
 
 // If you need to add Handlebars helpers, here is a useful example:
-Handlebars.registerHelper('toLowerCase', function (str) {
+Handlebars.registerHelper('toLowerCase', function(str) {
   return str.toLowerCase();
 });
 
-Handlebars.registerHelper('toUpperCase', function (str) {
+Handlebars.registerHelper('toUpperCase', function(str) {
 	return str.toUpperCase();
 });
+
+Handlebars.registerHelper('toUpperCaseNested', function(array, value) {
+	return str.toUpperCase(array[value]);
+});
+
+Handlebars.registerHelper('toLowerCaseNested', function(array, value) {
+	return str.toLowerCase(array[value]);
+});
+
+Handlebars.registerHelper('in', function(key, ...list) {
+	return list.includes(key);
+});
+//toLowerCaseNested 
 
 Handlebars.registerHelper('eq', (a, b) => a == b)
 
@@ -108,6 +122,42 @@ Hooks.once('ready', function () {
   // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
   Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
 });
+
+Hooks.once('setup', function () {
+	_configureTrackableAttributes();
+});
+
+//Hooks.on('renderCustomActorSheet', function (app, html, data) {
+//Hooks.on("renderItemSheet",function(app,_html)
+/*Hooks.on("updateActor", function (system="a-time-of-war") {
+	console.log("HEY");
+});*/
+
+/*Hooks.on('renderCustomActorSheet', function (app, html, data) {
+	console.log(data);
+});*/
+
+function _configureTrackableAttributes() {
+	const person = {
+		bar: ["damage", "fatigue"],
+		value: []
+	};
+	
+	CONFIG.Actor.trackableAttributes = {
+		"pc": {
+			bar: [...person.bar, "luck"],
+			value: []
+		},
+		"npc": {
+			bar: [...person.bar],
+			value: []
+		},
+		"vehicle": {
+			bar: [],
+			value: ["mp.walk", "mp.run", "mp.jump"]
+		}
+	};
+}
 
 /* -------------------------------------------- */
 /*  Hotbar Macros                               */

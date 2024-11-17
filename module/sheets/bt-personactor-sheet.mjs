@@ -122,7 +122,7 @@ export class BTPersonActorSheet extends ActorSheet {
    */
   _prepareItems(context) {
     // Initialize containers.
-    const gear = [];
+    /*const gear = [];
     const features = [];
     const spells = {
       0: [],
@@ -159,7 +159,7 @@ export class BTPersonActorSheet extends ActorSheet {
     // Assign and return
     context.gear = gear;
     context.features = features;
-    context.spells = spells;
+    context.spells = spells;*/
   }
 
   /* -------------------------------------------- */
@@ -256,9 +256,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		const rollData = actorData.getRollData();
 		const rollType = dataset.rolltype;
 		
-		if(rollType == "skill")
-			console.log(systemData.skills[dataset.label]);
-		
 		switch(rollType) {
 			case "attribute":
 				return this.RollAttribute(element, dataset, actorData, systemData, rollData);
@@ -290,8 +287,6 @@ export class BTPersonActorSheet extends ActorSheet {
 	GetLinkMod(linkText, systemData) {
 		let link = 0;
 		
-		console.log("GetLinkMod - linkText: " + linkText);
-		console.log("twoAttributes: " + linkText.length > 1);
 		//Are there two linked attributes?
 		if(linkText.length > 1) {
 			let linkA = this.GetAttributeMod(systemData.attributes[linkText[0]].level);
@@ -299,22 +294,15 @@ export class BTPersonActorSheet extends ActorSheet {
 			link += linkA + linkB;
 		}
 		else {
-			console.log("Attribute is " + systemData.attributes[linkText]);
-			console.log("Level: " + systemData.attributes[linkText].level);
 			link += this.GetAttributeMod(systemData.attributes[linkText].level);
 		}
 		
 		return link;
 	}
 	
-	RollAttribute(element, dataset, actorData, systemData, rollData) {
+	async RollAttribute(element, dataset, actorData, systemData, rollData) {
 		//Figure out the link modifier.
 		const linkText = dataset.link.split("+");
-		/*	? dataset.link.split("+")
-			: (rollType == "skill"
-				? systemData.skills[dataset.label].link.split("+")
-				: null);*/
-		console.log("LinkText: " + linkText);
 		const link = this.GetLinkMod(linkText, systemData);
 		
 		//Set the base TN
@@ -327,8 +315,8 @@ export class BTPersonActorSheet extends ActorSheet {
 			tn = 12;
 		}
 			
-		const formula = "2d6+" + link;// + " >= " + tn;
-		let roll = new Roll(formula, rollData);
+		const formula = "{2d6+" + link + "}cs>=" + tn;
+		let roll = await new Roll(formula, rollData).evaluate();
 		
 		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
 		let margin = "+0";
@@ -336,38 +324,49 @@ export class BTPersonActorSheet extends ActorSheet {
 			margin = "+" + Math.ceil((roll.total - tn)/2);
 		}
 		else if(roll.total < tn) {
-			margin = "-" + Math.floor((roll.total - tn)/2);
+			margin = Math.floor((roll.total - tn)/2);
 		}
-			
-		roll.toMessage({
-			speaker: ChatMessage.getSpeaker({ actor: actorData }),
-			flavor: "Rolling " + dataset.label + ":",
-			rollMode: game.settings.get('core', 'rollMode'),
-			margin:margin,
-			tn:tn,
-			isSuccess:roll.total >= tn,
-			successOrFail:margin < 0 ? "fail" : "success",
-			content: renderTemplate("systems/a-time-of-war/templates/roll/roll.html")
+		
+		const results = roll.dice[0].results;
+		console.log(roll.dice[0].results);
+		
+		const flavor = "Rolling " + dataset.label + ":";
+		let msgData = {
+			name: dataset.label,
+			dice1: results[0].result,
+			dice2: results[1].result,
+			dice3: results[2] ? results[2].result : "",
+			speaker: actorData.name,//ChatMessage.getSpeaker({ actor: actorData }),
+			flavor: flavor,
+			margin: margin,
+			tn: tn,
+			isSuccess: roll.total >= tn,
+			successOrFail: margin < 0 ? "fail" : "success",
+			rollType: "attribute"
+		};
+		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
+		
+		const render = await renderTemplate("systems/a-time-of-war/templates/roll/roll.hbs", msgData);
+		const msg = await ChatMessage.create({
+			content: render,
+			sound: CONFIG.sounds.dice
 		});
 		
-		return roll;
+		return msg;
 	}
 	
-	RollSkill(element, dataset, actorData, systemData, rollData) {
-		const skill = dataset.label;
+	async RollSkill(element, dataset, actorData, systemData, rollData) {
+		const name = dataset.label;
+		const baseSkill = dataset.baseskill;
 		
-		const link = systemData.skills[skill].link;
-		const tn = systemData.skills[skill].tn;
+		const skill = baseSkill == undefined ? systemData.skills[name] : systemData.skills[baseSkill][name];
+		const link = skill.link;
+		const tn = skill.tn;
+		const level = skill.level;
+		const actionType = skill.type;
 		
-		console.log("skill link: " + link);
-		console.log("tn: " + tn);
-		
-		const level = systemData.skills[skill].level;
-		
-		console.log("Level: " + level);
-		
-		const formula = "2d6+" + this.GetLinkMod(link.split("+"), systemData) + level;// + " >= " + tn;
-		let roll = new Roll(formula, rollData);
+		const formula = "{2d6+" + this.GetLinkMod(link.split("+"), systemData) + level + "}cs>=" + tn;
+		let roll = await new Roll(formula, rollData).evaluate();
 		
 		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
 		let margin = "+0";
@@ -375,99 +374,34 @@ export class BTPersonActorSheet extends ActorSheet {
 			margin = "+" + Math.ceil((roll.total - tn)/2);
 		}
 		else if(roll.total < tn) {
-			margin = "-" + Math.floor((roll.total - tn)/2);
+			margin = Math.floor((roll.total - tn)/2);
 		}
 		
-		roll.toMessage({
-			speaker: ChatMessage.getSpeaker({ actor: actorData }),
-			flavor: "Rolling " + skill + ":",
-			rollMode: game.settings.get('core', 'rollMode'),
-			margin:margin,
-			tn:tn,
-			isSuccess:roll.total >= tn,
-			successOrFail:margin < 0 ? "fail" : "success",
-			content: renderTemplate("systems/a-time-of-war/templates/roll/roll.html")
+		const results = roll.dice[0].results;
+		
+		const flavor = "Rolling " + dataset.label + ":";
+		let msgData = {
+			name: dataset.label,
+			dice1: results[0].result,
+			dice2: results[1].result,
+			dice3: results[2] ? results[2].result : "",
+			speaker: actorData.name,//ChatMessage.getSpeaker({ actor: actorData }),
+			flavor: flavor,
+			margin: margin,
+			tn: tn,
+			isSuccess: roll.total >= tn,
+			successOrFail: margin < 0 ? "fail" : "success",
+			actionType: actionType,
+			rollType: "skill"
+		};
+		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
+		
+		const render = await renderTemplate("systems/a-time-of-war/templates/roll/roll.hbs", msgData);
+		const msg = await ChatMessage.create({
+			content: render,
+			sound: CONFIG.sounds.dice
 		});
 		
-		return roll;
+		return msg;
 	}
 }
-
-
-//Make the rollable stuff rollable
-/*$(document).ready(function() {
-	//const actorData = this;
-	//const systemData = actorData.system;
-	const selector = '.rollable';
-	const rollData = actorData.getRollData();
-	
-	//Alter the selector and add classes if you need different roll types.
-	$(document).("click", selector, a => {
-		a.preventDefault();
-		
-		//Get the TN from the data-tn attribute.
-		const tn = a.dataset.tn;
-		//Get the mod.
-		const mod = 1;//systemData.attributes[systemData.attributes.indexOf(a.dataset.link)].level;
-		//remember to add injury modifiers here
-		
-		//Make the roll 
-		const formula = (mod != null && mod != 0
-			? (mod > 0 ? "+" + mod : "-" + mod)
-			: "") + "+2d6>=" + tn;
-		const roll = new Roll(formula, rollData);
-		
-		//Generate a system.preRoll Hook.
-		if (Hooks.call("system.preRoll", roll) === false)
-			return;
-		
-		//Evaluate the roll after the preRoll Hook.
-		roll.evaluate({async: false});
-		
-		//Calculate MOS or MOF.
-		let margin = roll.total == tn
-			? "+0"
-			: (roll.total > tn ? "+" : "-") + roll.total;
-			
-		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
-		let margin = "+0";
-		if(roll.total > tn) {
-			margin = "+" + Math.ceil((roll.total - tn)/2);
-		}
-		else if(roll.total < tn) {
-			margin = "-" + Math.floor((roll.total - tn)/2);
-		}
-		
-		temp = {
-			flavor:"ROLL",
-			tooltip:await roll.getTooltip(),
-			formula:formula,
-			result:roll.total,
-			isSuccess:roll.total >= tn,
-			margin:margin,
-			successOrFail:margin < 0 ? "fail" : "success"
-		};
-		
-		const rollMsgData = {
-			user: game.user.id,
-			speaker: {
-				actor: actor?.id || null,
-				token: actor?.token?.id || null,
-				alias: actor?.name || null
-			},
-			type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-			rolls:[roll],
-			content: await renderTemplate("systems/a-time-of-war/templates/roll/roll.html", temp),
-			sound: CONFIG.sounds.dice
-		}
-		
-		const rMode = game.settings.get("core", "rollMode");
-		const msgData = ChatMessage.applyRollMode(rollMsgData, rMode);
-		
-		await ChatMessage.create(msgData, {
-			rollMode:rMode
-		});
-		
-		//await roll.toMessage({flavor: ""});
-	});
-});*/
