@@ -107,11 +107,30 @@ Handlebars.registerHelper('in', function(key, ...list) {
 });
 //toLowerCaseNested 
 
+//Operator helpers
 Handlebars.registerHelper('eq', (a, b) => a == b);
 Handlebars.registerHelper('le', (a, b) => a <= b);
 Handlebars.registerHelper('lt', (a, b) => a < b);
 Handlebars.registerHelper('ge', (a, b) => a >= b);
 Handlebars.registerHelper('gt', (a, b) => a > b);
+
+//Capitalisation helper
+Handlebars.registerHelper('cap', function(key) {
+	if(key.split(" ").length <= 1) {
+		//Normal, no spaces, just capitalise the string.
+		return key.slice(0,1).toUpperCase() + key.slice(1).toLowerCase();
+	}
+	else {
+		//It has spaces, capitalise each word.
+		let temp = key.split(" ");
+		let tempKet = "";
+		let i = 0;
+		temp.forEach(str => {
+			tempKey += str.slice(0,1).toUpperCase() + str.slice(1).toLowerCase() + i++ < temp.length ? " " : "";
+		});
+		return tempKey;
+	}
+});
 
 /*Handlebars.registerHelper('ifEqual', function (a, b, options) {
     if (a == b) { return options.fn(this); }
@@ -119,7 +138,7 @@ Handlebars.registerHelper('gt', (a, b) => a > b);
 });*/
 
 /* -------------------------------------------- */
-/*  Ready Hook                                  */
+/*  Hooks	                                    */
 /* -------------------------------------------- */
 
 Hooks.once('ready', function () {

@@ -39,7 +39,7 @@ export class BTPersonActorSheet extends ActorSheet {
   /* -------------------------------------------- */
 
   /** @override */
-  async getData() {
+  getData() {
     // Retrieve the data structure from the base sheet. You can inspect or log
     // the context variable to see the structure, but some key properties for
     // sheets are the actor object, the data object, whether or not it's
@@ -60,7 +60,6 @@ export class BTPersonActorSheet extends ActorSheet {
     if (actorData.type == 'pc') {
 		this._preparePCData(context);
       //this._prepareItems(context);
-      //this._prepareCharacterData(context);
     }
 
     // Prepare NPC data and items.
@@ -71,7 +70,7 @@ export class BTPersonActorSheet extends ActorSheet {
 
     // Enrich biography info for display
     // Enrichment turns text like `[[/r 1d20]]` into buttons
-    context.enrichedBiography = await TextEditor.enrichHTML(
+    /*context.enrichedBiography = await TextEditor.enrichHTML(
       this.actor.system.biography,
       {
         // Whether to show secret blocks in the finished html
@@ -83,7 +82,7 @@ export class BTPersonActorSheet extends ActorSheet {
         // Relative UUID resolution
         relativeTo: this.actor,
       }
-    );
+    );*/
 
     // Prepare active effects
     /*context.effects = prepareActiveEffectCategories(
@@ -95,25 +94,56 @@ export class BTPersonActorSheet extends ActorSheet {
     return context;
   }
 
-  /**
-   * Character-specific context modifications
-   *
-   * @param {object} context The context object to mutate
-   */
-  _preparePCData(context) {
-    // This is where you can enrich character-specific editor fields
-    // or setup anything else that's specific to this type
-  }
+	/**
+	* Character-specific context modifications
+	*
+	* @param {object} context The context object to mutate
+	*/
+	_preparePCData(context) {
+		// This is where you can enrich character-specific editor fields
+		// or setup anything else that's specific to this type
 
-  /**
-   * Character-specific context modifications
-   *
-   * @param {object} context The context object to mutate
-   */
-  _prepareNPCData(context) {
-    // This is where you can enrich character-specific editor fields
-    // or setup anything else that's specific to this type
-  }
+		//this._prepareVariables(context);
+
+		//Calc handlebars
+		Handlebars.registerHelper('calcXPForNextSL', function(xp) {
+			return this.CalcXPForNextSL(xp);
+		});
+		Handlebars.registerHelper('calcXPForNextTP', function(xp) {
+			return 100-xp == 0 ? 100 : 100-xp;
+		});
+	}
+  
+	//Prepare the stuff that isn't in template.json (usually because it's temporary or user-defined).
+	/*_prepareVariables(context) {
+		console.log("Preparing variables.");
+		const systemData = context.system;
+		
+		if(systemData.traits == undefined)
+			systemData.traits = {};
+		if(systemData.advances == undefined)
+			systemData.advances = {};
+		
+		//define advanceMaker
+		if(systemData.advanceMaker == undefined) {
+			systemData.advanceMaker = {
+				type: "",
+				name: "",
+				xp: 0,
+				free: false
+			}
+		}
+	}*/
+
+	/**
+	* Character-specific context modifications
+	*
+	* @param {object} context The context object to mutate
+	*/
+	_prepareNPCData(context) {
+		// This is where you can enrich character-specific editor fields
+		// or setup anything else that's specific to this type
+	}
 
   /**
    * Organize and classify Items for Actor sheets.
@@ -164,55 +194,267 @@ export class BTPersonActorSheet extends ActorSheet {
 
   /* -------------------------------------------- */
 
-  /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
+	/** @override */
+	activateListeners(html) {
+		super.activateListeners(html);
 
-    // Render the item sheet for viewing/editing prior to the editable check.
-    html.on('click', '.item-edit', (ev) => {
-      const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.items.get(li.data('itemId'));
-      item.sheet.render(true);
-    });
+		// Rollable abilities.
+		html.on('click', '.rollable', this._onRoll.bind(this));
+		
+		//Adding new skills and traits
+		html.on('change', '.add-new-skill', this.AddNewSkill.bind(this));
+		//html.on('change', '.add-new-trait', this._addNewTrait.bind(this));
 
-    // -------------------------------------------------------------
-    // Everything below here is only needed if the sheet is editable
-    if (!this.isEditable) return;
+		//Activate progression listeners
+		this.listenForProgression(html);
 
-    // Add Inventory Item
-    html.on('click', '.item-create', this._onItemCreate.bind(this));
+		// Render the item sheet for viewing/editing prior to the editable check.
+		/*html.on('click', '.item-edit', (ev) => {
+		  const li = $(ev.currentTarget).parents('.item');
+		  const item = this.actor.items.get(li.data('itemId'));
+		  item.sheet.render(true);
+		});*/
 
-    // Delete Inventory Item
-    html.on('click', '.item-delete', (ev) => {
-      const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.items.get(li.data('itemId'));
-      item.delete();
-      li.slideUp(200, () => this.render(false));
-    });
+		// -------------------------------------------------------------
+		// Everything below here is only needed if the sheet is editable
+		if (!this.isEditable) return;
 
-    // Active Effect management
-    html.on('click', '.effect-control', (ev) => {
-      const row = ev.currentTarget.closest('li');
-      const document =
-        row.dataset.parentId === this.actor.id
-          ? this.actor
-          : this.actor.items.get(row.dataset.parentId);
-      onManageActiveEffect(ev, document);
-    });
+		// Add Inventory Item
+		/*html.on('click', '.item-create', this._onItemCreate.bind(this));
 
-    // Rollable abilities.
-    html.on('click', '.rollable', this._onRoll.bind(this));
+		// Delete Inventory Item
+		html.on('click', '.item-delete', (ev) => {
+		  const li = $(ev.currentTarget).parents('.item');
+		  const item = this.actor.items.get(li.data('itemId'));
+		  item.delete();
+		  li.slideUp(200, () => this.render(false));
+		});
 
-    // Drag events for macros.
-    if (this.actor.isOwner) {
-      let handler = (ev) => this._onDragStart(ev);
-      html.find('li.item').each((i, li) => {
-        if (li.classList.contains('inventory-header')) return;
-        li.setAttribute('draggable', true);
-        li.addEventListener('dragstart', handler, false);
-      });
-    }
-  }
+		// Active Effect management
+		html.on('click', '.effect-control', (ev) => {
+		  const row = ev.currentTarget.closest('li');
+		  const document =
+			row.dataset.parentId === this.actor.id
+			  ? this.actor
+			  : this.actor.items.get(row.dataset.parentId);
+		  onManageActiveEffect(ev, document);
+		});
+
+		// Drag events for macros.
+		if (this.actor.isOwner) {
+		  let handler = (ev) => this._onDragStart(ev);
+		  html.find('li.item').each((i, li) => {
+			if (li.classList.contains('inventory-header')) return;
+			li.setAttribute('draggable', true);
+			li.addEventListener('dragstart', handler, false);
+		  });
+		}*/
+	}
+
+	//These listeners make the advance maker work.
+	listenForProgression(html) {
+		console.log("Binding progression events, {0}", html);
+		
+		//Bind the advance delete buttons.
+		html.on('click', '.delete-advance', this._onDeleteAdvance.bind(this));
+		
+		//Bind the advance creation sequence.
+		html.on('click', '.advance-free', this._onAdvanceFreeToggle.bind(this));
+		html.on('change','.advance-type', this._onAdvanceUpdate.bind(this));
+		html.on('change','.advance-name', this._onAdvanceUpdate.bind(this));
+		html.on('input','.advance-xp', this._onAdvanceUpdate.bind(this));
+		html.on('click', '.advance-finish', this._onAdvanceFinish.bind(this));
+	}
+	
+	AddNewSkill(event) {
+		const element = event.currentTarget;
+		const dataset = element.dataset;
+		
+		const actorData = this.getData().actor;
+		const systemData = actorData.system;
+		
+		const baseSkill = dataset.baseskill;
+		const newSkillName = element.value;
+		const link = document.getElementsByClassName("new-skill-link-"+baseSkill)[0];
+		
+		const dataName = 'system.skills.'+baseSkill+'.'+newSkillName;
+		let updateData = {};
+		updateData[dataName] = {
+			xp: 0,
+			mod: 0,
+			level: -1,
+			link: link.value,
+			tn: dataset.tn,
+			type: dataset.type
+		};
+		
+		element.value = "";
+		link.value = "";
+		
+		//this.actor.update(updateData);
+		//systemData.skills[baseSkill][newSkillName] = updateData;
+		this.Update(updateData, "skills", baseSkill, newSkillName);
+	}
+	
+	Update(updateData, ...keys) {
+		this.actor.update(updateData);
+		let systemData = this.getData().actor.system;
+		let thing = systemData;
+		for(var i = 0; i < keys.length; i++) {
+			if(i < keys.length-1)
+				thing = thing[keys[i]];
+			else
+				thing = updateData;
+		}
+	}
+	
+	/*RefreshSheet() {
+		this.document.prepareDerivedData();
+		this.render();
+	}*/
+	
+	_onDeleteAdvance(event) {
+		const element = event.currentTarget;
+		const dataset = element.dataset;
+		
+		const actorData = this.getData().actor;
+		const systemData = actorData.system;
+		
+		const targetName = dataset.name;
+		const targetType = dataset.type;
+		const targetXP = dataset.xp;
+		const targetId = dataset.id;
+		
+		const advances = systemData.advances;
+		console.log(advances);
+		console.log("name: {0}, type: {1}, target: {2}", targetName, targetType, targetXP);
+		let advance = null;
+		for(var i = 0; i < advances.length; i++) {
+			let adv = advances[i];
+			console.log("adv name: {0}, type: {1}, target: {2}, id: {3}", adv.name, adv.type, adv.xp, adv.id);
+			if(adv.name == targetName && adv.type == targetType && adv.xp == targetXP && adv.id == targetId) {
+				advance = adv;
+			}
+		}
+		console.log(advance);
+		console.log(advances[advance]);
+		
+		//const advance = systemData.advances[targetName];
+		//console.log(advance);
+		
+		//systemData.advances[targetName] = {};
+		
+		let list = Object.entries(advances);
+		list.pop(advance);
+		console.log(list);
+	}
+	
+	//When you click the free XP toggle/checkbox, it calls this function.
+	_onAdvanceFreeToggle(event) {
+		const element = event.currentTarget;
+		
+		const actorData = this.getData().actor;
+		const systemData = actorData.system;
+		const advanceMaker = systemData.advanceMaker;
+		
+		advanceMaker.free = !advanceMaker.free;
+	}
+	
+	//When you alter (oninput) an input field in the advance maker, it calls this function where 'which' is type, name or xp based on which field you changed.
+	_onAdvanceUpdate(event) {
+		const element = event.currentTarget;
+		
+		const actorData = this.getData().actor;
+		const systemData = actorData.system;
+		const advanceMaker = systemData.advanceMaker;
+		
+		const which = element.id.split("advance-")[1];
+		const value = element.value;
+		console.log("Which: {0}, Value: {1}", which, value);
+		
+		//See if it's a custom skill
+		const isCustomSkill = which == "name" && value.includes("/");
+		if(isCustomSkill) {
+			advanceMaker.baseSkill = value.split("/")[0];
+			advanceMaker.name = value.split("/")[1];
+		}
+		else {
+			if(which == "xp" && !parseInt(value)) {
+				console.error("value {0} can't be parsed to int", value);
+				return;
+			}
+			else {
+				switch(which) {
+					case "type":
+						advanceMaker.type = value;
+						break;
+					case "name":
+						advanceMaker.name = value;
+						break;
+					case "xp":
+						advanceMaker.xp = value;
+						break;
+					default:
+						break;
+				}
+			}
+		}
+		console.log(advanceMaker);
+	}
+	
+	//When you click the submit button on the advance maker, it calls this function.
+	_onAdvanceFinish(event) {
+		//event.preventDefault();
+		
+		const actorData = this.getData().actor;
+		const systemData = actorData.system;
+		const advanceMaker = systemData.advanceMaker;
+		let id = "advance-";
+		let i = 1;
+		const advances = Object.entries(systemData.advances);
+		advances.forEach(advance => {
+			if(advance.id != undefined)
+			{
+				let tid = advance.id.split('-')[1];
+				if(tid > i)
+					i = tid + 1;
+			}
+		});
+		
+		//Make an advance schema with an appropriate name and fill it with the data from the advance maker
+		const dataName = 'system.advances.'+advanceMaker.name;
+		let updateData = {};
+		updateData[dataName] = {
+			name: advanceMaker.name,
+			type: advanceMaker.type,
+			xp: advanceMaker.xp,
+			free: advanceMaker.free,
+			id: id+i
+		};
+		/*systemData.advances[advanceMaker.name] = {
+			name: advanceMaker.name,
+			type: advanceMaker.type,
+			xp: advanceMaker.xp,
+			free: advanceMaker.free
+		}
+		console.log(systemData.advances);*/
+		
+		//console.log("Before: {0}", advanceMaker);
+		
+		//console.log("After: {0}", advanceMaker);
+		
+		//this.RefreshSheet();
+		
+		//this.actor.update(updateData);
+		//systemData.skills[baseSkill][newSkillName] = updateData;
+		this.Update(updateData, "advances", advanceMaker.name);
+		
+		//Reset the advance maker
+		advanceMaker.type = "";
+		advanceMaker.name = "";
+		advanceMaker.xp = 0;
+		advanceMaker.free = false;
+	}
 
   /**
    * Handle creating a new Owned Item for the actor using initial data defined in the HTML dataset
@@ -248,6 +490,7 @@ export class BTPersonActorSheet extends ActorSheet {
 	*/
 	_onRoll(event) {
 		event.preventDefault();
+		console.log("HEY");
 		const element = event.currentTarget;
 		const dataset = element.dataset;
 
@@ -265,23 +508,6 @@ export class BTPersonActorSheet extends ActorSheet {
 				console.error("RollType " + rollType + " not recognised!");
 				return null;
 		}
-	}
-	
-	GetAttributeMod(level) {
-		if(level == 0)
-			return -4;
-		else if(level == 1)
-			return -2;
-		else if(level == 2 || level == 3)
-			return -1;
-		else if(level >= 4 && level <= 6)
-			return 0;
-		else if(level >= 7 && level <= 9)
-			return 1;
-		else if(level == 10)
-			return 2;
-		else if(level >= 11) //Attribute/3 rounding down, max +5
-			return Math.min(5, Math.floor(level/3));
 	}
 	
 	GetLinkMod(linkText, systemData, level = false) {
@@ -304,6 +530,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		//Figure out the link modifier.
 		const linkText = dataset.link.split("+");
 		const link = this.GetLinkMod(linkText, systemData, true);
+		console.log("TRYING TO ROLL ATTRIBUTE {0}", linkText);
 		
 		//Set the base TN
 		let tn = 7;
@@ -365,6 +592,7 @@ export class BTPersonActorSheet extends ActorSheet {
 	async RollSkill(element, dataset, actorData, systemData, rollData) {
 		const name = dataset.label;
 		const baseSkill = dataset.baseskill;
+		console.log("TRYING TO ROLL SKILL {0}", name);
 		
 		const skill = baseSkill == undefined ? systemData.skills[name] : systemData.skills[baseSkill][name];
 		const level = skill.level;

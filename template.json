@@ -7,7 +7,8 @@
           "gender": "",
           "age": 0,
           "build": "",
-          "biography": ""
+          "biography": "",
+		  "lang_primary": ""
         },
         "damage": {
           "value": 0,
@@ -50,6 +51,15 @@
         "xp_spent": 0,
         "xp_unspent": 0
       },
+	  "advanceMaker": {
+		  "type": "attribute",
+		  "name": "",
+		  "xp": 0,
+		  "free": false
+	  },
+	  "advances": {
+		  
+	  },
       "attributes": {
         "str": { "level": 0, "xp": 0, "mod": -4 },
         "bod": { "level": 0, "xp": 0, "mod": -4 },
@@ -60,8 +70,9 @@
         "cha": { "level": 0, "xp": 0, "mod": -4 },
         "edg": { "level": 0, "xp": 0, "mod": -4 }
       },
+	  "traits": {},
       "skills": {
-        "acrobatics_freefall": { "xp": 0, "mod": 0, "level": -1, "link": "rfl", "tn": 7, "type": "", "type": "SB" },
+        "acrobatics_freefall": { "xp": 0, "mod": 0, "level": -1, "link": "rfl", "tn": 7, "type": "SB" },
         "acrobatics_gymnastics": { "xp": 0, "mod": 0, "level": -1, "link": "rfl", "tn": 7, "type": "SB" },
         "climbing": { "xp": 0, "mod": 0, "level": -1, "link": "dex", "tn": 7, "type": "SB" },
         "navigation_air": { "xp": 0, "mod": 0, "level": -1, "link": "int", "tn": 7, "type": "SB" },

@@ -46,14 +46,96 @@ export class BTActor extends Actor {
 		if (actorData.type !== 'pc')
 			return;
 		
-		const systemData = actorData.system;
-		this.CalculateSkillLevels(actorData, systemData);
+		//this.CalculateSkillLevels(actorData, systemData);
 		
-		this.AddCustomSkill(systemData, "art", "painting", "dex", "");
+		//this.AddCustomSkill(systemData, "art", "painting", "dex", "");
+		
+		const systemData = actorData.system;
+		
+		//Reset skills by setting their XP to 0.
+		const skills = Object.entries(systemData.skills);
+		skills.forEach(skill => {
+			let name = skill[0];
+			let data = Object.entries(skill[1]);
+			if(data.length == 0)
+				return;
+			
+			const isCustomSkill = data[0][0] != "xp";
+			if(isCustomSkill) {
+				name = data[0][0];
+				data = data[0][1];
+			}
+			else
+				data = skill[1];
+			
+			data.xp = 0;
+		});
+		
+		//Reset attributes by setting their XP to 0.
+		const attributes = Object.entries(systemData.attributes);
+		attributes.forEach(attribute => {
+			attribute.xp = 0;
+		});
+		
+		//Reset traits by setting their XP to 0.
+		//if(systemData.traits == undefined) { systemData.traits = {}; } //Traits can be null, so if it is, just make it empty.
+		const traits = Object.entries(systemData.traits);
+		traits.forEach(trait => {
+			trait.xp = 0;
+		});
+		
+		//Reset spent XP counter.
+		systemData.xp_spent = 0;
+		
+		console.log("Advances: {0}", systemData.advances);
+		
+		//Check advances and plug the XP back into the sheet.
+		//if(systemData.advances == undefined) { systemData.advances = {}; } //Advances can be null, so if it is, just make it empty.
+		Object.entries(systemData.advances).forEach(adv => {
+			const advance = adv[1];
+			const xp = advance.xp;
+			console.log("Advance: {0}, XP: {1}", advance, xp);
+			switch(advance.type) {
+				case "skill":
+					const skill = (advance.baseSkill != "") ? skills[advance.name] : skills[advance.baseSkill][advance.name];
+					skill.xp += xp;
+					break;
+				case "attribute":
+					const attribute = systemData.attributes[advance.name];
+					attribute.xp += xp;
+					break;
+				case "trait":
+					const trait = systemData.traits[advance.name];
+					trait.xp += xp;
+					break;
+				default:
+					console.error("Advance type {0} not recognised!", advance.type);
+					break;
+			}
+			systemData.xp_spent += advance.free ? 0 : xp;
+		});
+		console.log(systemData.xp_spent);
+		
+		this.CalculateSkillLevels(skills, systemData);
+		this.CalculateAttributeAndTraitLevels(attributes, traits);
 	}
 	
-	CalculateSkillLevels(actorData, systemData) {
-		const skills = Object.entries(systemData.skills);
+	CalculateAttributeAndTraitLevels(attributes, traits) {
+		attributes.forEach(attribute => {
+			console.log("Attribute: {0}, XP: {1}", attribute, attribute.xp);
+			attribute.level = this.CalcTP(attribute.xp);
+			attribute.mod = this.GetAttributeMod(attribute.level);
+		});
+		traits.forEach(trait => {
+			trait.level = this.CalcTP(trait.xp);
+		});
+		
+		let updateData = attributes;
+		const dataName = 'system.attributes';
+		this.update(updateData);
+	}
+	
+	CalculateSkillLevels(skills, systemData) {
 		const tieredSkills = ["computers", "martial_arts", "melee_weapons", "pickpocket", "sleightofhand", "quickdraw", "art", "interest"];
 		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
 		
@@ -111,7 +193,19 @@ export class BTActor extends Actor {
 				type: "SB"
 		}
 		systemData.skills[baseSkill][skillName] = skill;
-		
+	}
+	
+	CreateAdvance(systemData, name, type, xp, free = false) {
+		systemData.advances["name"] = {
+			name: name,
+			type: type,
+			xp: xp,
+			free: free
+		};
+	}
+	
+	CalcTP(xp) {
+		return xp >= 0 ? Math.floor(xp/100) : Math.ceil(xp/100);
 	}
 	
 	CalcSL(xp) {
@@ -149,7 +243,24 @@ export class BTActor extends Actor {
 		const remainder = l-xp;
 		return remainder;
 	}
-
+	
+	GetAttributeMod(level) {
+		if(level == 0)
+			return -4;
+		else if(level == 1)
+			return -2;
+		else if(level == 2 || level == 3)
+			return -1;
+		else if(level >= 4 && level <= 6)
+			return 0;
+		else if(level >= 7 && level <= 9)
+			return 1;
+		else if(level == 10)
+			return 2;
+		else if(level >= 11) //Attribute/3 rounding down, max +5
+			return Math.min(5, Math.floor(level/3));
+	}
+	
 	/**
 	* Prepare NPC type specific data.
 	*/
@@ -182,8 +293,8 @@ export class BTActor extends Actor {
     const data = { ...this.system };
 
     // Prepare character roll data.
-    this._getPcRollData(data);
-    this._getNpcRollData(data);
+    this._getPCRollData(data);
+    this._getNPCRollData(data);
     this._getVehicleRollData(data);
 
     return data;
@@ -192,7 +303,7 @@ export class BTActor extends Actor {
   /**
    * Prepare character roll data.
    */
-  _getPcRollData(data) {
+  _getPCRollData(data) {
     if (this.type !== 'pc') return;
 
     // Copy the ability scores to the top level, so that rolls can use
@@ -212,7 +323,7 @@ export class BTActor extends Actor {
   /**
    * Prepare NPC roll data.
    */
-  _getNpcRollData(data) {
+  _getNPCRollData(data) {
     if (this.type !== 'npc') return;
 
     // Process additional NPC data here.

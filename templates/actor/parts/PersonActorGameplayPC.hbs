@@ -88,8 +88,10 @@
 		{{/each}}
 		<tr>
 			<td>
-				<input type="text" oninput="AddNewSkill()">
-				<label for="createNewArt" class="resource-label align-left" data-rolltype="skill" data-label="createNewArt" data-baseskill="art">
+				<select class="new-skill-link-art">
+					<option value="str" selected="selected">STR</option>
+				</select>
+				<input class="add-new-skill" data-baseskill="art" data-tn="7" data-type="SB" type="text" placeholder="type name of art new skill here">
 			</td>
 		</tr>
 	</table>

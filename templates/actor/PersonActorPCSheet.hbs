@@ -14,9 +14,9 @@
 				and it will add a small amount of padding, a border, and will
 				center all of its child elements content and text. --}}
 				<div class="resource flex-group-center">
-					<label for="system.gender" class="resource-label">Gender Identity: </label>
+					<label for="system.details.gender" class="resource-label">Gender Identity: </label>
 					<div class="resource flexrow flex-center flex-between">
-						<input type="text" name="system.gender" placeholder="" value="{{system.gender}}"/>
+						<input type="text" name="system.details.gender" placeholder="" value="{{system.details.gender}}"/>
 					</div>
 				</div>
 
@@ -33,9 +33,9 @@
 			<div class="resources grid grid-2col">
 				
 				<div class="resource flex-group-center">
-					<label for="system.build" class="resource-label">Build: </label>
+					<label for="system.details.build" class="resource-label">Build: </label>
 					<div class="resource flexrow flex-center flex-between">
-						<input type="text" name="system.build" placeholder="" value="{{system.build}}"/>
+						<input type="text" name="system.details.build" placeholder="" value="{{system.details.build}}"/>
 					</div>
 				</div>
 
@@ -52,9 +52,9 @@
 			<div class="resources grid grid-2col">
 				
 				<div class="resource flex-group-center">
-					<label for="system.age" class="resource-label">Age: </label>
+					<label for="system.details.age" class="resource-label">Age: </label>
 					<div class="resource flexrow flex-center flex-between">
-						<input type="text" name="system.age" placeholder="20" value="{{system.age}}"/>
+						<input type="text" name="system.details.age" placeholder="20" value="{{system.details.age}}"/>
 					</div>
 				</div>
 
@@ -68,6 +68,27 @@
 				</div>
 				
 			</div>
+			<div class="resources grid grid-2col">
+			
+				<div class="resource flex-group-center">
+					<label for="system.details.lang_primary" class="resource-label">Primary Language: </label>
+					<div class="resource flexrow flex-center flex-between">
+						</input type="text" name="system.details.lang_primary" placeholder="English" value="{{system.details.lang_primary}}"/>
+					</div>
+				</div>
+
+				<!--<div class="resource flex-group-center">
+					<label for="system.fatigue.value" class="resource-label">Luck</label>
+					<div class="resource flexrow flex-center flex-between">
+						<input type="number" name="system.luck.value" value="{{system.luck.value}}"/>
+						<span> / </span>
+						<label for="system.luck.max">{{system.luck.max}}</label>
+					</div>
+				</div>-->
+				
+			</div>
+			
+			
 		</div>
 	</header>
 
