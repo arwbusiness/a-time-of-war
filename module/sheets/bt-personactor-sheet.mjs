@@ -198,15 +198,8 @@ export class BTPersonActorSheet extends ActorSheet {
 	activateListeners(html) {
 		super.activateListeners(html);
 
-		// Rollable abilities.
-		html.on('click', '.rollable', this._onRoll.bind(this));
-		
-		//Adding new skills and traits
-		html.on('change', '.add-new-skill', this.AddNewSkill.bind(this));
-		//html.on('change', '.add-new-trait', this._addNewTrait.bind(this));
-
 		//Activate progression listeners
-		this.listenForProgression(html);
+		this.listenForSheetButtons(html);
 
 		// Render the item sheet for viewing/editing prior to the editable check.
 		/*html.on('click', '.item-edit', (ev) => {
@@ -250,13 +243,42 @@ export class BTPersonActorSheet extends ActorSheet {
 		  });
 		}*/
 	}
+	
+	Update(updateData, ...keys) {
+		this.actor.update(updateData);
+		let systemData = this.getData().actor.system;
+		let thing = systemData;
+		for(var i = 0; i < keys.length; i++) {
+			//console.log("Keys[i]: {0}", keys[i]);
+			if(i < keys.length-1)
+				thing = thing[keys[i]];
+			else
+				thing = updateData;
+		}
+		//console.log("Thing: {0}", thing);
+		//console.log("systemData: {0}", systemData);
+		this.RefreshSheet();
+	}
+	
+	RefreshSheet() {
+		this.document.prepareDerivedData();
+		this.render();
+	}
 
 	//These listeners make the advance maker work.
-	listenForProgression(html) {
-		console.log("Binding progression events, {0}", html);
+	listenForSheetButtons(html) {
+		// Rollable buttons.
+		html.on('click', '.rollable', this._onRoll.bind(this));
+		
+		//Adding new skills and traits
+		html.on('change', '.add-new-skill', this.AddNewSkill.bind(this));
+		//html.on('change', '.add-new-trait', this.AddNewTrait.bind(this));
+		
+		//Bind the custom skill delete buttons.
+		html.on('click', '.delete-custom-skill', this.DeleteCustomSkill.bind(this));
 		
 		//Bind the advance delete buttons.
-		html.on('click', '.delete-advance', this._onDeleteAdvance.bind(this));
+		html.on('click', '.delete-advance', this.DeleteAdvance.bind(this));
 		
 		//Bind the advance creation sequence.
 		html.on('click', '.advance-free', this._onAdvanceFreeToggle.bind(this));
@@ -264,6 +286,27 @@ export class BTPersonActorSheet extends ActorSheet {
 		html.on('change','.advance-name', this._onAdvanceUpdate.bind(this));
 		html.on('input','.advance-xp', this._onAdvanceUpdate.bind(this));
 		html.on('click', '.advance-finish', this._onAdvanceFinish.bind(this));
+	}
+	
+	DeleteCustomSkill(event) {
+		const element = event.currentTarget;
+		const dataset = element.dataset;
+		
+		const actorData = this.getData().actor;
+		const systemData = actorData.system;
+		
+		//split id="delete-survival-{{key}}" into 3 and assign the indexes
+		const baseSkill = element.id.split("-")[1];
+		const skillName = element.id.split("-")[2];
+		
+		let skills = foundry.utils.duplicate(this.actor.system.skills[baseSkill]);
+		if(!skills[skillName].xp)
+			skills[skillName] = [];
+		
+		let updateData = {};
+		updateData["system.skills." + baseSkill] = skills;
+		this.actor.update(updateData);
+		this.render();
 	}
 	
 	AddNewSkill(event) {
@@ -275,45 +318,27 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		const baseSkill = dataset.baseskill;
 		const newSkillName = element.value;
-		const link = document.getElementsByClassName("new-skill-link-"+baseSkill)[0];
+		const link = dataset.link;
 		
-		const dataName = 'system.skills.'+baseSkill+'.'+newSkillName;
 		let updateData = {};
-		updateData[dataName] = {
+		updateData = {
 			xp: 0,
 			mod: 0,
 			level: -1,
-			link: link.value,
+			link: link,
 			tn: dataset.tn,
 			type: dataset.type
 		};
 		
 		element.value = "";
-		link.value = "";
 		
-		//this.actor.update(updateData);
-		//systemData.skills[baseSkill][newSkillName] = updateData;
-		this.Update(updateData, "skills", baseSkill, newSkillName);
-	}
-	
-	Update(updateData, ...keys) {
-		this.actor.update(updateData);
-		let systemData = this.getData().actor.system;
-		let thing = systemData;
-		for(var i = 0; i < keys.length; i++) {
-			if(i < keys.length-1)
-				thing = thing[keys[i]];
-			else
-				thing = updateData;
-		}
-	}
-	
-	/*RefreshSheet() {
-		this.document.prepareDerivedData();
+		this.actor.update({
+			["system.skills."+baseSkill+"."+newSkillName]: updateData
+		});
 		this.render();
-	}*/
+	}
 	
-	_onDeleteAdvance(event) {
+	DeleteAdvance(event) {
 		const element = event.currentTarget;
 		const dataset = element.dataset;
 		
@@ -323,30 +348,23 @@ export class BTPersonActorSheet extends ActorSheet {
 		const targetName = dataset.name;
 		const targetType = dataset.type;
 		const targetXP = dataset.xp;
-		const targetId = dataset.id;
+		const targetId = element.id;
 		
-		const advances = systemData.advances;
-		console.log(advances);
-		console.log("name: {0}, type: {1}, target: {2}", targetName, targetType, targetXP);
-		let advance = null;
-		for(var i = 0; i < advances.length; i++) {
-			let adv = advances[i];
-			console.log("adv name: {0}, type: {1}, target: {2}, id: {3}", adv.name, adv.type, adv.xp, adv.id);
-			if(adv.name == targetName && adv.type == targetType && adv.xp == targetXP && adv.id == targetId) {
-				advance = adv;
+		let advances = foundry.utils.duplicate(this.actor.system.advances);
+		let updateData = {};
+		//updateData["system.advances"] = [];
+		Object.entries(advances).forEach(advance => {
+			if(advance[1].id != targetId) {
+				//systemData.advances[advance[1].id] = advance;
+				updateData["system.advances."+advance[1].id] = advance;
 			}
-		}
-		console.log(advance);
-		console.log(advances[advance]);
+		});
 		
-		//const advance = systemData.advances[targetName];
-		//console.log(advance);
+		console.log(updateData);
 		
-		//systemData.advances[targetName] = {};
-		
-		let list = Object.entries(advances);
-		list.pop(advance);
-		console.log(list);
+		this.actor.update(updateData);
+		this.document.prepareDerivedData();
+		this.render();
 	}
 	
 	//When you click the free XP toggle/checkbox, it calls this function.
@@ -370,7 +388,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		const which = element.id.split("advance-")[1];
 		const value = element.value;
-		console.log("Which: {0}, Value: {1}", which, value);
 		
 		//See if it's a custom skill
 		const isCustomSkill = which == "name" && value.includes("/");
@@ -404,22 +421,30 @@ export class BTPersonActorSheet extends ActorSheet {
 	
 	//When you click the submit button on the advance maker, it calls this function.
 	_onAdvanceFinish(event) {
-		//event.preventDefault();
-		
 		const actorData = this.getData().actor;
 		const systemData = actorData.system;
 		const advanceMaker = systemData.advanceMaker;
 		let id = "advance-";
 		let i = 1;
 		const advances = Object.entries(systemData.advances);
-		advances.forEach(advance => {
-			if(advance.id != undefined)
-			{
-				let tid = advance.id.split('-')[1];
-				if(tid > i)
-					i = tid + 1;
+		i += advances.length;
+		
+		//Name validation
+		const allowedAttributes = ["str", "bod", "dex", "rfl", "wil", "int", "cha", "edg"];
+		if(advanceMaker.type == "attribute")
+		{
+			let name = advanceMaker.name;
+			if(!allowedAttributes.includes(name)) {
+				console.error("{0} is not a valid attribute", name);
+				return;
 			}
-		});
+		}
+		
+		//XP input validation
+		if(!parseInt(advanceMaker.xp) || advanceMaker.xp == "" || advanceMaker.xp == undefined || advanceMaker.xp == null) {
+			console.error("XP {0} didn't parse correctly or was blank!", advanceMaker.xp);
+			return;
+		}
 		
 		//Make an advance schema with an appropriate name and fill it with the data from the advance maker
 		const dataName = 'system.advances.'+advanceMaker.name;
@@ -431,22 +456,7 @@ export class BTPersonActorSheet extends ActorSheet {
 			free: advanceMaker.free,
 			id: id+i
 		};
-		/*systemData.advances[advanceMaker.name] = {
-			name: advanceMaker.name,
-			type: advanceMaker.type,
-			xp: advanceMaker.xp,
-			free: advanceMaker.free
-		}
-		console.log(systemData.advances);*/
 		
-		//console.log("Before: {0}", advanceMaker);
-		
-		//console.log("After: {0}", advanceMaker);
-		
-		//this.RefreshSheet();
-		
-		//this.actor.update(updateData);
-		//systemData.skills[baseSkill][newSkillName] = updateData;
 		this.Update(updateData, "advances", advanceMaker.name);
 		
 		//Reset the advance maker

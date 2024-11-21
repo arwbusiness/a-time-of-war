@@ -13,7 +13,7 @@ export class BTActor extends Actor {
 	}
 
 	/** @override */
-		prepareBaseData() {
+	prepareBaseData() {
 		// Data modifications in this step occur before processing embedded
 		// documents or derived data.
 	}
@@ -46,10 +46,6 @@ export class BTActor extends Actor {
 		if (actorData.type !== 'pc')
 			return;
 		
-		//this.CalculateSkillLevels(actorData, systemData);
-		
-		//this.AddCustomSkill(systemData, "art", "painting", "dex", "");
-		
 		const systemData = actorData.system;
 		
 		//Reset skills by setting their XP to 0.
@@ -74,27 +70,23 @@ export class BTActor extends Actor {
 		//Reset attributes by setting their XP to 0.
 		const attributes = Object.entries(systemData.attributes);
 		attributes.forEach(attribute => {
-			attribute.xp = 0;
+			attribute[1].xp = 0;
 		});
 		
 		//Reset traits by setting their XP to 0.
-		//if(systemData.traits == undefined) { systemData.traits = {}; } //Traits can be null, so if it is, just make it empty.
 		const traits = Object.entries(systemData.traits);
 		traits.forEach(trait => {
-			trait.xp = 0;
+			trait[1].xp = 0;
 		});
 		
 		//Reset spent XP counter.
 		systemData.xp_spent = 0;
 		
-		console.log("Advances: {0}", systemData.advances);
-		
 		//Check advances and plug the XP back into the sheet.
-		//if(systemData.advances == undefined) { systemData.advances = {}; } //Advances can be null, so if it is, just make it empty.
 		Object.entries(systemData.advances).forEach(adv => {
 			const advance = adv[1];
-			const xp = advance.xp;
-			console.log("Advance: {0}, XP: {1}", advance, xp);
+			const xp = parseInt(advance.xp);
+			//console.log("Advance: {0}, XP: {1}", advance, xp);
 			switch(advance.type) {
 				case "skill":
 					const skill = (advance.baseSkill != "") ? skills[advance.name] : skills[advance.baseSkill][advance.name];
@@ -102,7 +94,7 @@ export class BTActor extends Actor {
 					break;
 				case "attribute":
 					const attribute = systemData.attributes[advance.name];
-					attribute.xp += xp;
+					attribute.xp += xp;//parseInt(attribute.xp) + xp;
 					break;
 				case "trait":
 					const trait = systemData.traits[advance.name];
@@ -114,72 +106,74 @@ export class BTActor extends Actor {
 			}
 			systemData.xp_spent += advance.free ? 0 : xp;
 		});
-		console.log(systemData.xp_spent);
 		
-		this.CalculateSkillLevels(skills, systemData);
-		this.CalculateAttributeAndTraitLevels(attributes, traits);
+		this.CalculateAttributeLevels(systemData);
+		this.CalculateSkillLevels(systemData);
+		this.CalculateTraitLevels(systemData);
+		
+		this.render();
 	}
 	
-	CalculateAttributeAndTraitLevels(attributes, traits) {
-		attributes.forEach(attribute => {
-			console.log("Attribute: {0}, XP: {1}", attribute, attribute.xp);
+	CalculateAttributeLevels(systemData) {
+		const attributes = systemData.attributes;
+		
+		let updateData = {};
+		let list = Object.entries(attributes);
+		list.forEach(att => {
+			const attribute = att[1];
 			attribute.level = this.CalcTP(attribute.xp);
 			attribute.mod = this.GetAttributeMod(attribute.level);
-		});
-		traits.forEach(trait => {
-			trait.level = this.CalcTP(trait.xp);
+			updateData["system.attributes."+att[0]] = attribute;
 		});
 		
-		let updateData = attributes;
-		const dataName = 'system.attributes';
 		this.update(updateData);
 	}
 	
-	CalculateSkillLevels(skills, systemData) {
+	CalculateTraitLevels(systemData) {
+		const traits = systemData.traits;
+		
+		let updateData = {};
+		let list = Object.entries(traits);
+		list.forEach(tr => {
+			const trait = tr[1];
+			trait.level = this.CalcTP(trait.xp);
+			updateData["system.traits."+tr[0]] = trait;
+		});
+		
+		this.update(updateData);
+	}
+	
+	CalculateSkillLevels(systemData) {
 		const tieredSkills = ["computers", "martial_arts", "melee_weapons", "pickpocket", "sleightofhand", "quickdraw", "art", "interest"];
 		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
 		
-		for(var i = 0; i <= skills.length-1; i++) {
+		const skills = systemData.skills;
+		//console.log(skills);
+		
+		let updateData = {};
+		
+		let list = Object.entries(skills);
+		//console.log(list);
+		list.forEach(sk => {
+			//console.log(sk[0]);
+			//console.log(sk[1]);
 			
-			let name = skills[i][0];
-			let data = Object.entries(skills[i][1]);
-			if(data.length == 0) //Skip custom skill groups that are empty
-				continue;
+			if(customSkills.includes(sk[0]))
+				return;
 			
-			const isCustomSkill = data[0][0] != "xp";
-			if(isCustomSkill) {
-				name = data[0][0];
-				data = data[0][1];
-			}
-			else
-				data = skills[i][1];
+			let skill = sk[1];
 			
-			//extract the elements for use
-			const xp = data.xp;
-			let mod = data.mod;
-			let level = data.level;
-			//const link = data.link;
-			let tn = data.tn;
-			let type = data.type;
-			
-			//What's the Link Modifier?
-			let linkText = data.link.toString().split("+");
+			skill.level = this.CalcSL(skill.xp);
+			let linkText = skill.link.split("+");
 			const linkA = systemData.attributes[linkText[0]].mod;
 			const linkB = linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0;
 			const linkMod = linkA + linkB;
-			
-			//Calculate the Skill Level based on XP:
-			level = this.CalcSL(xp);
-			
-			//Calculate the roll mod:
-			mod = linkMod + level;
-			
-			//Uprate tiered skills.
-			if(name in tieredSkills && level > 3) {
-				tn++;
-				type = type.substring(0,1)+"A";
-			}
-		}
+			skill.mod = skill.level + linkMod;
+			updateData["system.skills."+sk[0]] = skill;
+		});
+		
+		//console.log("updateData: {0}", updateData);
+		this.update(updateData);
 	}
 	
 	AddCustomSkill(systemData, baseSkill, skillName, linkA, linkB) {

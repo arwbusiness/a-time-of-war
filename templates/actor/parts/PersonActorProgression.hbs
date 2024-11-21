@@ -10,10 +10,10 @@
 	{{#each system.advances as |advance key|}}
 	<tr>
 		<td>{{advance.type}}</td>
-		<td>{{advance.name}}</td>
+		<td>{{advance.name}} {{advance.id}}</td>
 		<td>{{advance.xp}}{{#if advance.free}} (free){{/if}}</td>
 		<td>
-			<input type="button" class="delete-advance" data-type="{{advance.type}}" data-name="{{advance.name}}" data-xp="{{advance.xp}}" value="Delete" />
+			<input type="button" class="delete-advance" data-type="{{advance.type}}" data-name="{{advance.name}}" data-xp="{{advance.xp}}" id="{{advance.id}}" value="Delete" />
 		</td>
 	</tr>
 	{{/each}}
