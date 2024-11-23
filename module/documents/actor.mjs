@@ -81,30 +81,39 @@ export class BTActor extends Actor {
 		
 		//Reset spent XP counter.
 		systemData.xp_spent = 0;
-		
-		//Check advances and plug the XP back into the sheet.
-		Object.entries(systemData.advances).forEach(adv => {
-			const advance = adv[1];
-			const xp = parseInt(advance.xp);
-			//console.log("Advance: {0}, XP: {1}", advance, xp);
-			switch(advance.type) {
-				case "skill":
-					const skill = (advance.baseSkill != "") ? skills[advance.name] : skills[advance.baseSkill][advance.name];
-					skill.xp += xp;
-					break;
-				case "attribute":
-					const attribute = systemData.attributes[advance.name];
-					attribute.xp += xp;//parseInt(attribute.xp) + xp;
-					break;
-				case "trait":
-					const trait = systemData.traits[advance.name];
-					trait.xp += xp;
-					break;
-				default:
-					console.error("Advance type {0} not recognised!", advance.type);
-					break;
+		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
+		Object.entries(systemData.advances).forEach(advance => {
+			const data = advance[1];
+			const xp = parseInt(data.xp);
+			const type = data.type;
+			const name = data.name;
+			const baseSkill = data.baseSkill;
+			console.log(xp + " " + type + " " + name + " " + baseSkill);
+			
+			if(type == "attribute") {
+				systemData.attributes[name].xp += xp;
 			}
-			systemData.xp_spent += advance.free ? 0 : xp;
+			
+			if(type == "skill") {
+				console.log("baseSkill: {0}", baseSkill);
+				if(baseSkill == undefined || baseSkill == "") {
+					console.log(systemData.skills[name]);
+					systemData.skills[name].xp += xp;
+				}
+				else if (customSkills.includes(baseSkill)) {
+					console.log(systemData.skills[baseSkill][name]);
+					systemData.skills[baseSkill][name].xp += xp;
+				}
+				else {
+					console.error("baseSkill: {0} not recognised!", baseSkill);
+				}
+			}
+			
+			if(type == "trait") {
+				systemData.traits[name].xp += xp;
+			}
+			
+			systemData.xp_spent += data.free ? 0 : xp;
 		});
 		
 		this.CalculateAttributeLevels(systemData);
@@ -143,7 +152,7 @@ export class BTActor extends Actor {
 		this.update(updateData);
 	}
 	
-	CalculateSkillLevels(systemData) {
+	/*CalculateSkillLevels(systemData) {
 		const tieredSkills = ["computers", "martial_arts", "melee_weapons", "pickpocket", "sleightofhand", "quickdraw", "art", "interest"];
 		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
 		
@@ -155,13 +164,13 @@ export class BTActor extends Actor {
 		let list = Object.entries(skills);
 		//console.log(list);
 		list.forEach(sk => {
-			//console.log(sk[0]);
-			//console.log(sk[1]);
 			
-			if(customSkills.includes(sk[0]))
-				return;
-			
+			let isCustomSkill = false;
 			let skill = sk[1];
+			if(customSkills.includes(sk[0])) {
+				isCustomSkill = true;
+				skill = 
+			}
 			
 			skill.level = this.CalcSL(skill.xp);
 			let linkText = skill.link.split("+");
@@ -173,6 +182,45 @@ export class BTActor extends Actor {
 		});
 		
 		//console.log("updateData: {0}", updateData);
+		this.update(updateData);
+	}*/
+	
+	CalculateSkillLevels(systemData) {
+		const tieredSkills = ["computers", "martial_arts", "melee_weapons", "pickpocket", "sleightofhand", "quickdraw", "art", "interest"];
+		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
+		
+		const skills = systemData.skills;
+		
+		let updateData = {};
+		let list = Object.entries(skills);
+		list.forEach(skill => {
+			let data = skill[1];
+			
+			let isCustomSkill = false;
+			if(customSkills.includes(skill[0])) {
+				isCustomSkill = true;
+				Object.entries(data).forEach(customSkill => {
+					let newData = customSkill[1];
+					newData.level = this.CalcSL(newData.xp);
+					let linkText = newData.link.split("+");
+					const linkA = systemData.attributes[linkText[0]].mod;
+					const linkB = linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0;
+					const linkMod = linkA + linkB;
+					newData.mod = newData.level + linkMod;
+					updateData["system.skills."+skill[0]+"."+customSkill[0]] = newData;
+				});
+			}
+			else {
+				data.level = this.CalcSL(data.xp);
+				let linkText = data.link.split("+");
+				const linkA = systemData.attributes[linkText[0]].mod;
+				const linkB = linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0;
+				const linkMod = linkA + linkB;
+				data.mod = data.level + linkMod;
+				updateData["system.skills."+skill[0]] = data;
+			}
+		});
+		
 		this.update(updateData);
 	}
 	
@@ -218,24 +266,6 @@ export class BTActor extends Actor {
 		}
 		
 		return sl;
-	}
-	
-	CalcXPForNextSL(xp) {
-		if(xp >= 570)
-			return 0;
-		
-		let mult = 1;
-		for(var l = 20; l < 570; mult++) {
-			if(xp < l)
-				break;
-			else {
-				l += (10*mult);
-				sl++;
-			}
-		}
-		
-		const remainder = l-xp;
-		return remainder;
 	}
 	
 	GetAttributeMod(level) {

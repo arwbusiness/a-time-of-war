@@ -1,97 +1,109 @@
-
-<h3>Advances</h3>
-<table>
-	<tr>
-		<th>Type</th>
-		<th>Name</th>
-		<th>XP</th>
-		<th>Delete</th>
-	</tr>
-	{{#each system.advances as |advance key|}}
-	<tr>
-		<td>{{advance.type}}</td>
-		<td>{{advance.name}} {{advance.id}}</td>
-		<td>{{advance.xp}}{{#if advance.free}} (free){{/if}}</td>
-		<td>
-			<input type="button" class="delete-advance" data-type="{{advance.type}}" data-name="{{advance.name}}" data-xp="{{advance.xp}}" id="{{advance.id}}" value="Delete" />
-		</td>
-	</tr>
-	{{/each}}
-</table>
-
 <!--Advance maker-->
-<h3>Submit New Advance</h3>
-<div id="advanceMaker" class="grid grid-5col">
-	<div class="flex-group-center">
-		Free advance: <input type="checkbox" class="advance-free" />
-	</div>
-	
-	<div class="flex-group-center">
-		<select for="system.advanceMaker.type" id="advance-type" class="advance-type">
-			<option value="attribute" selected="selected">Attribute</option>
-			<option value="skill">Skill</option>
-			<option value="trait">Trait</option>
-		</select>
-	</div>
-	
-	<script>
-		
-	</script>
-	
-	<div class="flex-group-center">
-		<select id="advance-name" class="advance-name" data-type>
-			{{#if (eq system.advanceMaker.type "attribute")}}
-				<option value="str" selected="selected">STR</option>
-				<option value="bod">BOD</option>
-				<option value="dex">DEX</option>
-				<option value="rfl">RFL</option>
-				<option value="wil">WIL</option>
-				<option value="int">INT</option>
-				<option value="cha">CHA</option>
-				<option value="edg">EDG</option>
-			{{else if (eq system.advanceMaker.type "trait")}}
-				{{#each system.traits as |trait key|}}
-					<option value="{{key}}" {{#if (eq key "acrobatics_freefall")}}selected="selected"{{/if}}>{{key}}</option>
-				{{/each}}
-			{{else if (eq system.advanceMaker.type "")}}
-				{{#each system.skills as |skill key|}}
-				{{#unless (in key 'art' 'career' 'interest' 'language' 'protocol' 'science' 'streetwise' 'survival')}}
-					<option value="{{key}}">{{key}}</option>
-				{{/unless}}
-				{{/each}}
-				{{#each system.skills.art as |skill key|}}
-					<option value="art/{{key}}">Art/{{key}}</option>
-				{{/each}}
-				{{#each system.skills.career as |skill key|}}
-					<option value="career/{{key}}">Career/{{key}}</option>
-				{{/each}}
-				{{#each system.skills.interest as |skill key|}}
-					<option value="interest/{{key}}">Interest/{{key}}</option>
-				{{/each}}
-				{{#each system.skills.language as |skill key|}}
-					<option value="language/{{key}}">Language/{{key}}</option>
-				{{/each}}
-				{{#each system.skills.protocol as |skill key|}}
-					<option value="protocol/{{key}}">Protocol/{{key}}</option>
-				{{/each}}
-				{{#each system.skills.science as |skill key|}}
-					<option value="science/{{key}}">Science/{{key}}</option>
-				{{/each}}
-				{{#each system.skills.streetwise as |skill key|}}
-					<option value="streetwise/{{key}}">Streetwise/{{key}}</option>
-				{{/each}}
-				{{#each system.skills.survival as |skill key|}}
-					<option value="survival/{{key}}">Survival/{{key}}</option>
-				{{/each}}
-			{{/if}}
-		</select>
-	</div>
-	
-	<div class="flex-group-center">
-		<input id="advance-xp" type="number" class="advance-xp"></input>
-	</div>
-	
-	<div class="flex-group-center">
-		<input type="button" class="advance-finish">Submit</input>
-	</div>
-</div>
+<table id="advanceMaker" style="width:100%" class="items-list">
+	<caption>
+		<h3>Submit New Advance</h3>
+	</caption>
+	<thead>
+		<tr class="items-header">
+			<th style="width:16.4%">Type</th>
+			<th style="width:39.6%">Name</th>
+			<th style="width:17.46%">XP Value</th>
+			<th style="width:16.7%">Advance is free</th>
+			<th style="width:9.84%">Submit</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr style="text-align:center">
+			<td>
+				<select id="advance-type" class="advance-type" style="width:89.24%" onfocus="this.selectedIndex = -1;">
+					<option value="attribute">Attribute</option>
+					<option value="skill">Skill</option>
+					<option value="trait">Trait</option>
+				</select>
+			</td>
+			<td>
+				<select id="advance-name" class="advance-name" style="width:94.18%" onfocus="this.selectedIndex = -1;">
+					{{#if (eq system.advanceMaker.type "attribute")}}
+						<option value="str">STR</option>
+						<option value="bod">BOD</option>
+						<option value="dex">DEX</option>
+						<option value="rfl">RFL</option>
+						<option value="wil">WIL</option>
+						<option value="int">INT</option>
+						<option value="cha">CHA</option>
+						<option value="edg">EDG</option>
+					{{else if (eq system.advanceMaker.type "trait")}}
+						{{#each system.traits as |trait key|}}
+							<option value="{{key}}">{{key}}</option>
+						{{/each}}
+					{{else if (eq system.advanceMaker.type "skill")}}
+						{{#each system.skills as |skill key|}}
+						{{#unless (in key 'art' 'career' 'interest' 'language' 'protocol' 'science' 'streetwise' 'survival' 'piloting_protomech')}}
+							<option value="{{key}}">{{key}}</option>
+						{{/unless}}
+						{{/each}}
+						{{#each system.skills.art as |skill key|}}
+							<option value="art/{{key}}">Art/{{key}}</option>
+						{{/each}}
+						{{#each system.skills.career as |skill key|}}
+							<option value="career/{{key}}">Career/{{key}}</option>
+						{{/each}}
+						{{#each system.skills.interest as |skill key|}}
+							<option value="interest/{{key}}">Interest/{{key}}</option>
+						{{/each}}
+						{{#each system.skills.language as |skill key|}}
+							<option value="language/{{key}}">Language/{{key}}</option>
+						{{/each}}
+						{{#each system.skills.protocol as |skill key|}}
+							<option value="protocol/{{key}}">Protocol/{{key}}</option>
+						{{/each}}
+						{{#each system.skills.science as |skill key|}}
+							<option value="science/{{key}}">Science/{{key}}</option>
+						{{/each}}
+						{{#each system.skills.streetwise as |skill key|}}
+							<option value="streetwise/{{key}}">Streetwise/{{key}}</option>
+						{{/each}}
+						{{#each system.skills.survival as |skill key|}}
+							<option value="survival/{{key}}">Survival/{{key}}</option>
+						{{/each}}
+					{{/if}}
+				</select>
+			</td>
+			<td>
+				<input id="advance-xp" type="number" class="advance-xp" placeholder="0" />
+			</td>
+			<td>
+				<input type="checkbox" id="advance-free" class="advance-free" />
+			</td>
+			<td>
+				<input type="button" class="advance-finish" />
+			</td>
+		</tr>
+	</tbody>
+</table>
+<br>
+<table class="items-list">
+	<caption>
+		<h3>Advances</h3>
+	</caption>
+	<thead>
+		<tr class="items-header">
+			<th>Type</th>
+			<th>Name</th>
+			<th>XP</th>
+			<th>Delete</th>
+		</tr>
+	</thead>
+	<tbody>
+		{{#each system.advances as |advance key|}}
+		<tr>
+			<td>{{advance.type}}</td>
+			<td>{{advance.name}}</td>
+			<td>{{#if advance.free}}(free){{/if}} {{advance.xp}}</td>
+			<td>
+				<input type="button" class="delete-advance" data-type="{{advance.type}}" data-name="{{advance.name}}" data-xp="{{advance.xp}}" id="{{advance.id}}" value="Delete" />
+			</td>
+		</tr>
+		{{/each}}
+	</tbody>
+</table>

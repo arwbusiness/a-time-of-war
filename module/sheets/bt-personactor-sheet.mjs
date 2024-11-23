@@ -12,8 +12,8 @@ export class BTPersonActorSheet extends ActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['bt', 'sheet', 'actor', 'person'],
-      width: 600,
-      height: 600,
+      width: 750,
+      height: 650,
       tabs: [
         {
           navSelector: '.sheet-tabs',
@@ -107,11 +107,29 @@ export class BTPersonActorSheet extends ActorSheet {
 
 		//Calc handlebars
 		Handlebars.registerHelper('calcXPForNextSL', function(xp) {
-			return this.CalcXPForNextSL(xp);
+			if(xp >= 570)
+				return 0;
+			
+			let sl = -1;
+			let mult = 1;
+			for(var l = 20; l < 570; mult++) {
+				if(xp < l)
+					break;
+				else {
+					l += (10*mult);
+					sl++;
+				}
+			}
+			
+			const remainder = l-xp;
+			return remainder;
 		});
 		Handlebars.registerHelper('calcXPForNextTP', function(xp) {
 			return 100-xp == 0 ? 100 : 100-xp;
 		});
+		
+		//DERIVED DATA
+		
 	}
   
 	//Prepare the stuff that isn't in template.json (usually because it's temporary or user-defined).
@@ -280,38 +298,58 @@ export class BTPersonActorSheet extends ActorSheet {
 		//Bind the advance delete buttons.
 		html.on('click', '.delete-advance', this.DeleteAdvance.bind(this));
 		
+		//Dual attribute roll button.
+		html.on('click', '.dual-attribute-roll', this._onDualAttributeRollToggle.bind(this));
+		document.getElementById("dual-attribute-roll").value = "";
+		
 		//Bind the advance creation sequence.
 		html.on('click', '.advance-free', this._onAdvanceFreeToggle.bind(this));
 		html.on('change','.advance-type', this._onAdvanceUpdate.bind(this));
 		html.on('change','.advance-name', this._onAdvanceUpdate.bind(this));
-		html.on('input','.advance-xp', this._onAdvanceUpdate.bind(this));
+		html.on('blur','.advance-xp', this._onAdvanceUpdate.bind(this));
 		html.on('click', '.advance-finish', this._onAdvanceFinish.bind(this));
+		document.getElementById("advance-name").value = "";
 	}
 	
 	DeleteCustomSkill(event) {
 		const element = event.currentTarget;
 		const dataset = element.dataset;
 		
-		const actorData = this.getData().actor;
-		const systemData = actorData.system;
-		
 		//split id="delete-survival-{{key}}" into 3 and assign the indexes
 		const baseSkill = element.id.split("-")[1];
 		const skillName = element.id.split("-")[2];
 		
+		//Make a dupe list and cleanse+update the real one.
 		let skills = foundry.utils.duplicate(this.actor.system.skills[baseSkill]);
-		if(!skills[skillName].xp)
-			skills[skillName] = [];
-		
 		let updateData = {};
-		updateData["system.skills." + baseSkill] = skills;
+		updateData["system.skills."+baseSkill] = [];
 		this.actor.update(updateData);
-		this.render();
+		updateData = {};
+		
+		Object.entries(skills).forEach(skill => {
+			console.log(skill);
+			const data = skill[1];
+			console.log(skill[0] + " " + skillName);
+			if(skill[0] != skillName) {
+				updateData["system.skills."+baseSkill+"."+skillName] = {
+					xp: data.xp,
+					mod: data.mod,
+					level: data.level,
+					link: data.link,
+					tn: data.tn,
+					type: data.type,
+					baseSkill: baseSkill
+				}
+			}
+		});
+		
+		this.actor.update(updateData);
 	}
 	
 	AddNewSkill(event) {
 		const element = event.currentTarget;
 		const dataset = element.dataset;
+		console.log(dataset);
 		
 		const actorData = this.getData().actor;
 		const systemData = actorData.system;
@@ -323,12 +361,13 @@ export class BTPersonActorSheet extends ActorSheet {
 		let updateData = {};
 		updateData = {
 			xp: 0,
-			mod: 0,
+			mod: this.GetLinkMod(link.split("+"), systemData),
 			level: -1,
 			link: link,
 			tn: dataset.tn,
 			type: dataset.type
 		};
+		console.log(updateData);
 		
 		element.value = "";
 		
@@ -338,33 +377,57 @@ export class BTPersonActorSheet extends ActorSheet {
 		this.render();
 	}
 	
-	DeleteAdvance(event) {
+	async DeleteAdvance(event) {
 		const element = event.currentTarget;
 		const dataset = element.dataset;
 		
-		const actorData = this.getData().actor;
-		const systemData = actorData.system;
-		
-		const targetName = dataset.name;
-		const targetType = dataset.type;
-		const targetXP = dataset.xp;
 		const targetId = element.id;
 		
 		let advances = foundry.utils.duplicate(this.actor.system.advances);
 		let updateData = {};
-		//updateData["system.advances"] = [];
-		Object.entries(advances).forEach(advance => {
-			if(advance[1].id != targetId) {
-				//systemData.advances[advance[1].id] = advance;
-				updateData["system.advances."+advance[1].id] = advance;
+		updateData["system.advances"] = [];
+		await this.actor.update(updateData);
+		
+		updateData = {};
+		let i = 1;
+		Object.entries(advances).forEach(entry => {
+			console.log(entry);
+			const data = entry[1];
+			const type = data.type;
+			const name = data.name;
+			const xp = data.xp;
+			const id = data.id;
+			const free = data.free;
+			const baseSkill = data.baseSkill;
+			
+			if(id != targetId) {
+				updateData["system.advances."+id] = {
+					type: type,
+					name: name,
+					xp: xp,
+					id: ("advance-" + i++),
+					baseSkill: baseSkill,
+					free: free
+				}
 			}
 		});
 		
-		console.log(updateData);
+		await this.actor.update(updateData);
+	}
+	
+	_onDualAttributeRollToggle(event) {
+		const element = event.currentTarget;
 		
-		this.actor.update(updateData);
-		this.document.prepareDerivedData();
-		this.render();
+		const dar = document.getElementById("dual-attribute-roll");
+		if(element.checked) {
+			dar.classList.remove("hidden");
+			document.getElementById("dual-attribute-divider").classList.add("hidden");
+		}
+		else {
+			dar.value = "";
+			dar.classList.add("hidden");
+			document.getElementById("dual-attribute-divider").classList.remove("hidden");
+		}
 	}
 	
 	//When you click the free XP toggle/checkbox, it calls this function.
@@ -378,45 +441,68 @@ export class BTPersonActorSheet extends ActorSheet {
 		advanceMaker.free = !advanceMaker.free;
 	}
 	
-	//When you alter (oninput) an input field in the advance maker, it calls this function where 'which' is type, name or xp based on which field you changed.
-	_onAdvanceUpdate(event) {
+	async _onAdvanceUpdate(event) {
 		const element = event.currentTarget;
+		const id = element.id;
+		let value = element.value;
+		const updateTarget = "system.advanceMaker";
 		
-		const actorData = this.getData().actor;
-		const systemData = actorData.system;
-		const advanceMaker = systemData.advanceMaker;
+		console.log(value);
 		
-		const which = element.id.split("advance-")[1];
-		const value = element.value;
+		let orig = ["1", "2", "3"];
+		orig[0] = document.getElementById("advance-type").value;
+		orig[1] = document.getElementById("advance-name").value;
+		orig[2] = document.getElementById("advance-xp").value;
+		orig[3] = document.getElementById("advance-free").checked;
 		
-		//See if it's a custom skill
-		const isCustomSkill = which == "name" && value.includes("/");
-		if(isCustomSkill) {
-			advanceMaker.baseSkill = value.split("/")[0];
-			advanceMaker.name = value.split("/")[1];
-		}
-		else {
-			if(which == "xp" && !parseInt(value)) {
-				console.error("value {0} can't be parsed to int", value);
-				return;
-			}
-			else {
-				switch(which) {
-					case "type":
-						advanceMaker.type = value;
-						break;
-					case "name":
-						advanceMaker.name = value;
-						break;
-					case "xp":
-						advanceMaker.xp = value;
-						break;
-					default:
-						break;
+		//const actorData = this.getData().actor;
+		//const systemData = actorData.system;
+		//const advanceMaker = systemData.advanceMaker;
+		
+		let updateData = {};
+		switch(id.split('advance-')[1]) {
+			case "type":
+				updateData[updateTarget] = {
+					type: value
 				}
-			}
+				//advanceMaker.type = value;
+				break;
+			case "name":
+				if(value.includes('/'))
+				{
+					let baseSkill = value.split('/')[0];
+					value = value.split('/')[1];
+					updateData[updateTarget] = {
+						baseSkill: baseSkill,
+						name: value
+					}
+					//advanceMaker.baseSkill = baseSkill;
+					//advanceMaker.name = value;
+				}
+				else {
+					updateData[updateTarget] = {
+						baseSkill: undefined,
+						name: value
+					}
+					//advanceMaker.name = value;
+				}
+				break;
+			case "xp":
+				updateData[updateTarget] = {
+					xp: parseInt(value)
+				}
+				//advanceMaker.xp = parseInt(value);
+				break;
+			default:
+				break;
 		}
-		console.log(advanceMaker);
+		
+		await this.actor.update(updateData);
+		//document.getElementById(id).value = element.value;
+		document.getElementById("advance-type").value = orig[0];
+		document.getElementById("advance-name").value = orig[1];
+		document.getElementById("advance-xp").value = parseInt(orig[2]);
+		document.getElementById("advance-free").checked = orig[3];
 	}
 	
 	//When you click the submit button on the advance maker, it calls this function.
@@ -434,6 +520,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		if(advanceMaker.type == "attribute")
 		{
 			let name = advanceMaker.name;
+			console.log(name);
 			if(!allowedAttributes.includes(name)) {
 				console.error("{0} is not a valid attribute", name);
 				return;
@@ -447,23 +534,28 @@ export class BTPersonActorSheet extends ActorSheet {
 		}
 		
 		//Make an advance schema with an appropriate name and fill it with the data from the advance maker
-		const dataName = 'system.advances.'+advanceMaker.name;
 		let updateData = {};
-		updateData[dataName] = {
+		updateData["system.advances."+id+i] = {
 			name: advanceMaker.name,
 			type: advanceMaker.type,
 			xp: advanceMaker.xp,
 			free: advanceMaker.free,
-			id: id+i
+			id: id+i,
+			baseSkill: advanceMaker.baseSkill
 		};
 		
-		this.Update(updateData, "advances", advanceMaker.name);
-		
 		//Reset the advance maker
-		advanceMaker.type = "";
-		advanceMaker.name = "";
-		advanceMaker.xp = 0;
-		advanceMaker.free = false;
+		updateData["system.advanceMaker"] = {
+			type: "attribute",
+			name: "",
+			xp: "",
+			free: false,
+			id: "",
+			baseSkill: undefined
+		}
+		
+		this.actor.update(updateData);
+		this.render();
 	}
 
   /**
@@ -536,11 +628,41 @@ export class BTPersonActorSheet extends ActorSheet {
 		return link;
 	}
 	
+	GetAttributeMod(level) {
+		if(level == 0)
+			return -4;
+		else if(level == 1)
+			return -2;
+		else if(level == 2 || level == 3)
+			return -1;
+		else if(level >= 4 && level <= 6)
+			return 0;
+		else if(level >= 7 && level <= 9)
+			return 1;
+		else if(level == 10)
+			return 2;
+		else if(level >= 11) //Attribute/3 rounding down, max +5
+			return Math.min(5, Math.floor(level/3));
+	}
+	
 	async RollAttribute(element, dataset, actorData, systemData, rollData) {
 		//Figure out the link modifier.
-		const linkText = dataset.link.split("+");
+		let linkText = dataset.link.split("+");
+		
+		//Is it a dual attribute roll?
+		let name = dataset.label;
+		const dar = document.getElementById("dual-attribute-roll");
+		if(!dar.classList.contains("hidden")) {
+			linkText = (dar.value + dataset.link).split("+");
+			name = dar.value.toUpperCase() + dataset.link.toUpperCase();
+		}
+		
+		dar.value = "";
+		dar.classList.add("hidden");
+		document.getElementById("dual-attribute-divider").classList.remove("hidden");
+		document.getElementsByClassName("dual-attribute-roll")[0].checked = false;
+		
 		const link = this.GetLinkMod(linkText, systemData, true);
-		console.log("TRYING TO ROLL ATTRIBUTE {0}", linkText);
 		
 		//Set the base TN
 		let tn = 7;
@@ -562,24 +684,21 @@ export class BTPersonActorSheet extends ActorSheet {
 		const total = (dice3 ? dice1+dice2+dice3-Math.min(dice1,dice2,dice3) : dice1+dice2)+link;
 		
 		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
-		let margin = "+0";
-		if(total > tn) {
-			margin = "+" + Math.ceil((total - tn)/2);
-		}
-		else if(total < tn) {
-			margin = Math.floor((total - tn)/2);
-		}
+		const margin = (total >= tn ? "+" : "") + (total - tn);
 		
-		const flavor = "Rolling " + dataset.label + ":";
+		let label = dataset.label;
+		if(twoAttributes)
+			label = linkText[0].toUpperCase() + "+" + linkText[1].toUpperCase();
+		//const flavor = "Rolling " + name + ":";
 		let msgData = {
-			name: dataset.label,
+			name: label,
 			dice1: dice1,
 			dice2: dice2,
 			dice3: dice3,
 			droppedDie: droppedDie,
 			rollMod: link == 0 ? "+0" : link,
 			speaker: actorData.name,
-			flavor: flavor,
+			//flavor: flavor,
 			margin: margin,
 			tn: tn,
 			isSuccess: roll.total >= tn,
@@ -626,36 +745,9 @@ export class BTPersonActorSheet extends ActorSheet {
 		//keeps highest 2 by default but there's probably a negative trait that makes you roll 3 keep the two lowest, so I should account for that.
 		
 		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
-		let margin = "+0";
-		if(total > tn) {
-			margin = "+" + Math.ceil((total - tn)/2);
-		}
-		else if(total < tn) {
-			margin = Math.floor((total - tn)/2);
-		}
+		const margin = (total >= tn ? "+" : "") + (total - tn);
 		
-		/*let skillName = "";
-		switch(dataset.label) {
-			case "acrobatics_freefall":
-				skillName = "Acrobatics/FreeFall";
-				break;
-			case "acrobatics_gymnastics":
-				skillName = "Acrobatics/Gymnastics";
-				break;
-			case "acrobatics_gymnastics":
-				skillName = "Acrobatics/Gymnastics";
-				break;
-			default:
-				skillName = dataset.label;
-				break;
-		}
-		*/
-		/*if(baseSkill != undefined)
-			skillName = baseSkill + "/" + dataset.label;
-		else
-			skillName = dataset.label;*/
-		
-		const flavor = "Rolling " + (baseSkill == undefined ? dataset.label : baseSkill + "/" + dataset.label) + (!isTrained ? " (Untrained)" : "") + ":";
+		//const flavor = "Rolling {{{localize " + (baseSkill == undefined ? dataset.label + "}}}" : baseSkill + "}}/" + dataset.label) + (!isTrained ? " (Untrained)" : "") + ":";
 		
 		let msgData = {
 			name: dataset.label,
@@ -665,7 +757,8 @@ export class BTPersonActorSheet extends ActorSheet {
 			droppedDie: droppedDie,
 			rollMod: rollMod == 0 ? "+0" : rollMod,
 			speaker: actorData.name,
-			flavor: flavor,
+			//flavor: flavor,
+			untrained: level == -1,
 			margin: margin,
 			tn: tn,
 			isSuccess: roll.total >= tn,
@@ -673,7 +766,8 @@ export class BTPersonActorSheet extends ActorSheet {
 			actionType: actionType,
 			rollType: "skill",
 			result: total,
-			img: actorData.img
+			img: actorData.img,
+			baseSkill: baseSkill == undefined ? "none" : baseSkill
 		};
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
 		

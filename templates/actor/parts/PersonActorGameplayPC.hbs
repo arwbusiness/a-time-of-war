@@ -17,32 +17,53 @@
 			{{/each}}
 		</tr>
 	</table>
+	<div class="flexrow">
+		<h3 style="font-size:16px !important">Dual Attribute Roll</h3>
+		<input type="checkbox" class="dual-attribute-roll" value="Dual Attribute Roll" />
+		<select id="dual-attribute-roll" class="hidden" value="" style="width:25%">
+			<option value="str+">STR</option>
+			<option value="bod+">BOD</option>
+			<option value="rfl+">RFL</option>
+			<option value="dex+">DEX</option>
+			<option value="wil+">WIL</option>
+			<option value="int+">INT</option>
+			<option value="cha+">CHA</option>
+			<option value="edg+">EDG</option>
+		</select>
+		<div style="width:25%" id="dual-attribute-divider"></div>
+	</div>
+	<br>
 	
 	<h3 style="float:center">Skills</h3>
-	<table>
+	<table style="width:50%">
 		<tr>
-			<th>
-				<span>Skill</span>
+			<th style="width:10%">
+				<span style="text-align:left">Skill</span>
 			</th>
-			<th>
-				<span>Mod</span>
-			</th>
-			<th>
-				<span>Link</span>
-			</th>
-			<th>
-				<span>Level</span>
-			</th>
-			<th>
+			<th style="width:10%">
 				<span>TN</span>
 			</th>
-			<th></th>
+			<th style="width:10%">
+				<span>Mod</span>
+			</th>
+			<th style="width:10%">
+				<span>Link</span>
+			</th>
+			<th style="width:10%">
+				<span>Level</span>
+			</th>
+			<th style="width:15%">
+				XP to Next SL
+			</th>
 		</tr>
 		{{#each system.skills as |skill key|}}
-		{{#unless (in key 'art' 'career' 'interest' 'language' 'protocol' 'science' 'streetwise' 'survival')}}
+		{{#unless (in key 'art' 'career' 'interest' 'language' 'protocol' 'science' 'streetwise' 'survival' 'piloting_protomech')}}
 		<tr>
 			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}">{{key}}</label>
+				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}">{{localize key}}</label>
+			</td>
+			<td>
+				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
@@ -51,12 +72,11 @@
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
+				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
 			</td>
-			<td></td>
 		</tr>
 		{{/unless}}
 		{{/each}}
@@ -71,16 +91,16 @@
 				<label for="system.skills.art.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="art">{{key}}</label>
 			</td>
 			<td>
+				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+			</td>
+			<td>
 				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-art-{{key}}" value="Delete" />
@@ -89,18 +109,6 @@
 		{{/unless}}
 		{{/each}}
 		<tr>
-			<!--<td>
-				<select class="new-skill-link-art">
-					<option value="str" selected="selected">STR</option>
-					<option value="bod">BOD</option>
-					<option value="rfl">RFL</option>
-					<option value="dex">DEX</option>
-					<option value="wil">WIL</option>
-					<option value="int">INT</option>
-					<option value="cha">CHA</option>
-					<option value="edg">EDG</option>
-				</select>
-			</td>-->
 			<td>
 				<input class="add-new-skill" data-link="dex" data-baseskill="art" data-tn="7" data-type="SB" type="text" placeholder="type name of new art skill here">
 			</td>
@@ -115,16 +123,16 @@
 				<label for="system.skills.career.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="career">{{key}}</label>
 			</td>
 			<td>
+				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+			</td>
+			<td>
 				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-career-{{key}}" value="Delete" />
@@ -146,16 +154,16 @@
 				<label for="system.skills.interest.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="interest">{{key}}</label>
 			</td>
 			<td>
+				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+			</td>
+			<td>
 				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-interest-{{key}}" value="Delete" />
@@ -177,16 +185,16 @@
 				<label for="system.skills.language.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="language">{{key}}</label>
 			</td>
 			<td>
+				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+			</td>
+			<td>
 				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
 				{{#unless (eq key system.details.lang_primary)}}
@@ -210,16 +218,16 @@
 				<label for="system.skills.protocol.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="protocol">{{key}}</label>
 			</td>
 			<td>
+				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+			</td>
+			<td>
 				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-protocol-{{key}}" value="Delete" />
@@ -241,16 +249,16 @@
 				<label for="system.skills.science.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="science">{{key}}</label>
 			</td>
 			<td>
+				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+			</td>
+			<td>
 				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-science-{{key}}" value="Delete" />
@@ -272,16 +280,16 @@
 				<label for="system.skills.streetwise.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="streetwise">{{key}}</label>
 			</td>
 			<td>
+				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+			</td>
+			<td>
 				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-streetwise-{{key}}" value="Delete" />
@@ -303,16 +311,16 @@
 				<label for="system.skills.survival.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="survival">{{key}}</label>
 			</td>
 			<td>
+				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+			</td>
+			<td>
 				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
 			</td>
 			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.level}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{skill.tn}}</div>
+				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-survival-{{key}}" value="Delete" />
