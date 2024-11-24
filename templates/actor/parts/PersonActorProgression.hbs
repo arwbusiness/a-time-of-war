@@ -97,8 +97,8 @@
 	<tbody>
 		{{#each system.advances as |advance key|}}
 		<tr>
-			<td>{{advance.type}}</td>
-			<td>{{advance.name}}</td>
+			<td>{{localize advance.type}}</td>
+			<td>{{localize advance.name}}</td>
 			<td>{{#if advance.free}}(free){{/if}} {{advance.xp}}</td>
 			<td>
 				<input type="button" class="delete-advance" data-type="{{advance.type}}" data-name="{{advance.name}}" data-xp="{{advance.xp}}" id="{{advance.id}}" value="Delete" />

@@ -292,6 +292,10 @@ export class BTPersonActorSheet extends ActorSheet {
 
 	//These listeners make the advance maker work.
 	listenForSheetButtons(html) {
+		//fields
+		html.on('change', '#lang-primary', this.ChangeLangPrimary.bind(this));
+		html.on('change', '#age', this.ChangeAge.bind(this));
+		
 		// Rollable buttons.
 		html.on('click', '.rollable', this._onRoll.bind(this));
 		
@@ -319,6 +323,133 @@ export class BTPersonActorSheet extends ActorSheet {
 		html.on('blur','.advance-xp', this._onAdvanceUpdate.bind(this));
 		html.on('click', '.advance-finish', this._onAdvanceFinish.bind(this));
 		document.getElementById("advance-name").value = "";
+	}
+	
+	ChangeLangPrimary(event) {
+		const element = event.currentTarget;
+		
+		let updateData = {};
+		updateData["system.details.lang_primary"] = element.value;
+		this.actor.update(updateData);
+	}
+	
+	/*ChangeDetail(event) {
+		const element = event.currentTarget;
+		const dataset = element.dataset;
+		
+		let updateData = {};
+		if(dataset.for == "height") {
+			this.getData().actor.system.details.build = element.value;
+			updateData["system.details.build"] = element.value;
+		}
+		else if(dataset.for == "weight") {
+			this.getData().actor.system.details.gender = element.value;
+			updateData["system.details.gender"] = element.value;
+		}
+		this.actor.update(updateData);
+	}*/
+	
+	ChangeAge(event) {
+		const element = event.currentTarget;
+		
+		let updateData = {};
+		updateData["system.details.age"] = element.value;
+		
+		//age mods
+		const age = updateData["system.details.age"];
+		//str
+		if(age < 25) {
+			updateData["system.agemods.str"] = "+0";
+			updateData["system.agemods.bod"] = "+0";
+			updateData["system.agemods.dex"] = "+0";
+			updateData["system.agemods.rfl"] = "+0";
+			updateData["system.agemods.int"] = "+0";
+			updateData["system.agemods.wil"] = "+0";
+			updateData["system.agemods.cha"] = "+0";
+		}
+		else if(age >= 25 && age < 31) {
+			updateData["system.agemods.str"] = "+100";
+			updateData["system.agemods.bod"] = "+100";
+			updateData["system.agemods.dex"] = "+0";
+			updateData["system.agemods.rfl"] = "+100";
+			updateData["system.agemods.int"] = "+100";
+			updateData["system.agemods.wil"] = "+100";
+			updateData["system.agemods.cha"] = "+50";
+		}
+		else if(age >= 31 && age < 41) {
+			updateData["system.agemods.str"] = "+200";
+			updateData["system.agemods.bod"] = "+200";
+			updateData["system.agemods.dex"] = "+0";
+			updateData["system.agemods.rfl"] = "+0";
+			updateData["system.agemods.int"] = "+200";
+			updateData["system.agemods.wil"] = "+200";
+			updateData["system.agemods.cha"] = "+50";
+		}
+		else if(age >= 41 && age < 51) {
+			updateData["system.agemods.str"] = "+200";
+			updateData["system.agemods.bod"] = "+200";
+			updateData["system.agemods.dex"] = "-50";
+			updateData["system.agemods.rfl"] = "+0";
+			updateData["system.agemods.int"] = "+200";
+			updateData["system.agemods.wil"] = "+250";
+			updateData["system.agemods.cha"] = "+25";
+		}
+		else if(age >= 51 && age < 61) {
+			updateData["system.agemods.str"] = "+200";
+			updateData["system.agemods.bod"] = "+100";
+			updateData["system.agemods.dex"] = "-50";
+			updateData["system.agemods.rfl"] = "-100";
+			updateData["system.agemods.int"] = "+200";
+			updateData["system.agemods.wil"] = "+250";
+			updateData["system.agemods.cha"] = "-25";
+		}
+		else if(age >= 61 && age < 71) {
+			updateData["system.agemods.str"] = "+100";
+			updateData["system.agemods.bod"] = "+0";
+			updateData["system.agemods.dex"] = "-150";
+			updateData["system.agemods.rfl"] = "-100";
+			updateData["system.agemods.int"] = "+250";
+			updateData["system.agemods.wil"] = "+250";
+			updateData["system.agemods.cha"] = "-75";
+		}
+		else if(age >= 71 && age < 81) {
+			updateData["system.agemods.str"] = "-50";
+			updateData["system.agemods.bod"] = "-125";
+			updateData["system.agemods.dex"] = "-150";
+			updateData["system.agemods.rfl"] = "-200";
+			updateData["system.agemods.int"] = "+250";
+			updateData["system.agemods.wil"] = "+200";
+			updateData["system.agemods.cha"] = "-175";
+		}
+		else if(age >= 81 && age < 91) {
+			updateData["system.agemods.str"] = "-200";
+			updateData["system.agemods.bod"] = "-275";
+			updateData["system.agemods.dex"] = "-250";
+			updateData["system.agemods.rfl"] = "-300";
+			updateData["system.agemods.int"] = "+150";
+			updateData["system.agemods.wil"] = "+150";
+			updateData["system.agemods.cha"] = "-275";
+		}
+		else if(age >= 91 && age < 101) {
+			updateData["system.agemods.str"] = "-350";
+			updateData["system.agemods.bod"] = "-450";
+			updateData["system.agemods.dex"] = "-400";
+			updateData["system.agemods.rfl"] = "-425";
+			updateData["system.agemods.int"] = "+0";
+			updateData["system.agemods.wil"] = "+50";
+			updateData["system.agemods.cha"] = "-375";
+		}
+		else if(age >= 101) {
+			updateData["system.agemods.str"] = "-550";
+			updateData["system.agemods.bod"] = "-650";
+			updateData["system.agemods.dex"] = "-600";
+			updateData["system.agemods.rfl"] = "-575";
+			updateData["system.agemods.int"] = "-200";
+			updateData["system.agemods.wil"] = "-50";
+			updateData["system.agemods.cha"] = "-525";
+		}
+		
+		this.actor.update(updateData);
 	}
 	
 	async DeleteCustomSkill(event) {
@@ -770,7 +901,7 @@ export class BTPersonActorSheet extends ActorSheet {
 	}
 	
 	GetAttributeMod(level) {
-		if(level == 0)
+		if(level <= 0)
 			return -4;
 		else if(level == 1)
 			return -2;
@@ -803,7 +934,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		document.getElementById("dual-attribute-divider").classList.remove("hidden");
 		document.getElementsByClassName("dual-attribute-roll")[0].checked = false;
 		
-		const link = this.GetLinkMod(linkText, systemData, true);
+		let link = this.GetLinkMod(linkText, systemData, true);
 		
 		//Set the base TN
 		let tn = 7;
@@ -812,6 +943,16 @@ export class BTPersonActorSheet extends ActorSheet {
 			tn = 18;
 		else
 			tn = 12;
+		
+		link = 0;
+		for(var t = 0; t < linkText.length; t++) {
+			var lin = linkText[t];
+			var ageMod = systemData.agemods[lin];
+			var normalXP = systemData.attributes[lin].xp;
+			var result = Math.floor((parseInt(ageMod) + normalXP)/100);
+			
+			link += this.GetAttributeMod(result, systemData);
+		}
 			
 		const formula = "{2d6+" + link + "}cs>=" + tn;
 		let roll = await new Roll(formula, rollData).evaluate();
@@ -871,7 +1012,20 @@ export class BTPersonActorSheet extends ActorSheet {
 		const tn = isTrained ? skill.tn : (link.toString().includes("+") ? 18 : 12);
 		const actionType = skill.type;
 		
-		const rollMod = this.GetLinkMod(link.split("+"), systemData, !isTrained) + (isTrained ? level : 0);
+		let rollMod = 0;//this.GetLinkMod(link.split("+"), systemData, !isTrained) + (isTrained ? level : 0);
+		
+		//age modifers, man
+		let linkText = link.split("+");
+		for(var t = 0; t < linkText.length; t++) {
+			var lin = linkText[t];
+			var ageMod = systemData.agemods[lin];
+			var normalXP = systemData.attributes[lin].xp;
+			var result = Math.floor((parseInt(ageMod) + normalXP)/100);
+			
+			rollMod += this.GetAttributeMod(result, systemData);
+		}
+		rollMod += (isTrained ? level : 0);
+		
 		const formula = "{2d6+" + rollMod + "}cs>=" + tn;
 		console.log(formula);
 		let roll = await new Roll(formula, rollData).evaluate();

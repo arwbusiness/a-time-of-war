@@ -1,6 +1,6 @@
 <div class="character" style="width:100%; border:10px;">
 
-	<table style="width:100%">
+	<table style="width:100%; table-layout:fixed;">
 		<caption>
 			<h3>Traits</h3>
 		</caption>
@@ -8,10 +8,10 @@
 			<tr>
 				<th style="width:4.09%"></th>
 				<th style="width:17%">Name</th>
-				<th style="width:17%">Subtitle</th>
+				<th style="width:17%"><!--Subtitle--></th>
 				<th style="width:5%">Level</th>
-				<th style="width:45.91%">Description</th>
-				<th style="width:3%">XP Until Next</th>
+				<th style="width:44.91%">Description</th>
+				<th style="width:4%">XP Until Next</th>
 				<th style="width:8%"></th>
 			</tr>
 		</thead>
@@ -25,17 +25,17 @@
 					{{localize trait.name}}
 				</td>
 				<td>
-					{{#unless (in key 'a' 'b' 'c')}}
-					<input class="modify-trait-component" type="text" value="{{trait.subtitle}}" data-traitid="{{trait.id}}@subtitle" placeholder="Enter a trait type/subtitle here" />
-					{{/unless}}
+					{{#if (in trait.name 'alternate_id' 'bloodmark' 'citizenship' 'compulsion' 'connections' 'custom_vehicle' 'dark_secret' 'dependents' 'design_quirk' 'enemy' 'exceptional_attribute' 'extra income' 'implant_prosthetic' 'in_for_life' 'lost_limb' 'natural_aptitude' 'property' 'rank' 'reputation' 'title' 'vehicle')}}
+					<textarea class="modify-trait-component" type="text" value="{{trait.subtitle}}" data-traitid="{{trait.id}}@subtitle" placeholder="Enter a trait type/subtitle here">{{trait.subtitle}}</textarea>
+					{{/if}}
 				</td>
-				<td>
+				<td style="text-align:center">
 					{{trait.level}}
 				</td>
 				<td>
 					<textarea class="modify-trait-component" type="text" value="{{trait.description}}" data-traitid="{{trait.id}}@description" placeholder="Enter a trait description here" contenteditable="true" style="max-width:100%">{{trait.description}}</textarea>
 				</td>
-				<td>
+				<td style="text-align:center">
 					{{calcXPForNextTP trait.xp}}
 				</td>
 				<td>
@@ -44,12 +44,13 @@
 			</tr>
 			{{/each}}
 			<tr>
-				<td style="text-align:right; padding-right:5px; font-style:bold;">
-					add new trait?
+				<td></td>
+				<td><!-- style="text-align:right; padding-right:5px; font-style:bold;">-->
+					<input type="button" id="add-new-trait" value="Add New Trait" />
 				</td>
 				<td>
 					<select id="new-trait-selector" onfocus="this.selectedIndex = -1;">
-						<option value="Alternate ID">Alternate ID</option>
+						<option value="alternate_id">Alternate ID</option>
 						<option value="ambidextrous">Ambidextrous</option>
 						<option value="animal_empathy">Animal Empathy</option>
 						<option value="attractive">Attractive</option>
@@ -72,14 +73,44 @@
 						<option value="property">Property</option>
 						<option value="rank">Rank</option>
 						<option value="sixth_sense">Sixth Sense</option>
-						<option value="tech_empaty">Tech Empathy</option>
+						<option value="tech_empathy">Tech Empathy</option>
 						<option value="thick_skinned">Thick-Skinned</option>
 						<option value="title">Title/Bloodname</option>
 						<option value="toughness">Toughness</option>
+						<option value="equipped">Equipped</option>
+						<option value="extra_income">Extra Income</option>
+						<option value="reputation">Reputation</option>
+						<option value="wealth">Wealth</option>
+						<option value="vehicle">Vehicle Level</option>
+						<option value="custom_vehicle">Custom Vehicle</option>
+						<option value="design_quirk">Design Quirk</option>
+						<option value="animal_antipathy">Animal Antipathy
+						<option value="bloodmark">Bloodmark</option>
+						<option value="combat_paralysis">Combat Paralysis</option>
+						<option value="compulsion">Compulsion</option>
+						<option value="dark_secret">Dark Secret</option>
+						<option value="dependent">Dependent</option>
+						<option value="enemy">Enemy</option>
+						<option value="glass_jaw">Glass Jaw</option>
+						<option value="gremlins">Gremlins</option>
+						<option value="handicap">Handicap</option>
+						<option value="illiterate">Illiterate</option>
+						<option value="impatient">Impatient</option>
+						<option value="in_for_life">In For Life</option>
+						<option value="introvert">Introvert</option>
+						<option value="lost_limb">Lost Limb</option>
+						<option value="poor_hearing">Poor Hearing</option>
+						<option value="poor_vision">Poor Vision</option>
+						<!--<option value="slow_learner">Slow Learner</option>-->
+						<option value="thin_skinned">Thin-Skinned</option>
+						<option value="tds">Transit Disorientation Syndrome (TDS)</option>
+						<option value="unattractive">Unattractive</option>
+						<option value="unlucky">Unlucky</option>
 					</select>
 				</td>
+				<td></td>
 				<td>
-					<input type="button" id="add-new-trait" value="Add" />
+					
 				</td>
 			</tr>
 		</tbody>

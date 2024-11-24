@@ -6,8 +6,8 @@
         "details": {
           "gender": "",
           "age": 0,
-          "build": "",
-          "biography": "",
+          "height": "",
+		  "weight": "",
 		  "lang_primary": ""
         },
         "damage": {
@@ -42,10 +42,16 @@
     "pc": {
       "templates": ["person"],
       "luck": {
-        "value": 1,
-        "min": 1,
-        "max": 10
+        "value": 0,
+        "min": 0,
+        "max": 20
       },
+	  "biography": {
+		"appearance": "",
+		"childhood": "",
+		"early_years": "",
+		"adult_life": ""
+	  },
       "advancement": {
         "xp_total": 0,
         "xp_spent": 0,

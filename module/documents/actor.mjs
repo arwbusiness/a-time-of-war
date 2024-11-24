@@ -89,7 +89,6 @@ export class BTActor extends Actor {
 			const name = data.name;
 			const traitId = data.traitId;
 			const baseSkill = data.baseSkill;
-			console.log(xp + " " + type + " " + name + " " + baseSkill);
 			
 			if(type == "attribute") {
 				systemData.attributes[name].xp += xp;
@@ -98,11 +97,9 @@ export class BTActor extends Actor {
 			if(type == "skill") {
 				console.log("baseSkill: {0}", baseSkill);
 				if(baseSkill == undefined || baseSkill == "") {
-					console.log(systemData.skills[name]);
 					systemData.skills[name].xp += xp;
 				}
 				else if (customSkills.includes(baseSkill)) {
-					console.log(systemData.skills[baseSkill][name]);
 					systemData.skills[baseSkill][name].xp += xp;
 				}
 				else {
@@ -116,10 +113,26 @@ export class BTActor extends Actor {
 			
 			systemData.xp_spent += data.free ? 0 : xp;
 		});
+				
+		//special case for primary language
+		const lang_primary = systemData.details.lang_primary;
+		if(lang_primary != undefined)
+			systemData.skills["language"][lang_primary].xp = 570;
 		
+		//Age additions!
+		//if(systemData.calcAge)
+		//	this.CalculateAgeModifiers();
+	//it goes fuckin recursive for some reason, can't work out why
+		
+		//Ok, get the levels!
 		this.CalculateAttributeLevels(systemData);
 		this.CalculateSkillLevels(systemData);
 		this.CalculateTraitLevels(systemData);
+		
+		//Derived values!
+		systemData.damage.max = Math.max(1, systemData.attributes.bod.level * 2);
+		systemData.fatigue.max = Math.max(1, systemData.attributes.wil.level * 2);
+		systemData.luck.max = systemData.attributes.edg.level;
 		
 		this.render();
 	}
@@ -132,6 +145,7 @@ export class BTActor extends Actor {
 		list.forEach(att => {
 			const attribute = att[1];
 			attribute.level = this.CalcTP(attribute.xp);
+			//age modifier
 			attribute.mod = this.GetAttributeMod(attribute.level);
 			updateData["system.attributes."+att[0]] = attribute;
 		});
@@ -152,39 +166,6 @@ export class BTActor extends Actor {
 		
 		this.update(updateData);
 	}
-	
-	/*CalculateSkillLevels(systemData) {
-		const tieredSkills = ["computers", "martial_arts", "melee_weapons", "pickpocket", "sleightofhand", "quickdraw", "art", "interest"];
-		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
-		
-		const skills = systemData.skills;
-		//console.log(skills);
-		
-		let updateData = {};
-		
-		let list = Object.entries(skills);
-		//console.log(list);
-		list.forEach(sk => {
-			
-			let isCustomSkill = false;
-			let skill = sk[1];
-			if(customSkills.includes(sk[0])) {
-				isCustomSkill = true;
-				skill = 
-			}
-			
-			skill.level = this.CalcSL(skill.xp);
-			let linkText = skill.link.split("+");
-			const linkA = systemData.attributes[linkText[0]].mod;
-			const linkB = linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0;
-			const linkMod = linkA + linkB;
-			skill.mod = skill.level + linkMod;
-			updateData["system.skills."+sk[0]] = skill;
-		});
-		
-		//console.log("updateData: {0}", updateData);
-		this.update(updateData);
-	}*/
 	
 	CalculateSkillLevels(systemData) {
 		const tieredSkills = ["computers", "martial_arts", "melee_weapons", "pickpocket", "sleightofhand", "quickdraw", "art", "interest"];
@@ -225,6 +206,89 @@ export class BTActor extends Actor {
 		});
 		
 		this.update(updateData);
+	}
+	
+	CalculateAgeModifiers() {
+		const systemData = this.system;
+		systemData.calcAge = false;
+		if(systemData.attributes == undefined || systemData.attributes.str == undefined)
+				return;
+			
+		const age = systemData.details.age;
+		systemData.attributes.str.xp == undefined ? 0 : systemData.attributes.str.xp;
+		systemData.attributes.bod.xp == undefined ? 0 : systemData.attributes.bod.xp;
+		systemData.attributes.dex.xp == undefined ? 0 : systemData.attributes.dex.xp;
+		systemData.attributes.rfl.xp == undefined ? 0 : systemData.attributes.rfl.xp;
+		systemData.attributes.wil.xp == undefined ? 0 : systemData.attributes.wil.xp;
+		systemData.attributes.int.xp == undefined ? 0 : systemData.attributes.int.xp;
+		systemData.attributes.cha.xp == undefined ? 0 : systemData.attributes.cha.xp;
+		systemData.attributes.edg.xp == undefined ? 0 : systemData.attributes.edg.xp;
+		
+		if(age >= 25 && age < 31) {
+			systemData.attributes.str.xp += 100;
+			systemData.attributes.bod.xp += 100;
+			systemData.attributes.rfl.xp += 100;
+			systemData.attributes.int.xp += 100;
+			systemData.attributes.wil.xp += 100;
+			systemData.attributes.cha.xp += 50;
+		}
+		else if(age >= 31 && age < 41) {
+			systemData.attributes.str.xp += 100;
+			systemData.attributes.bod.xp += 100;
+			systemData.attributes.rfl.xp -= 100;
+			systemData.attributes.int.xp += 100;
+			systemData.attributes.wil.xp += 100;
+		}
+		else if(age >= 41 && age < 51) {
+			systemData.attributes.dex.xp -= 50;
+			systemData.attributes.cha.xp -= 25;
+		}
+		else if(age >= 51 && age < 61) {
+			systemData.attributes.bod.xp -= 100;
+			systemData.attributes.rfl.xp -= 100;
+			systemData.attributes.cha.xp -= 50;
+		}
+		else if(age >= 61 && age < 71) {
+			systemData.attributes.str.xp -= 100;
+			systemData.attributes.bod.xp -= 100;
+			systemData.attributes.dex.xp -= 100;
+			systemData.attributes.int.xp += 50;
+			systemData.attributes.cha.xp -= 50;
+		}
+		else if(age >= 71 && age < 81) {
+			systemData.attributes.str.xp -= 100;
+			systemData.attributes.bod.xp -= 125;
+			systemData.attributes.rfl.xp -= 100;
+			systemData.attributes.int.xp -= 50;
+			systemData.attributes.cha.xp -= 75;
+		}
+		else if(age >= 81 && age < 91) {
+			systemData.attributes.str.xp -= 150;
+			systemData.attributes.bod.xp -= 150;
+			systemData.attributes.dex.xp -= 100;
+			systemData.attributes.rfl.xp -= 100;
+			systemData.attributes.wil.xp -= 100;
+			systemData.attributes.int.xp -= 50;
+			systemData.attributes.cha.xp -= 100;
+		}
+		else if(age >= 91 && age < 101) {
+			systemData.attributes.str.xp -= 150;
+			systemData.attributes.bod.xp -= 175;
+			systemData.attributes.dex.xp -= 150;
+			systemData.attributes.rfl.xp -= 125;
+			systemData.attributes.wil.xp -= 150;
+			systemData.attributes.int.xp -= 100;
+			systemData.attributes.cha.xp -= 100;
+		}
+		else if(age >= 101) {
+			systemData.attributes.str.xp -= 200;
+			systemData.attributes.bod.xp -= 200;
+			systemData.attributes.dex.xp -= 200;
+			systemData.attributes.rfl.xp -= 150;
+			systemData.attributes.wil.xp -= 200;
+			systemData.attributes.int.xp -= 100;
+			systemData.attributes.cha.xp -= 150;
+		}
 	}
 	
 	AddCustomSkill(systemData, baseSkill, skillName, linkA, linkB) {
