@@ -125,7 +125,14 @@ export class BTPersonActorSheet extends ActorSheet {
 			return remainder;
 		});
 		Handlebars.registerHelper('calcXPForNextTP', function(xp) {
-			return 100-xp == 0 ? 100 : 100-xp;
+			if(xp == 0)
+				return 100;
+			
+			const level_sub = Math.floor(xp/100); //2 for 299
+			const level_over = level_sub + 1;
+			const remainder = xp - level_sub * 100 //(299 - 200 = 99)
+			
+			return 100-remainder;
 		});
 		
 		//DERIVED DATA
@@ -290,7 +297,10 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		//Adding new skills and traits
 		html.on('change', '.add-new-skill', this.AddNewSkill.bind(this));
-		//html.on('change', '.add-new-trait', this.AddNewTrait.bind(this));
+		html.on('click', '#add-new-trait', this.AddNewTrait.bind(this));
+		html.on('click', '.delete-trait', this.DeleteTrait.bind(this));
+		html.on('change', '.modify-trait-component', this.ModifyTraitComponent.bind(this));
+		html.on('click', '.trait-to-chat', this.TraitToChatMessage.bind(this));
 		
 		//Bind the custom skill delete buttons.
 		html.on('click', '.delete-custom-skill', this.DeleteCustomSkill.bind(this));
@@ -311,7 +321,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		document.getElementById("advance-name").value = "";
 	}
 	
-	DeleteCustomSkill(event) {
+	async DeleteCustomSkill(event) {
 		const element = event.currentTarget;
 		const dataset = element.dataset;
 		
@@ -321,17 +331,16 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		//Make a dupe list and cleanse+update the real one.
 		let skills = foundry.utils.duplicate(this.actor.system.skills[baseSkill]);
+		const updateTarget = "system.skills."+baseSkill;
 		let updateData = {};
-		updateData["system.skills."+baseSkill] = [];
-		this.actor.update(updateData);
+		updateData[updateTarget] = [];
+		await this.actor.update(updateData);
 		updateData = {};
 		
 		Object.entries(skills).forEach(skill => {
-			console.log(skill);
 			const data = skill[1];
-			console.log(skill[0] + " " + skillName);
 			if(skill[0] != skillName) {
-				updateData["system.skills."+baseSkill+"."+skillName] = {
+				updateData[updateTarget+"."+skill[0]] = {
 					xp: data.xp,
 					mod: data.mod,
 					level: data.level,
@@ -343,7 +352,8 @@ export class BTPersonActorSheet extends ActorSheet {
 			}
 		});
 		
-		this.actor.update(updateData);
+		console.log(updateData);
+		await this.actor.update(updateData);
 	}
 	
 	AddNewSkill(event) {
@@ -357,6 +367,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		const baseSkill = dataset.baseskill;
 		const newSkillName = element.value;
 		const link = dataset.link;
+		console.log(link);
 		
 		let updateData = {};
 		updateData = {
@@ -365,7 +376,9 @@ export class BTPersonActorSheet extends ActorSheet {
 			level: -1,
 			link: link,
 			tn: dataset.tn,
-			type: dataset.type
+			type: dataset.type,
+			name: element.value,
+			baseSkill: baseSkill
 		};
 		console.log(updateData);
 		
@@ -377,13 +390,133 @@ export class BTPersonActorSheet extends ActorSheet {
 		this.render();
 	}
 	
-	async DeleteAdvance(event) {
+	async ModifyTraitComponent(event) {
 		const element = event.currentTarget;
 		const dataset = element.dataset;
 		
+		const value = element.value;
+		const traitId = dataset.traitid.split("@")[0];
+		const which = dataset.traitid.split("@")[1];
+		
+		let updateData = {};
+		if(which == "subtitle") {
+			updateData["system.traits."+traitId] = {
+				subtitle: value
+			};
+		}
+		else if(which == "description") {
+			updateData["system.traits."+traitId] = {
+				description: value
+			};
+		}
+		console.log(updateData);
+		
+		await this.actor.update(updateData);
+		await this.render();
+	}
+	
+	// Generate a random UUID
+	UUID() {
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+		.replace(/[xy]/g, function (c) {
+			const r = Math.random() * 16 | 0, 
+				v = c == 'x' ? r : (r & 0x3 | 0x8);
+			return v.toString(16);
+		});
+	}
+	
+	AddNewTrait(event) {
+		const element = document.getElementById("new-trait-selector");
+		if(element.value == undefined || element.value == "") {
+			console.error("Trait {0} from selector not recognised", element.value);
+			return;
+		}
+		
+		const traits = foundry.utils.duplicate(this.actor.system.traits);
+		
+		const uuid = this.UUID();
+		let updateData = {};
+		updateData["system.traits.trait-"+uuid] = {
+			id: "trait-" + uuid,
+			name: element.value,
+			subtitle: "",
+			level: 0,
+			xp: 0,
+			description: ""
+		};
+		
+		this.actor.update(updateData);
+		this.render();
+	}
+	
+	async DeleteTrait(event) {
+		const element = event.currentTarget;
+		const targetId = element.id.split("-delete")[0];
+		
+		let traits = foundry.utils.duplicate(this.actor.system.traits);
+		let updateData = {};
+		updateData["system.traits"] = [];
+		await this.actor.update(updateData);
+		
+		updateData = {};
+		let i = 1;
+		Object.entries(traits).forEach(entry => {
+			console.log(entry);
+			const data = entry[1];
+			const name = data.name;
+			const subtitle = data.subtitle;
+			const level = data.level;
+			const xp = data.xp;
+			const description = data.description;
+			const id = data.id;
+			
+			if(id != targetId) {
+				updateData["system.traits."+id] = {
+					name: name,
+					id: id,
+					subtitle: subtitle,
+					description: description,
+					level: level,
+					xp: xp
+				};
+			}
+		});
+		
+		await this.actor.update(updateData);
+	}
+	
+	async TraitToChatMessage(event) {
+		const element = event.currentTarget;
+		const traitId = element.id;
+		const data = foundry.utils.duplicate(this.actor.system.traits)[traitId];
+		const actorData = this.getData().actor;
+		
+		const flavour = "";
+		let msgData = {
+			name: data.name,
+			flavour: flavour,
+			speaker: actorData.name,
+			subtitle: data.subtitle,
+			description: data.description
+			
+		};
+		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
+		
+		const render = await renderTemplate("systems/a-time-of-war/templates/chat/Trait.hbs", msgData);
+		const msg = await ChatMessage.create({
+			content: render//,
+			//sound: CONFIG.sounds.dice
+		});
+		
+		return msg;
+	}
+	
+	async DeleteAdvance(event) {
+		const element = event.currentTarget;
 		const targetId = element.id;
 		
 		let advances = foundry.utils.duplicate(this.actor.system.advances);
+		console.log("advances: {0}", advances);
 		let updateData = {};
 		updateData["system.advances"] = [];
 		await this.actor.update(updateData);
@@ -397,8 +530,10 @@ export class BTPersonActorSheet extends ActorSheet {
 			const name = data.name;
 			const xp = data.xp;
 			const id = data.id;
+			const traitId = data.traitId;
 			const free = data.free;
 			const baseSkill = data.baseSkill;
+			console.log("targetId: {0}, id: {1}", targetId, id);
 			
 			if(id != targetId) {
 				updateData["system.advances."+id] = {
@@ -407,6 +542,7 @@ export class BTPersonActorSheet extends ActorSheet {
 					xp: xp,
 					id: ("advance-" + i++),
 					baseSkill: baseSkill,
+					traitId: traitId,
 					free: free
 				}
 			}
@@ -439,6 +575,8 @@ export class BTPersonActorSheet extends ActorSheet {
 		const advanceMaker = systemData.advanceMaker;
 		
 		advanceMaker.free = !advanceMaker.free;
+		
+		console.log("Advances: {0}", this.getData().actor.system.advances);
 	}
 	
 	async _onAdvanceUpdate(event) {
@@ -465,7 +603,6 @@ export class BTPersonActorSheet extends ActorSheet {
 				updateData[updateTarget] = {
 					type: value
 				}
-				//advanceMaker.type = value;
 				break;
 			case "name":
 				if(value.includes('/'))
@@ -476,29 +613,25 @@ export class BTPersonActorSheet extends ActorSheet {
 						baseSkill: baseSkill,
 						name: value
 					}
-					//advanceMaker.baseSkill = baseSkill;
-					//advanceMaker.name = value;
 				}
 				else {
 					updateData[updateTarget] = {
 						baseSkill: undefined,
 						name: value
 					}
-					//advanceMaker.name = value;
 				}
 				break;
 			case "xp":
 				updateData[updateTarget] = {
 					xp: parseInt(value)
 				}
-				//advanceMaker.xp = parseInt(value);
 				break;
 			default:
 				break;
 		}
 		
 		await this.actor.update(updateData);
-		//document.getElementById(id).value = element.value;
+		
 		document.getElementById("advance-type").value = orig[0];
 		document.getElementById("advance-name").value = orig[1];
 		document.getElementById("advance-xp").value = parseInt(orig[2]);
@@ -533,16 +666,24 @@ export class BTPersonActorSheet extends ActorSheet {
 			return;
 		}
 		
+		let advanceName = advanceMaker.name;
+		if(advanceMaker.type == "trait") {
+			advanceName = systemData.traits[advanceMaker.name].name;
+			console.log(advanceName);
+		}
+		
 		//Make an advance schema with an appropriate name and fill it with the data from the advance maker
 		let updateData = {};
 		updateData["system.advances."+id+i] = {
-			name: advanceMaker.name,
+			name: advanceName,
 			type: advanceMaker.type,
 			xp: advanceMaker.xp,
 			free: advanceMaker.free,
+			traitId: advanceMaker.type == "trait" ? advanceMaker.name : undefined,
 			id: id+i,
 			baseSkill: advanceMaker.baseSkill
 		};
+		console.log(updateData);
 		
 		//Reset the advance maker
 		updateData["system.advanceMaker"] = {
@@ -709,7 +850,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		};
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
 		
-		const render = await renderTemplate("systems/a-time-of-war/templates/roll/roll.hbs", msgData);
+		const render = await renderTemplate("systems/a-time-of-war/templates/chat/StatRoll.hbs", msgData);
 		const msg = await ChatMessage.create({
 			content: render,
 			sound: CONFIG.sounds.dice
@@ -771,7 +912,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		};
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
 		
-		const render = await renderTemplate("systems/a-time-of-war/templates/roll/roll.hbs", msgData);
+		const render = await renderTemplate("systems/a-time-of-war/templates/chat/StatRoll.hbs", msgData);
 		const msg = await ChatMessage.create({
 			content: render,
 			sound: CONFIG.sounds.dice

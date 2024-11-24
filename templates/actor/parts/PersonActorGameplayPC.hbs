@@ -35,303 +35,61 @@
 	<br>
 	
 	<h3 style="float:center">Skills</h3>
-	<table style="width:50%">
-		<tr>
-			<th style="width:10%">
-				<span style="text-align:left">Skill</span>
-			</th>
-			<th style="width:10%">
-				<span>TN</span>
-			</th>
-			<th style="width:10%">
-				<span>Mod</span>
-			</th>
-			<th style="width:10%">
-				<span>Link</span>
-			</th>
-			<th style="width:10%">
-				<span>Level</span>
-			</th>
-			<th style="width:15%">
-				XP to Next SL
-			</th>
-		</tr>
-		{{#each system.skills as |skill key|}}
-		{{#unless (in key 'art' 'career' 'interest' 'language' 'protocol' 'science' 'streetwise' 'survival' 'piloting_protomech')}}
-		<tr>
-			<td>
-				<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}">{{localize key}}</label>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
-			</td>
-			<td>
-				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
-			</td>
-		</tr>
-		{{/unless}}
-		{{/each}}
-	</table>
-	<!-- Custom skill tables -->
-	<h3 style="float:center; font-size:16px !important;">Arts</h3>
-	<table>
-		{{#each system.skills.art as |skill key|}}
-		{{#unless (eq skill.level undefined)}}
-		<tr>
-			<td>
-				<label for="system.skills.art.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="art">{{key}}</label>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
-			</td>
-			<td>
-				<input type="button" class="delete-custom-skill" id="delete-art-{{key}}" value="Delete" />
-			</td>
-		</tr>
-		{{/unless}}
-		{{/each}}
-		<tr>
-			<td>
-				<input class="add-new-skill" data-link="dex" data-baseskill="art" data-tn="7" data-type="SB" type="text" placeholder="type name of new art skill here">
-			</td>
-		</tr>
-	</table>
-	
-	<h3 style="float:center; font-size:16px !important;">Careers</h3>
-	<table>
-		{{#each system.skills.career as |skill key|}}
-		<tr>
-			<td>
-				<label for="system.skills.career.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="career">{{key}}</label>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
-			</td>
-			<td>
-				<input type="button" class="delete-custom-skill" id="delete-career-{{key}}" value="Delete" />
-			</td>
-		</tr>
-		{{/each}}
-		<tr>
-			<td>
-				<input class="add-new-skill" data-link="int" data-baseskill="career" data-tn="7" data-type="SB" type="text" placeholder="type name of new career skill here">
-			</td>
-		</tr>
-	</table>
-	
-	<h3 style="float:center; font-size:16px !important;">Interests</h3>
-	<table>
-		{{#each system.skills.interest as |skill key|}}
-		<tr>
-			<td>
-				<label for="system.skills.interest.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="interest">{{key}}</label>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
-			</td>
-			<td>
-				<input type="button" class="delete-custom-skill" id="delete-interest-{{key}}" value="Delete" />
-			</td>
-		</tr>
-		{{/each}}
-		<tr>
-			<td>
-				<input class="add-new-skill" data-link="int" data-baseskill="interest" data-tn="8" data-type="CB" type="text" placeholder="type name of new interest skill here">
-			</td>
-		</tr>
-	</table>
-		
-	<h3 style="float:center; font-size:16px !important;">Languages</h3>
-	<table>
-		{{#each system.skills.language as |skill key|}}
-		<tr>
-			<td>
-				<label for="system.skills.language.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="language">{{key}}</label>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
-			</td>
-			<td>
-				{{#unless (eq key system.details.lang_primary)}}
-				<input type="button" class="delete-custom-skill" id="delete-language-{{key}}" value="Delete" />
-				{{/unless}}
-			</td>
-		</tr>
-		{{/each}}
-		<tr>
-			<td>
-				<input class="add-new-skill" data-link="int+cha" data-baseskill="language" data-tn="8" data-type="SA" type="text" placeholder="type name of new language skill here">
-			</td>
-		</tr>
-	</table>
-		
-	<h3 style="float:center; font-size:16px !important;">Protocols</h3>
-	<table>
-		{{#each system.skills.protocol as |skill key|}}
-		<tr>
-			<td>
-				<label for="system.skills.protocol.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="protocol">{{key}}</label>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
-			</td>
-			<td>
-				<input type="button" class="delete-custom-skill" id="delete-protocol-{{key}}" value="Delete" />
-			</td>
-		</tr>
-		{{/each}}
-		<tr>
-			<td>
-				<input class="add-new-skill" data-link="wil+cha" data-baseskill="protocol" data-tn="9" data-type="CA" type="text" placeholder="type name of new protocol skill here">
-			</td>
-		</tr>
-	</table>
-		
-	<h3 style="float:center; font-size:16px !important;">Sciences</h3>
-	<table>
-		{{#each system.skills.science as |skill key|}}
-		<tr>
-			<td>
-				<label for="system.skills.science.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="science">{{key}}</label>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
-			</td>
-			<td>
-				<input type="button" class="delete-custom-skill" id="delete-science-{{key}}" value="Delete" />
-			</td>
-		</tr>
-		{{/each}}
-		<tr>
-			<td>
-				<input class="add-new-skill" data-link="int+wil" data-baseskill="science" data-tn="9" data-type="CA" type="text" placeholder="type name of new science skill here">
-			</td>
-		</tr>
-	</table>
-		
-	<h3 style="float:center; font-size:16px !important;">Streetwise</h3>
-	<table>
-		{{#each system.skills.streetwise as |skill key|}}
-		<tr>
-			<td>
-				<label for="system.skills.streetwise.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="streetwise">{{key}}</label>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
-			</td>
-			<td>
-				<input type="button" class="delete-custom-skill" id="delete-streetwise-{{key}}" value="Delete" />
-			</td>
-		</tr>
-		{{/each}}
-		<tr>
-			<td>
-				<input class="add-new-skill" data-link="cha" data-baseskill="streetwise" data-tn="8" data-type="CB" type="text" placeholder="type name of new streetwise skill here">
-			</td>
-		</tr>
-	</table>
-		
-	<h3 style="float:center; font-size:16px !important;">Survival</h3>
-	<table>
-		{{#each system.skills.survival as |skill key|}}
-		<tr>
-			<td>
-				<label for="system.skills.survival.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}" data-baseskill="survival">{{key}}</label>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
-			</td>
-			<td>
-				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
-			</td>
-			<td>
-				<input type="button" class="delete-custom-skill" id="delete-survival-{{key}}" value="Delete" />
-			</td>
-		</tr>
-		{{/each}}
-		<tr>
-			<td>
-				<input class="add-new-skill" data-link="bod+int" data-baseskill="survival" data-tn="9" data-type="CA" type="text" placeholder="type name of new survival skill here">
-			</td>
-		</tr>
-	</table>
-
+	<div>
+		<table style="width:50%; float:left">
+			<tr>
+				<th style="width:20%">
+					<span style="text-align:left">Skill</span>
+				</th>
+				<th style="width:10%">
+					<span>TN</span>
+				</th>
+				<th style="width:10%">
+					<span>Mod</span>
+				</th>
+				<th style="width:10%">
+					<span>Link</span>
+				</th>
+				<th style="width:10%">
+					<span>Level</span>
+				</th>
+				<th style="width:15%">
+					XP to Next SL
+				</th>
+			</tr>
+		</table>
+		<table style="width:50%; float:right">
+			<tr>
+				<th style="width:20%">
+					<span style="text-align:left">Skill</span>
+				</th>
+				<th style="width:10%">
+					<span>TN</span>
+				</th>
+				<th style="width:10%">
+					<span>Mod</span>
+				</th>
+				<th style="width:10%">
+					<span>Link</span>
+				</th>
+				<th style="width:10%">
+					<span>Level</span>
+				</th>
+				<th style="width:15%">
+					XP to Next SL
+				</th>
+			</tr>
+		</table>
+	</div>
+	<div style="float:clear"></div>
+	{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPCSkills1.hbs"}}
+	<div style="float:clear"></div>
+	<br>
+	{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPCSkills2.hbs"}}
+	<div style="float:clear"></div>
+	<br>
+	{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPCSkills3.hbs"}}
+	<div style="float:clear"></div>
+	<br>
+	{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPCSkillsCustom.hbs"}}
 </div>

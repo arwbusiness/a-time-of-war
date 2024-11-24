@@ -1,0 +1,87 @@
+<div class="character" style="width:100%; border:10px;">
+
+	<table style="width:100%">
+		<caption>
+			<h3>Traits</h3>
+		</caption>
+		<thead>
+			<tr>
+				<th style="width:4.09%"></th>
+				<th style="width:17%">Name</th>
+				<th style="width:17%">Subtitle</th>
+				<th style="width:5%">Level</th>
+				<th style="width:45.91%">Description</th>
+				<th style="width:3%">XP Until Next</th>
+				<th style="width:8%"></th>
+			</tr>
+		</thead>
+		<tbody>
+			{{#each system.traits as |trait key|}}
+			<tr>
+				<td>
+					<input id="{{trait.id}}" class="trait-to-chat" type="button" img="./assets/trait.png" />
+				</td>
+				<td>
+					{{localize trait.name}}
+				</td>
+				<td>
+					{{#unless (in key 'a' 'b' 'c')}}
+					<input class="modify-trait-component" type="text" value="{{trait.subtitle}}" data-traitid="{{trait.id}}@subtitle" placeholder="Enter a trait type/subtitle here" />
+					{{/unless}}
+				</td>
+				<td>
+					{{trait.level}}
+				</td>
+				<td>
+					<textarea class="modify-trait-component" type="text" value="{{trait.description}}" data-traitid="{{trait.id}}@description" placeholder="Enter a trait description here" contenteditable="true" style="max-width:100%">{{trait.description}}</textarea>
+				</td>
+				<td>
+					{{calcXPForNextTP trait.xp}}
+				</td>
+				<td>
+					<input type="button" id="{{trait.id}}-delete" class="delete-trait" value="Delete" />
+				</td>
+			</tr>
+			{{/each}}
+			<tr>
+				<td style="text-align:right; padding-right:5px; font-style:bold;">
+					add new trait?
+				</td>
+				<td>
+					<select id="new-trait-selector" onfocus="this.selectedIndex = -1;">
+						<option value="Alternate ID">Alternate ID</option>
+						<option value="ambidextrous">Ambidextrous</option>
+						<option value="animal_empathy">Animal Empathy</option>
+						<option value="attractive">Attractive</option>
+						<option value="citizenship">Citizenship</option>
+						<option value="combat_sense">Combat Sense</option>
+						<option value="connections">Connections</option>
+						<option value="exceptional_attribute">Exceptional Attribute</option>
+						<!--<option value="fast_learner">Fast Learner</option>-->
+						<option value="fit">Fit</option>
+						<option value="g_tolerance">G-Tolerance</option>
+						<option value="good_hearing">Good Hearing</option>
+						<option value="good_vision">Good Vision</option>
+						<option value="gregarious">Gregarious</option>
+						<option value="implant_prosthetic">Implant/Prosthetic</option>
+						<option value="natural_aptitude">Natural Aptitude</option>
+						<option value="pain_resistance">Pain Resistance</option>
+						<option value="patient">Patient</option>
+						<!--<option value="phenotype">asdf</option>-->
+						<option value="poison_resistance">Poison Resistance</option>
+						<option value="property">Property</option>
+						<option value="rank">Rank</option>
+						<option value="sixth_sense">Sixth Sense</option>
+						<option value="tech_empaty">Tech Empathy</option>
+						<option value="thick_skinned">Thick-Skinned</option>
+						<option value="title">Title/Bloodname</option>
+						<option value="toughness">Toughness</option>
+					</select>
+				</td>
+				<td>
+					<input type="button" id="add-new-trait" value="Add" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

@@ -100,6 +100,14 @@
         "piloting_mech": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
         "piloting_protomech": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
         "piloting_spacecraft": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
+		"gunnery_aerospace": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
+		"gunnery_air": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
+		"gunnery_battlesuit": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
+		"gunnery_ground": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
+		"gunnery_mech": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
+		"gunnery_sea": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
+		"gunnery_spacecraft": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
+		"gunnery_turret": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },
         "sensorops": { "xp": 0, "mod": 0, "level": -1, "link": "int+wil", "tn": 8, "type": "SA" },
         "tech_aeronautics": { "xp": 0, "mod": 0, "level": -1, "link": "dex+int", "tn": 9, "type": "CA" },
         "tech_cybernetics": { "xp": 0, "mod": 0, "level": -1,"link": "dex+int", "tn": 9, "type": "CA" },
@@ -157,7 +165,7 @@
         "career": {},
         "interest": {},
         "language": {
-          "english": { "xp": 0, "mod": 0, "level": -1, "link": "int+cha", "tn": 8, "type": "SA" }
+          "English": { "xp": 0, "mod": 0, "level": -1, "link": "int+cha", "tn": 8, "type": "SA" }
         },
         "protocol": {},
         "science": {},

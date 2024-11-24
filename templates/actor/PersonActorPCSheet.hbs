@@ -118,22 +118,21 @@
 	</div>
 	
     <div class="tab character" data-group="primary" data-tab="character">
-      {{!-- Editors must receive enriched text data from getData to properly handle rolls --}}
-      {{editor enrichedBiography target="system.biography" engine="prosemirror" button=true editable=editable}}
+		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorCharacter.hbs"}}
     </div>
 
     <div class="tab equipment" data-group="primary" data-tab="equipment">
-       {{> "systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs"}}
+		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs"}}
     </div>
 
 	{{#if (eq data.type "pc")}}
     <div class="tab progression" data-group="primary" data-tab="progression">
-      {{> "systems/a-time-of-war/templates/actor/parts/PersonActorProgression.hbs"}}
+		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorProgression.hbs"}}
     </div>
 	{{/if}}
 
     <div class="tab options flexcol" data-group="primary" data-tab="options">
-      {{> "systems/a-time-of-war/templates/actor/parts/PersonActorOptions.hbs"}}
+		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorOptions.hbs"}}
     </div>
 
   </section>

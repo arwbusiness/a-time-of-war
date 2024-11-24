@@ -34,7 +34,7 @@
 						<option value="edg">EDG</option>
 					{{else if (eq system.advanceMaker.type "trait")}}
 						{{#each system.traits as |trait key|}}
-							<option value="{{key}}">{{key}}</option>
+							<option value="{{trait.id}}">{{trait.name}}</option>
 						{{/each}}
 					{{else if (eq system.advanceMaker.type "skill")}}
 						{{#each system.skills as |skill key|}}

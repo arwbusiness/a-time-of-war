@@ -87,6 +87,7 @@ export class BTActor extends Actor {
 			const xp = parseInt(data.xp);
 			const type = data.type;
 			const name = data.name;
+			const traitId = data.traitId;
 			const baseSkill = data.baseSkill;
 			console.log(xp + " " + type + " " + name + " " + baseSkill);
 			
@@ -110,7 +111,7 @@ export class BTActor extends Actor {
 			}
 			
 			if(type == "trait") {
-				systemData.traits[name].xp += xp;
+				systemData.traits[traitId].xp += xp;
 			}
 			
 			systemData.xp_spent += data.free ? 0 : xp;
@@ -201,6 +202,8 @@ export class BTActor extends Actor {
 				isCustomSkill = true;
 				Object.entries(data).forEach(customSkill => {
 					let newData = customSkill[1];
+					if(newData.link == undefined)
+						return;
 					newData.level = this.CalcSL(newData.xp);
 					let linkText = newData.link.split("+");
 					const linkA = systemData.attributes[linkText[0]].mod;

@@ -1,0 +1,63 @@
+<div class="bt-roll">
+	<div style="height:20px">
+		<!--<img style="height:100%; width:100%; src='./{{{--img}}}';" />--><h3>{{speaker}}</h3>
+	</div>
+	<!--<span style="font-style:italic; font-size:11.5px">{{flavor}}</span>-->
+	<span style="font-style:italic; font-size:11.5px">
+		Rolling 
+		{{#if (eq rollType "skill")}}
+			{{#if (eq baseSkill "none")}}
+				{{localize name}}
+			{{else}}
+				{{localize baseSkill}}/{{name}}
+			{{/if}}
+			{{#if (eq untrained true)}}
+				 (untrained)
+			{{/if}}
+		{{else}}
+			{{localize name}}
+		{{/if}}:
+	</span>
+	<br>
+		<div class="chatDice">
+			{{#if (eq droppedDie 1)}}
+				<div class="chatDice dropped">{{dice1}}</div>
+			{{else}}
+				{{#if (eq dice1 "6")}}<div style="color:green">{{/if}}
+				{{#if (eq dice1 "1")}}<div style="color:red">{{/if}}
+				{{dice1}}
+				{{#if (eq dice1 "6")}}</div>{{else if (eq dice1 "1")}}</div>{{/if}}
+			{{/if}}
+		</div>
+		<div class="chatDice">
+			{{#if (eq droppedDie 2)}}
+				<div class="chatDice dropped">{{dice1}}</div>
+			{{else}}
+				{{#if (eq dice2 "6")}}<div style="color:green">{{/if}}
+				{{#if (eq dice2 "1")}}<div style="color:red">{{/if}}
+				{{dice2}}
+				{{#if (eq dice2 "6")}}</div>{{else if (eq dice2 "1")}}</div>{{/if}}
+			{{/if}}
+		</div>
+		{{#if dice3}}
+			{{#if (eq droppedDie 3)}}
+				<div class="chatDice dropped">{{dice3}}</div>
+			{{else}}
+				{{#if (eq dice3 "6")}}<div style="color:green">{{/if}}
+				{{#if (eq dice3 "1")}}<div style="color:red">{{/if}}
+				{{dice3}}
+				{{#if (eq dice3 "6")}}</div>{{else if (eq dice3 "1")}}</div>{{/if}}
+			{{/if}}
+		{{/if}}
+		<div class="chatRollMod">
+			<span>{{#if (gt rollMod 0)}}+{{/if}}{{rollMod}}</span>
+			<span style="padding-left:12px !important">{{#if (ge result tn)}}<span style="color:darkgreen">{{else}}<span style="color:darkred">{{/if}} = {{result}}</span></span>
+		</div>
+		<div class="chatTN">
+			TN: {{tn}}{{#if (eq rollType "skill")}}/{{actionType}}{{/if}}
+		</div>
+	<br><br>
+	<div class="chatRollMod">
+		<span style="font-style:italic !important; font-size:16px !important; padding-top:1px !important">{{successOrFail}} </span><span style="font-style:normal !important; font-size:16px !important; padding-top:1px !important"> by Mo{{#if (ge margin 0)}}S {{else}}F {{/if}}{{margin}}!</span>
+	</div>
+</div>

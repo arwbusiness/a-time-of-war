@@ -1,0 +1,54 @@
+<table style="width:50%; float:left">
+	<caption>COMBAT</caption>
+	{{#each system.skills as |skill key|}}
+	{{#if (in key 'archery' 'demolitions' 'escape_artist' 'martial_arts' 'melee_weapons' 'small_arms' 'strategy' 'support_weapons' 'tactics_infantry' 'tactics_land' 'tactics_sea' 'tactics_air' 'tactics_space' 'thrown_blades' 'thrown_blunt')}}
+	<tr>
+		<td>
+			<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}">{{localize key}}</label>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
+		</td>
+		<td>
+			<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
+		</td>
+	</tr>
+	{{/if}}
+	{{/each}}
+</table>
+<table style="width:50%; float:right">
+	<caption>TRAVEL</caption>
+	{{#each system.skills as |skill key|}}
+	{{#if (in key 'acrobatics_freefall' 'acrobatics_gymnastics' 'climbing' 'navigation_ground' 'navigation_air' 'navigation_ground' 'navigation_kfjump' 'navigation_sea' 'navigation_space' 'perception' 'running' 'stealth' 'swimming' 'tracking_urban' 'tracking_wilds' 'zero_g_operations')}}
+	<tr>
+		<td>
+			<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}">{{localize key}}</label>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
+		</td>
+		<td>
+			<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
+		</td>
+	</tr>
+	{{/if}}
+	{{/each}}
+</table>

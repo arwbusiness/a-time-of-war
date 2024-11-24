@@ -1,0 +1,27 @@
+<table style="width:50%; float:left">
+	<caption>MENTAL</caption>
+	{{#each system.skills as |skill key|}}
+	{{#if (in key 'administration' 'appraisal' 'computers' 'cryptography' 'forgery' 'investigation' 'security_electronic' 'security_mechanical')}}
+	<tr>
+		<td>
+			<label for="system.skills.{{key}}.level" class="resource-label rollable align-left" data-rolltype="skill" data-label="{{key}}" data-actiontype="{{skill.type}}">{{localize key}}</label>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.tn">{{skill.tn}}/{{skill.type}}</div>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.mod">{{skill.mod}}</div>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.link">{{skill.link}}</div>
+		</td>
+		<td>
+			<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
+		</td>
+		<td>
+			<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
+		</td>
+	</tr>
+	{{/if}}
+	{{/each}}
+</table>
