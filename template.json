@@ -66,6 +66,19 @@
 	  "advances": {
 		  
 	  },
+		"lifepath": {
+			"img": "",
+			"affiliation": "",
+			"subaffiliation": "",
+			"early_childhood": "",
+			"late_childhood": "",
+			"schooling": {
+				"lp-schooling-1": ""
+			},
+			"adult_life": {
+				
+			}
+		},
       "attributes": {
         "str": { "level": 0, "xp": 0, "mod": -4 },
         "bod": { "level": 0, "xp": 0, "mod": -4 },

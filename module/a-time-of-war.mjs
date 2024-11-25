@@ -148,6 +148,19 @@ Hooks.once('ready', function () {
 
 Hooks.once('setup', function () {
 	_configureTrackableAttributes();
+	
+	CONFIG.statusEffects = [
+		/*{
+			id:'dead',
+			label:'EFFECT.StatusDead',
+			icon:'icons/svg/skull.svg'
+		},*/
+		{
+			id:'stunned',
+			label:'EFFECT.StatusStunned',
+			icon:'icons/stunned.png'
+		}
+	];
 });
 
 //Hooks.on('renderCustomActorSheet', function (app, html, data) {

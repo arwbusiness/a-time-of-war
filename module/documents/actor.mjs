@@ -95,11 +95,13 @@ export class BTActor extends Actor {
 			}
 			
 			if(type == "skill") {
-				console.log("baseSkill: {0}", baseSkill);
+				console.log("baseSkill: {0}, name: {1}", baseSkill, name);
 				if(baseSkill == undefined || baseSkill == "") {
 					systemData.skills[name].xp += xp;
 				}
 				else if (customSkills.includes(baseSkill)) {
+					console.log(systemData.skills);
+					console.log("your baseSkill: {0}", systemData.skills[baseSkill]);
 					systemData.skills[baseSkill][name].xp += xp;
 				}
 				else {
@@ -116,7 +118,7 @@ export class BTActor extends Actor {
 				
 		//special case for primary language
 		const lang_primary = systemData.details.lang_primary;
-		if(lang_primary != undefined)
+		if(lang_primary != undefined && lang_primary != "")
 			systemData.skills["language"][lang_primary].xp = 570;
 		
 		//Age additions!
@@ -324,11 +326,13 @@ export class BTActor extends Actor {
 		let sl = -1;
 		let mult = 1;
 		for(var l = 20; l <= 570; mult++) {
-			if(xp <= l)
-				break;
-			else {
+			if(xp >= l)
+			{
 				l += (10*mult);
 				sl++;
+			}
+			else {
+				break;
 			}
 		}
 		

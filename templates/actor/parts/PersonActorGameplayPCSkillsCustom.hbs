@@ -20,6 +20,9 @@
 				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
+				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
+			</td>
+			<td>
 				<input type="button" class="delete-custom-skill" id="delete-art-{{key}}" value="Delete" />
 			</td>
 		</tr>
@@ -53,6 +56,9 @@
 				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
+				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
+			</td>
+			<td>
 				<input type="button" class="delete-custom-skill" id="delete-career-{{key}}" value="Delete" />
 			</td>
 		</tr>
@@ -82,6 +88,9 @@
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
+			</td>
+			<td>
+				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-interest-{{key}}" value="Delete" />
@@ -115,9 +124,12 @@
 				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
-				{{#unless (eq key system.details.lang_primary)}}
+				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
+			</td>
+			<td>
+				{{!-- #unless (eq skill.name system.details.lang_primary) --}}
 				<input type="button" class="delete-custom-skill" id="delete-language-{{key}}" value="Delete" />
-				{{/unless}}
+				{{!-- /unless --}}
 			</td>
 		</tr>
 		{{/each}}
@@ -146,6 +158,9 @@
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
+			</td>
+			<td>
+				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-protocol-{{key}}" value="Delete" />
@@ -179,6 +194,9 @@
 				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
+				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
+			</td>
+			<td>
 				<input type="button" class="delete-custom-skill" id="delete-science-{{key}}" value="Delete" />
 			</td>
 		</tr>
@@ -210,6 +228,9 @@
 				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
 			</td>
 			<td>
+				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
+			</td>
+			<td>
 				<input type="button" class="delete-custom-skill" id="delete-streetwise-{{key}}" value="Delete" />
 			</td>
 		</tr>
@@ -239,6 +260,9 @@
 			</td>
 			<td>
 				<div class="align-center" id="system.skills.{{key}}.level">{{#if (eq skill.level -1)}}untr{{else}}{{skill.level}}{{/if}}</div>
+			</td>
+			<td>
+				<div style="text-align:center">{{calcXPForNextSL skill.xp}}</div>
 			</td>
 			<td>
 				<input type="button" class="delete-custom-skill" id="delete-survival-{{key}}" value="Delete" />

@@ -1,4 +1,91 @@
 <div class="character" style="width:100%; border:10px;">
+	<div class="">
+		<table style="width:65%; table-layout:fixed; float:left">
+			<caption>
+				<h3>Life Path</h3>
+			</caption>
+			<tr>
+				<td>Affiliation:</td>
+				<td>{{localize system.lifepath.affiliation}}</td>
+				<td>
+					<select id="affiliation-select" onfocus="this.selectedIndex = -1;">
+						<option value="liao">Capellan Confederation (House Liao)</option>
+						<option value="kurita">Draconis Combine (House Kurita)</option>
+						<option value="davion">Federated Suns (House Davion)</option>
+						<option value="marik">Free Worlds League (House Marik)</option>
+						<option value="steiner">Lyran Alliance (House Steiner)</option>
+						<option value="rasalhague">Free Rasalhague Republic</option>
+						<option value="minor_periphery">Minor Periphery</option>
+						<option value="major_periphery">Major Periphery State</option>
+						<option value="deep_periphery">Deep Periphery</option>
+						<option value="terran">Terran</option>
+						<option value="independent">Independent</option>
+						<option value="comstar">ComStar/Word of Blake</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>Sub-affiliation:</td>
+				<td>{{localize system.lifepath.subaffiliation}}</td>
+				<td>
+					{{#unless (eq system.lifepath.affiliation undefined)}}
+					<select id="subaffiliation-select" onfocus="this.selectedIndex = -1;">
+					{{#if (eq system.lifepath.affiliation "liao")}}
+						<option value="capellan_com">Capellan Commonality</option>
+						<option value="liao_com">Liao Commonality</option>
+						<option value="sian_com">Sian Commonality</option>
+						<option value="stives_com">St. Ives Commonality</option>
+						<option value="victoria_com">Victoria Commonality</option>
+					{{else if (eq system.lifepath.affiliation "kurita")}}
+						<option value="azami">Azami</option>
+						<option value="benjamin">Benjamin District</option>
+						<option value="dieron">Dieron District</option>
+						<option value="galedon">New Samarkand (Galedon) District</option>
+						<option value="pesht">Pesht District</option>
+					{{else if (eq system.lifepath.affiliation "major_periphery")}}
+						<option value="aurigan">Aurigan Coalition</option>
+						<option value="circinus">Circinus Federation</option>
+						<option value="magistracy">Magistracy of Canopus</option>
+						<option value="marian">Marian Hegemony</option>
+						<option value="outworlds">Outworlds Alliance</option>
+						<option value="taurian">Taurian Concordat</option>
+					{{/if}}
+					</select>
+					{{/unless}}
+				</td>
+			</tr>
+			<tr>
+				<td>Early childhood:</td>
+				<td>{{localize system.lifepath.early_childhood}}</td>
+			</tr>
+			<tr>
+				<td>Late childhood:</td>
+				<td>{{localize system.lifepath.late_childhood}}</td>
+			</tr>
+			<tr>
+				<td>Schooling:</td>
+				<td>
+					<table>
+					{{#each system.lifepath.schooling as |schooling key|}}
+						<tr><td>{{key}}</td></tr>
+					{{/each}}
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>Adult life:</td>
+				<td>
+					<table>
+					{{#each system.lifepath.adult_life as |life key|}}
+						<tr><td>{{key}}</td></tr>
+					{{/each}}
+					</table>
+				</td>
+			</tr>
+		</table>
+		
+		<img style="width:240px; height:240px; float:right;" id="lifepath-img" name="lifepath-img" src="{{system.lifepath.img}}" />
+	</div>
 
 	<table style="width:100%; table-layout:fixed;">
 		<caption>

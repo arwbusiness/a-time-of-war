@@ -136,7 +136,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		});
 		
 		//DERIVED DATA
-		
 	}
   
 	//Prepare the stuff that isn't in template.json (usually because it's temporary or user-defined).
@@ -323,7 +322,66 @@ export class BTPersonActorSheet extends ActorSheet {
 		html.on('blur','.advance-xp', this._onAdvanceUpdate.bind(this));
 		html.on('click', '.advance-finish', this._onAdvanceFinish.bind(this));
 		document.getElementById("advance-name").value = "";
+		
+		//Lifepath stuff
+		html.on('change', '#affiliation-select', this.ChangeLifepath.bind(this));
+		html.on('change', '#subaffiliation-select', this.ChangeLifepath.bind(this));
 	}
+	
+	ChangeLifepath(event) {
+		const element = event.currentTarget;
+		const value = element.value;
+		const which = element.id.split('-select')[0];
+		
+		let updateData = {};
+		updateData["system.lifepath."+which] = value;
+		
+		if(which == "subaffiliation") {
+			switch(value) {
+				//Major Periphery State
+				case "circinus":
+				case "magistracy":
+				case "marian":
+				case "outworlds":
+				case "taurian":
+				case "aurigan":
+					updateData["system.lifepath.img"] = "systems/a-time-of-war/assets/affiliations/"+value+".png";
+					break;
+				default:
+					break;
+			}
+		}
+		else if(which == "affiliation") {
+			switch(value) {
+				//Great Houses
+				case "liao":
+				case "kurita":
+				case "steiner":
+				case "davion":
+				case "marik":
+					updateData["system.lifepath.img"] = "systems/a-time-of-war/assets/affiliations/"+value+".png";
+					break;
+				default:
+					break;
+			}
+		}
+		
+		document.getElementById("lifepath-img").src = "systems/a-time-of-war/assets/affiliations/"+value+".png";
+		this.actor.update(updateData);
+	}
+	
+	/*ToggleShowLifepath(event) {
+		const element = event.currentTarget;
+		const id = element.id;
+		const value = element.checked;
+		
+		if(id.split("-show-")[1] == "selectors") {
+			document.getElementById("lifepath-selectors").style.display = value ? "block" : "none";
+		}
+		else if(id.split("-show-")[1] == "modules") {
+			document.getElementById("lifepath-modules").style.display = value ? "block" : "none";
+		}
+	}*/
 	
 	ChangeLangPrimary(event) {
 		const element = event.currentTarget;
@@ -331,6 +389,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		let updateData = {};
 		updateData["system.details.lang_primary"] = element.value;
 		this.actor.update(updateData);
+		this.RefreshSheet();
 	}
 	
 	/*ChangeDetail(event) {
@@ -515,10 +574,21 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		element.value = "";
 		
-		this.actor.update({
+		if(baseSkill != undefined) {
+			this.actor.update({
+				["system.skills."+baseSkill+"."+newSkillName]: updateData
+			});
+		}
+		else {
+			this.actor.update({
+				["system.skills."+element.value]: updateData
+			});
+		}
+		
+		/*this.actor.update({
 			["system.skills."+baseSkill+"."+newSkillName]: updateData
-		});
-		this.render();
+		});*/
+		//this.render();
 	}
 	
 	async ModifyTraitComponent(event) {
@@ -944,7 +1014,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		else
 			tn = 12;
 		
-		link = 0;
+		/*link = 0;
 		for(var t = 0; t < linkText.length; t++) {
 			var lin = linkText[t];
 			var ageMod = systemData.agemods[lin];
@@ -952,7 +1022,7 @@ export class BTPersonActorSheet extends ActorSheet {
 			var result = Math.floor((parseInt(ageMod) + normalXP)/100);
 			
 			link += this.GetAttributeMod(result, systemData);
-		}
+		}*/
 			
 		const formula = "{2d6+" + link + "}cs>=" + tn;
 		let roll = await new Roll(formula, rollData).evaluate();
@@ -1012,10 +1082,10 @@ export class BTPersonActorSheet extends ActorSheet {
 		const tn = isTrained ? skill.tn : (link.toString().includes("+") ? 18 : 12);
 		const actionType = skill.type;
 		
-		let rollMod = 0;//this.GetLinkMod(link.split("+"), systemData, !isTrained) + (isTrained ? level : 0);
+		const rollMod = this.GetLinkMod(link.split("+"), systemData, !isTrained) + (isTrained ? level : 0);
 		
 		//age modifers, man
-		let linkText = link.split("+");
+		/*let linkText = link.split("+");
 		for(var t = 0; t < linkText.length; t++) {
 			var lin = linkText[t];
 			var ageMod = systemData.agemods[lin];
@@ -1024,7 +1094,7 @@ export class BTPersonActorSheet extends ActorSheet {
 			
 			rollMod += this.GetAttributeMod(result, systemData);
 		}
-		rollMod += (isTrained ? level : 0);
+		rollMod += (isTrained ? level : 0);*/
 		
 		const formula = "{2d6+" + rollMod + "}cs>=" + tn;
 		console.log(formula);
