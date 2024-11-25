@@ -23,6 +23,79 @@ export class BTPersonActorSheet extends ActorSheet {
       ],
     });
   }
+  
+	/*async _onDrop(event) {
+		console.log("event: {0}", event);
+		const target = event.target;
+		const data = event.dataTransfer.items;
+		console.log(data);
+		
+		//Is it an input?
+		if(target.classList.contains("droppable-input")) {
+			console.log("Congratulations, you hit the target!");
+		}
+		
+		return await super._onDrop(event);
+	}*/
+	
+	async _onDropItem(event, data) {
+		const ev = event;
+		if(ev.target.classList.contains("droppable-items")) {
+			console.log("Congratulations, you hit the target!");
+		}
+		else
+			return;
+		
+		const dt = data;
+		console.log("DROP_ITEM | event: {0}, data: {1}", ev, dt);
+		return await super._onDropItem(ev, dt);
+	}
+	
+	async _onDropActor(event, data) {
+		const element = event.target;
+
+		//You missed.
+		if(!event.target.classList.contains("droppable-actors"))
+		  return;
+
+		//Get the information we need to fetch stats from the dropped actor.
+		const uuid = data.uuid.split(".")[1];
+		const actor = game.actors.get(uuid);
+		
+		//Let's see if this element has a real/fake act going on.
+		let split = element.id.split("-");
+		let real = element;
+		let fake = null;
+		let fakeImg = null;
+		if(split[split.length-1] == "real" || split[split.length-1] == "fake") {
+			console.log("HEY!")
+			split = split.slice(0, split.length-1);
+			let str = "";
+			split.forEach(s => { str += s + "-"; });
+			real = document.getElementById(str+"real");
+			fake = document.getElementById(str+"fake");
+			fakeImg = document.getElementById(str+"fake-img");
+		}
+		console.log("Real: {0}", real);
+		if(fake != null)
+			console.log("Fake: {0}", fake);
+		if(fakeImg != null)
+			console.log("FakeImg: {0}", fakeImg);
+		
+		if(real != null && fake != null) {
+			real.style.display = "none";
+			fake.style.display = "block";
+			real.value = uuid;
+			fake.value = actor.name;
+			if(fakeImg != null) {
+				fakeImg.style.display = "block";
+				fakeImg.src = actor.img;
+			}
+		}
+
+		//Live and let live--continue the cycle.
+		super._onDropActor(event, data);
+	}
 
   /** @override */
   get template() {
@@ -410,6 +483,7 @@ export class BTPersonActorSheet extends ActorSheet {
 	
 	ChangeAge(event) {
 		const element = event.currentTarget;
+		console.log(element);
 		
 		let updateData = {};
 		updateData["system.details.age"] = element.value;
@@ -1050,7 +1124,6 @@ export class BTPersonActorSheet extends ActorSheet {
 			droppedDie: droppedDie,
 			rollMod: link == 0 ? "+0" : link,
 			speaker: actorData.name,
-			//flavor: flavor,
 			margin: margin,
 			tn: tn,
 			isSuccess: roll.total >= tn,
@@ -1084,18 +1157,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		const rollMod = this.GetLinkMod(link.split("+"), systemData, !isTrained) + (isTrained ? level : 0);
 		
-		//age modifers, man
-		/*let linkText = link.split("+");
-		for(var t = 0; t < linkText.length; t++) {
-			var lin = linkText[t];
-			var ageMod = systemData.agemods[lin];
-			var normalXP = systemData.attributes[lin].xp;
-			var result = Math.floor((parseInt(ageMod) + normalXP)/100);
-			
-			rollMod += this.GetAttributeMod(result, systemData);
-		}
-		rollMod += (isTrained ? level : 0);*/
-		
 		const formula = "{2d6+" + rollMod + "}cs>=" + tn;
 		console.log(formula);
 		let roll = await new Roll(formula, rollData).evaluate();
@@ -1112,8 +1173,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
 		const margin = (total >= tn ? "+" : "") + (total - tn);
 		
-		//const flavor = "Rolling {{{localize " + (baseSkill == undefined ? dataset.label + "}}}" : baseSkill + "}}/" + dataset.label) + (!isTrained ? " (Untrained)" : "") + ":";
-		
 		let msgData = {
 			name: dataset.label,
 			dice1: results[0].result,
@@ -1122,7 +1181,6 @@ export class BTPersonActorSheet extends ActorSheet {
 			droppedDie: droppedDie,
 			rollMod: rollMod == 0 ? "+0" : rollMod,
 			speaker: actorData.name,
-			//flavor: flavor,
 			untrained: level == -1,
 			margin: margin,
 			tn: tn,

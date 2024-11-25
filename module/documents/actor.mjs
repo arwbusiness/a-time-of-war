@@ -368,17 +368,16 @@ export class BTActor extends Actor {
 		//systemData.xp = systemData.cr * systemData.cr * 100;
 	}
 
-  /**
-   * Prepare NPC type specific data.
-   */
-  _prepareVehicleData(actorData) {
-    if (actorData.type !== 'vehicle') return;
+	/**
+	* Prepare NPC type specific data.
+	*/
+	_prepareVehicleData(actorData) {
+		if (actorData.type !== 'vehicle')
+			return;
 
-    // Make modifications to data here. For example:
-    const systemData = actorData.system;
-    
-	//systemData.xp = systemData.cr * systemData.cr * 100;
-  }
+		const systemData = actorData.system;
+		const flags = actorData.flags.bt || {};
+	}
 
   /**
    * Override getRollData() that's supplied to rolls.

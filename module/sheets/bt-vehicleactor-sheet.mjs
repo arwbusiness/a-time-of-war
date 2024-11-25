@@ -12,82 +12,173 @@ export class BTVehicleActorSheet extends ActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['bt', 'sheet', 'actor', 'vehicle'],
-      width: 600,
-      height: 600,
+      width: 750,
+      height: 650,
       tabs: [
-        {
+        /*{
           navSelector: '.sheet-tabs',
           contentSelector: '.sheet-body',
           initial: 'features',
-        },
+        },*/
       ],
     });
   }
 
-  /** @override */
-  get template() {
-    return `systems/a-time-of-war/templates/actor/actor-vehicle-sheet.hbs`;
-  }
+	/** @override */
+	get template() {
+		return `systems/a-time-of-war/templates/actor/VehicleActorSheet.hbs`;
+	}
+
+	async _onDropActor(event, data) {
+		const element = event.target;
+
+		//You missed.
+		if(!event.target.classList.contains("droppable-actors"))
+		  return;
+
+		//Get the information we need to fetch stats from the dropped actor.
+		const uuid = data.uuid.split(".")[1];
+		const actor = game.actors.get(uuid);
+		
+		//Let's see if this element has a real/fake act going on.
+		let split = element.id.split("-");
+		let real = element;
+		let fake = null;
+		let fakeImg = null;
+		if(split[split.length-1] == "real" || split[split.length-1] == "fake") {
+			console.log("HEY!")
+			split = split.slice(0, split.length-1);
+			let str = "";
+			split.forEach(s => { str += s + "-"; });
+			real = document.getElementById(str+"real");
+			fake = document.getElementById(str+"fake");
+			fakeImg = document.getElementById(str+"fake-img");
+		}
+		console.log("Real: {0}", real);
+		if(fake != null)
+			console.log("Fake: {0}", fake);
+		if(fakeImg != null)
+			console.log("FakeImg: {0}", fakeImg);
+		
+		if(real != null && fake != null) {
+			real.style.display = "none";
+			fake.style.display = "block";
+			real.value = uuid;
+			fake.value = actor.name;
+			if(fakeImg != null) {
+				fakeImg.style.display = "block";
+				fakeImg.src = actor.img;
+			}
+		}
+		
+		//Time to start actually processing data.
+		const vehicle = this.actor.system;
+		if(element.classList.contains("pilot-uuid")) {
+			this.UpdatePilot(uuid);
+		}
+
+		//Live and let live--continue the cycle.
+		super._onDropActor(event, data);
+	}
+	
+	//await _onDropActor({ target: target }, { uuid: uuid });
+	//target is an element
+	//uuid should be obvious, but it's an actor uuid
+	/*FakeDropActor(target, uuid) {
+		const ev = {
+			target: target
+		};
+		const dt = {
+			uuid: uuid
+		}
+		
+		await _onDropActor(ev, dt);
+	}*/
+	
+	UpdatePilot(uuid) {
+		const vehicle = this.actor.system;
+		const pilot = game.actors.get(uuid);
+		const skills = pilot.system.skills;
+		
+		const driveTypes = ['ground','rail','sea'];
+		const gunneryTypes = ['aerospace','air','battlesuit','ground','mech','sea','spacecraft','turret'];
+		const gunnery = gunneryTypes.includes(vehicle.type) ? skills["gunnery_"+vehicle.type].level : skills["gunnery_turret"].level;
+		const piloting = driveTypes.includes(vehicle.type) ? skills["driving_"+vehicle.type].level : skills["piloting_"+vehicle.type].level;
+		const perception = skills["perception"].level;
+		const sensorops = skills["sensorops"].level;
+		const computers = skills["computers"].level;
+		const comms = skills["comms_conventional"].level;
+		
+		let updateData = {};
+		updateData["system.pilot"] = uuid;
+		updateData["system.pilot_skills"] = {
+			gunnery: gunnery,
+			piloting: piloting,
+			perception: perception,
+			sensorops: sensorops,
+			computers: computers,
+			comms: comms
+		}
+		console.log(updateData);
+		
+		this.actor.update(updateData);
+	}
 
   /* -------------------------------------------- */
 
-  /** @override */
-  async getData() {
-    // Retrieve the data structure from the base sheet. You can inspect or log
-    // the context variable to see the structure, but some key properties for
-    // sheets are the actor object, the data object, whether or not it's
-    // editable, the items array, and the effects array.
-    const context = super.getData();
+	/** @override */
+	async getData() {
+		// Retrieve the data structure from the base sheet. You can inspect or log
+		// the context variable to see the structure, but some key properties for
+		// sheets are the actor object, the data object, whether or not it's
+		// editable, the items array, and the effects array.
+		const context = super.getData();
 
-    // Use a safe clone of the actor data for further operations.
-    const actorData = this.document.toObject(false);
+		// Use a safe clone of the actor data for further operations.
+		const actorData = this.document.toObject(false);
+		const systemData = actorData.system;
 
-    // Add the actor's data to context.data for easier access, as well as flags.
-    context.system = actorData.system;
-    context.flags = actorData.flags;
+		// Add the actor's data to context.data for easier access, as well as flags.
+		context.system = actorData.system;
+		context.flags = actorData.flags;
 
-    // Adding a pointer to CONFIG.BOILERPLATE
-    context.config = CONFIG.BT;
+		// Adding a pointer to CONFIG.BOILERPLATE
+		context.config = CONFIG.BT;
 
-    // Prepare character data and items.
-	this._prepareItems(context);
-	//this._prepareCharacterData(context);
+		// Prepare character data and items.
+		//this._prepareItems(context);
+		this.PrepareDerivedData(actorData, systemData);
 
-    // Enrich biography info for display
-    // Enrichment turns text like `[[/r 1d20]]` into buttons
-    context.enrichedBiography = await TextEditor.enrichHTML(
-      this.actor.system.biography,
-      {
-        // Whether to show secret blocks in the finished html
-        secrets: this.document.isOwner,
-        // Necessary in v11, can be removed in v12
-        async: true,
-        // Data to fill in for inline rolls
-        rollData: this.actor.getRollData(),
-        // Relative UUID resolution
-        relativeTo: this.actor,
-      }
-    );
+		// Prepare active effects
+		context.effects = prepareActiveEffectCategories(
+		// A generator that returns all effects stored on the actor
+		// as well as any items
+			this.actor.allApplicableEffects()
+		);
 
-    // Prepare active effects
-    context.effects = prepareActiveEffectCategories(
-      // A generator that returns all effects stored on the actor
-      // as well as any items
-      this.actor.allApplicableEffects()
-    );
-
-    return context;
-  }
-
-  /**
-   * Character-specific context modifications
-   *
-   * @param {object} context The context object to mutate
-   */
-  _prepareCharacterData(context) {
-    // This is where you can enrich character-specific editor fields
-    // or setup anything else that's specific to this type
-  }
+		return context;
+	}
+	
+	PrepareDerivedData(actorData, systemData) {
+		/*if(systemData.pilot != undefined && systemData.pilot != null) {
+			//this.UpdatePilot(systemData.pilot);
+			
+			const doc = this.document;
+			const sheet = doc._sheet;
+			const form = sheet.form;
+			console.log(form);
+			const real = document.getElementById("pilot-real");
+			const fake = document.getElementById("pilot-fake");
+			const img = document.getElementById("pilot-fake-img");
+			console.log(real);
+			if(real != null) {
+				console.log("HEY");
+				real.style.display = "none";
+				fake.style.display = "block";
+				img.style.display = "block";
+			}
+		}*/
+	}
 
   /**
    * Organize and classify Items for Actor sheets.
@@ -141,9 +232,11 @@ export class BTVehicleActorSheet extends ActorSheet {
   /** @override */
   activateListeners(html) {
     super.activateListeners(html);
+	
+	this.ActivateSheetListeners(html);
 
     // Render the item sheet for viewing/editing prior to the editable check.
-    html.on('click', '.item-edit', (ev) => {
+    /*html.on('click', '.item-edit', (ev) => {
       const li = $(ev.currentTarget).parents('.item');
       const item = this.actor.items.get(li.data('itemId'));
       item.sheet.render(true);
@@ -185,8 +278,102 @@ export class BTVehicleActorSheet extends ActorSheet {
         li.setAttribute('draggable', true);
         li.addEventListener('dragstart', handler, false);
       });
-    }
+    }*/
   }
+  
+	ActivateSheetListeners(html) {
+		const actorData = this.document.toObject(false);
+		const systemData = actorData.system;
+		
+		//Bind buttons and stuff.
+		html.on('change', '#vehicle-type', this.ChangeVehicleType.bind(this));
+		
+		//Check the pilot id, update with the current version of the actor if found and hide the real pilot elements.
+		this.RefreshPilot(html, actorData, systemData);
+		
+		//Try to make the lists default pick the thing they're supposed to, because they just default to the first option in the list otherwise.
+		let typeList = document.getElementById("vehicle-type");
+		switch(systemData.type) {
+			case "ground":
+				typeList.selectedIndex = 0;
+				break;
+			case "rail":
+				typeList.selectedIndex = 1;
+				break;
+			case "sea":
+				typeList.selectedIndex = 2;
+				break;
+			case "aerospace":
+				typeList.selectedIndex = 3;
+				break;
+			case "air":
+				typeList.selectedIndex = 4;
+				break;
+			case "battlesuit":
+				typeList.selectedIndex = 5;
+				break;
+			case "mech":
+				typeList.selectedIndex = 6;
+				break;
+			case "spacecraft":
+				typeList.selectedIndex = 7;
+				break;
+			default:
+				break;
+		}
+	
+		//Update the class based on tonnage
+		//This will need reworking to accommodate non-mech vehicles, which don't use these brackets to determine their light/medium/heavy/superheavy class.
+		const weight = systemData.tonnage;
+		//systemData["system.details.class"] = weight <= 35 ? "Light" : weight <= 55 ? "Medium" : weight <= 75 ? "Heavy" : "Assault";
+		let updateData = {};
+		updateData["system.details.class"] = weight <= 35 ? "Light" : weight <= 55 ? "Medium" : weight <= 75 ? "Heavy" : "Assault";
+		this.update(updateData);
+	}
+	
+	ChangeVehicleType(event) {
+		const element = event.currentTarget;
+		const value = element.value;
+		
+		let updateData = {};
+		updateData["system.type"] = value;
+		this.actor.update(updateData);
+	}
+	
+	RefreshPilot(html, actorData, systemData) {
+		const pilot = systemData.pilot;
+		if(pilot != undefined && pilot != "") {
+			console.log("pilot: {0}", pilot);
+		}
+		
+		const list = Object.entries(html[0]);
+		let real = null;
+		let fake = null;
+		//let img = null;
+		list.forEach(elem => {
+			const id = elem[1].id;
+			if(id == "pilot-real")
+				real = elem[1];
+			if(id == "pilot-fake")
+				fake = elem[1];
+			//if(id == "pilot-fake-img")
+			//	img = elem[1];
+		});
+		//console.log(img);
+		
+		if(real.value != undefined && real.value != "") {
+			const pilotActor = game.actors.get(real.value);
+			
+			real.style.display = "none";
+			fake.style.display = "block";
+			fake.value = pilotActor.name;
+			this.UpdatePilot(real.value);
+			
+			const img = document.getElementById("pilot-fake-img");
+			img.style.display = "block";
+			img.src = pilotActor.img;
+		}
+	}
 
   /**
    * Handle creating a new Owned Item for the actor using initial data defined in the HTML dataset

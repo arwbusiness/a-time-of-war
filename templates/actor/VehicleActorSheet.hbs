@@ -1,0 +1,105 @@
+<form class="{{cssClass}} {{actor.type}} flexcol" autocomplete="off">
+  {{!-- Sheet Header --}}
+	<header class="sheet-header">
+		<img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
+		<div class="header-fields">
+		
+			<h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+			<table>
+				<tr>
+					<td>
+						<span class="resource-label">Vehicle Type:</span>
+						<select id="vehicle-type" <!--onfocus="this.selectedIndex = -1;"-->>
+							<option value="ground">Ground</option>
+							<option value="rail">Rail</option>
+							<option value="sea">Sea</option>
+							<option value="aerospace">AeroSpace</option>
+							<option value="air">Air</option>
+							<option value="battlesuit">Battlesuit</option>
+							<option value="mech">'Mech</option>
+							<option value="spacecraft">Spacecraft</option>
+						</select>
+					</td>
+					<td>
+						<div class="flexrow">
+							<span class="resource-label">Tonnage:</span>
+							<input type="number" name="system.tonnage" id="vehicle-tonnage" value="{{system.tonnage}}" placeholder="Enter tonnage..." />
+							<span class="resource-label">T</span>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<table>
+							<tr>
+								<td>
+									<input class="droppable-actors pilot-uuid" id="pilot-real" style="display:block" placeholder="Drop an actor here to pilot the vehicle..." value="{{system.pilot}}" />
+									<input class="droppable-actors pilot-uuid" id="pilot-fake" style="display:none" />
+								</td>
+								<td>
+									<img id="pilot-fake-img" style="display:none; width:100px; height:100px;" />
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td>
+						<!--Vehicle details-->
+						<table style="font-size:10.5px;">
+							<tr><td>
+								<span class="resource-label">Model:</span>
+							</td><td>
+								<input style="height:100%" type="number" name="system.details.model" value="{{system.details.model}}" />
+							</td></tr>
+							<tr><td>
+								<span class="resource-label">Class:</span>
+							</td><td>
+								<span>{{system.details.class}}</span>
+							</td></tr>
+							<tr><td>
+								<span class="resource-label">Chassis:</span>
+							</td><td>
+								<input style="height:100%" type="number" name="system.details.chassis" value="{{system.details.chassis}}" />
+							</td></tr>
+							<tr><td>
+								<span class="resource-label">Manufacturer:</span>
+							</td><td>
+								<input style="height:100%" type="number" name="system.details.manufacturer" value="{{system.details.manufacturer}}" />
+							</td></tr>
+							<tr><td>
+								<span class="resource-label">Factory:</span>
+							</td><td>
+								<input style="height:100%" type="number" name="system.details.factory" value="{{system.details.factory}}" />
+							</td></tr>
+							<tr><td>
+								<span class="resource-label">Production Year:</span>
+							</td><td>
+								<input style="height:100%" type="number" name="system.details.production_year" value="{{system.details.production_year}}" />
+							</td></tr>
+							<tr><td>
+								<span class="resource-label">Engine:</span>
+							</td><td>
+								<input style="height:100%" type="text" name="system.details.engine" value="{{system.details.engine}}" />
+							</td></tr>
+							<tr><td>
+								<span class="resource-label">Armour:</span>
+							</td><td>
+								<input style="height:100%" type="text" name="system.details.armour" value="{{system.details.armour}}" />
+							</td></tr>
+							<tr><td>
+								<span class="resource-label">Communications:</span>
+							</td><td>
+								<input style="height:100%" type="text" name="system.details.communications" value="{{system.details.communications}}" />
+							</td></tr>
+							<tr><td>
+								<span class="resource-label">Targeting:</span>
+							</td><td>
+								<input style="height:100%" type="text" name="system.details.targeting" value="{{system.details.targeting}}" />
+							</td></tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			
+		</div>
+	</header>
+</form>
