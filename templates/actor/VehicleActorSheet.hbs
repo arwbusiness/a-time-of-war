@@ -1,48 +1,92 @@
 <form class="{{cssClass}} {{actor.type}} flexcol" autocomplete="off">
   {{!-- Sheet Header --}}
 	<header class="sheet-header">
-		<img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
 		<div class="header-fields">
-		
-			<h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
 			<table>
 				<tr>
 					<td>
-						<span class="resource-label">Vehicle Type:</span>
-						<select id="vehicle-type" <!--onfocus="this.selectedIndex = -1;"-->>
-							<option value="ground">Ground</option>
-							<option value="rail">Rail</option>
-							<option value="sea">Sea</option>
-							<option value="aerospace">AeroSpace</option>
-							<option value="air">Air</option>
-							<option value="battlesuit">Battlesuit</option>
-							<option value="mech">'Mech</option>
-							<option value="spacecraft">Spacecraft</option>
-						</select>
+						<img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
 					</td>
-					<td>
-						<div class="flexrow">
-							<span class="resource-label">Tonnage:</span>
-							<input type="number" name="system.tonnage" id="vehicle-tonnage" value="{{system.tonnage}}" placeholder="Enter tonnage..." />
-							<span class="resource-label">T</span>
-						</div>
-					</td>
-				</tr>
-				<tr>
 					<td>
 						<table>
 							<tr>
+								<h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+							</tr>
+							<tr>
 								<td>
-									<input class="droppable-actors pilot-uuid" id="pilot-real" style="display:block" placeholder="Drop an actor here to pilot the vehicle..." value="{{system.pilot}}" />
-									<input class="droppable-actors pilot-uuid" id="pilot-fake" style="display:none" />
+									<span class="resource-label">Vehicle Type:</span>
+									<select id="vehicle-type" <!--onfocus="this.selectedIndex = -1;"-->>
+										<option value="ground">Ground</option>
+										<option value="rail">Rail</option>
+										<option value="sea">Sea</option>
+										<option value="aerospace">AeroSpace</option>
+										<option value="air">Air</option>
+										<option value="battlesuit">Battlesuit</option>
+										<option value="mech">'Mech</option>
+										<option value="spacecraft">Spacecraft</option>
+									</select>
 								</td>
 								<td>
-									<img id="pilot-fake-img" style="display:none; width:100px; height:100px;" />
+									<div class="flexrow">
+										<span class="resource-label">Tonnage:</span>
+										<input type="number" name="system.tonnage" id="vehicle-tonnage" value="{{system.tonnage}}" placeholder="Enter tonnage..." />
+										<span class="resource-label">T</span>
+									</div>
 								</td>
 							</tr>
 						</table>
 					</td>
-					<td>
+				</tr>
+			</table>
+			<table style="">
+				<tr>
+					<td style="width:50%">
+						<table>
+							<tr>
+								<th>
+									<table>
+										<tr>
+											<th class="resource-label">Pilot:</th>
+											<th>
+												<input class="droppable-actors pilot-uuid" id="pilot-real" style="display:block" placeholder="Drop an actor here to pilot the vehicle..." value="{{system.pilot}}" />
+												<input class="droppable-actors pilot-uuid" id="pilot-fake" style="display:none" />
+											</th>
+										</tr>
+										<tr>
+											<td>
+												<input type="image" id="refresh-pilot" src="systems/a-time-of-war/icons/refresh.png" style="width:24px; height:24px" />
+											</td>
+											<td>
+												<input type="button" id="delete-pilot" class="clickable" value="X" />
+											</td>
+										</tr>
+									</table>
+								</th>
+								<th>
+									<img id="pilot-fake-img" style="display:none; width:135px; height:135px;" />
+								</th>
+							</tr>
+						</table>
+						<table style="text-align:center; font-size:10px">
+							<tr>
+								<th class="rollable" data-rolltype="skill" data-for="gunnery">Gunnery</th>
+								<th class="rollable" data-rolltype="skill" data-for="piloting">Piloting</th>
+								<th class="rollable" data-rolltype="skill" data-for="perception">Perception</th>
+								<th class="rollable" data-rolltype="skill" data-for="sensorops">Sensor Ops</th>
+								<th class="rollable" data-rolltype="skill" data-for="computers">Computers</th>
+								<th class="rollable" data-rolltype="skill" data-for="comms">Comms</th>
+							</tr>
+							<tr>
+								<td class="rollable" data-rolltype="skill" data-for="gunnery">{{system.pilot_skills.gunnery}}</td>
+								<td class="rollable" data-rolltype="skill" data-for="piloting">{{system.pilot_skills.piloting}}</td>
+								<td class="rollable" data-rolltype="skill" data-for="perception">{{system.pilot_skills.perception}}</td>
+								<td class="rollable" data-rolltype="skill" data-for="sensorops">{{system.pilot_skills.sensorops}}</td>
+								<td class="rollable" data-rolltype="skill" data-for="computers">{{system.pilot_skills.computers}}</td>
+								<td class="rollable" data-rolltype="skill" data-for="comms">{{system.pilot_skills.comms}}</td>
+							</tr>
+						</table>
+					</td>
+					<td style="width:50%">
 						<!--Vehicle details-->
 						<table style="font-size:10.5px;">
 							<tr><td>
@@ -99,7 +143,6 @@
 					</td>
 				</tr>
 			</table>
-			
 		</div>
 	</header>
 </form>

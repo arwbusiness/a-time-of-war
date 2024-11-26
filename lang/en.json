@@ -165,6 +165,15 @@
 	"childhood": "Childhood",
 	"early_years": "Early Years",
 	"adult_life": "Adult Life",
+"DIVIDER_LIFEPATH": "",
+	"affiliation": "Affiliation",
+	"subaffiliation": "Sub-affiliation",
+	"early_childhood": "Early Childhood",
+	"late_childhood": "Late Childhood",
+	"schooling": "Schooling",
+	"basic_field": "Basic Field",
+	"advanced_field": "Advanced Field",
+	"special_field": "Special Field",
 	"liao": "Capellan Confederation (House Liao)",
 		"capellan_com": "Capellan Commonality",
 		"liao_com": "Liao Commonality",
@@ -199,7 +208,8 @@
       "PersonItem": "Item Sheet",
       "VehicleActor": "Vehicle Sheet",
       "VehicleItem": "Vehicle Item Sheet",
-      "Property": "Property Sheet"
+      "Property": "Property Sheet",
+	  "LifepathModule": "Lifepath Module Sheet"
     },
     "Effect": {
       "Source": "Source",
@@ -245,7 +255,8 @@
       "equipment": "Equipment",
       "property": "Property",
       "vehicle_weapon": "Vehicle Weapon",
-      "vehicle_equipment": "Vehicle Equipment"
+      "vehicle_equipment": "Vehicle Equipment",
+	  "lifepath_module": "Lifepath Module"
     }
   }
 }

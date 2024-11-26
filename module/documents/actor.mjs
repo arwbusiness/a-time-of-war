@@ -81,6 +81,8 @@ export class BTActor extends Actor {
 		
 		//Reset spent XP counter.
 		systemData.xp_spent = 0;
+		
+		//Increase the XP of everything on the sheet using the xp from saved advances.
 		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
 		Object.entries(systemData.advances).forEach(advance => {
 			const data = advance[1];
@@ -115,16 +117,156 @@ export class BTActor extends Actor {
 			
 			systemData.xp_spent += data.free ? 0 : xp;
 		});
+		
+		//Special case for Age modifiers
+		const age = systemData.details.age;
+		//Make an ageXP object to hold the age modifiers
+		let ageXp = {
+			str: 0,
+			bod: 0,
+			dex: 0,
+			rfl: 0,
+			wil: 0,
+			int: 0,
+			cha: 0
+		};
+		
+		//Calculate the age modifiers
+		if (age >= 25 && age < 31)
+		{
+			ageXp.str = 100;
+			ageXp.bod = 100;
+			ageXp.dex = 0;
+			ageXp.rfl = 100;
+			ageXp.wil = 100;
+			ageXp["int"] = 100;
+			ageXp.cha = 50;
+		}
+		else if (age >= 31 && age < 41)
+		{
+			ageXp.str = 200;
+			ageXp.bod = 200;
+			ageXp.dex = 0;
+			ageXp.rfl = 0;
+			ageXp.wil = 200;
+			ageXp["int"] = 200;
+			ageXp.cha = 50;
+		}
+		else if (age >= 41 && age < 51)
+		{
+			ageXp.str = 200;
+			ageXp.bod = 200;
+			ageXp.dex = -50;
+			ageXp.rfl = 0;
+			ageXp.wil = 250;
+			ageXp["int"] = 0;
+			ageXp.cha = 25;
+		}
+		else if (age >= 51 && age < 61)
+		{
+			ageXp.str = 200;
+			ageXp.bod = 100;
+			ageXp.dex = -50;
+			ageXp.rfl = -100;
+			ageXp.wil = 250;
+			ageXp["int"] = 0;
+			ageXp.cha = -25;
+		}
+		else if (age >= 61 && age < 71)
+		{
+			ageXp.str = 100;
+			ageXp.bod = 0;
+			ageXp.dex = -150;
+			ageXp.rfl = -100;
+			ageXp.wil = 250;
+			ageXp["int"] = 0;
+			ageXp.cha = -75;
+		}
+		else if (age >= 71 && age < 81)
+		{
+			ageXp.str = 0;
+			ageXp.bod = -125;
+			ageXp.dex = -150;
+			ageXp.rfl = -200;
+			ageXp.wil = 200;
+			ageXp["int"] = 0;
+			ageXp.cha = -150;
+		}
+		else if (age >= 81 && age < 91)
+		{
+			ageXp.str = -150;
+			ageXp.bod = -275;
+			ageXp.dex = -250;
+			ageXp.rfl = -300;
+			ageXp.wil = 150;
+			ageXp["int"] = 0;
+			ageXp.cha = -250;
+		}
+		else if (age >= 91 && age < 101)
+		{
+			ageXp.str = -300;
+			ageXp.bod = -450;
+			ageXp.dex = -400;
+			ageXp.rfl = -425;
+			ageXp.wil = 50;
+			ageXp["int"] = 0;
+			ageXp.cha = -350;
+		}
+		else if (age >= 101)
+		{
+			ageXp.str = -500;
+			ageXp.bod = -650;
+			ageXp.dex = -600;
+			ageXp.rfl = -575;
+			ageXp.wil = -50;
+			ageXp["int"] = -200;
+			ageXp.cha = -500;
+		}
+		
+		//Ok, add the age XP now.
+		systemData.attributes["str"].xp += ageXp.str;
+		systemData.attributes["bod"].xp += ageXp.bod;
+		systemData.attributes["dex"].xp += ageXp.dex;
+		systemData.attributes["rfl"].xp += ageXp.rfl;
+		systemData.attributes["wil"].xp += ageXp.wil;
+		systemData.attributes["int"].xp += ageXp["int"];
+		systemData.attributes["cha"].xp += ageXp.cha;
+		
+		//Ok, let's get the XP modifiers from 
+		let moduleXP = 0;
+		/*Object.entries(systemData.lifepath.modules).forEach(entry => {
+			const module = entry[1].system;
+			const a = module.attributes;
+			const t = module.traits;
+			const s = module.skills;
+			moduleXP += module.cost;
+			
+			Object.entries(a).forEach(att => {
+				const name = att[0];
+				const value = att[1];
+				systemData.attributes[name].xp += value;
+			});
+			Object.entries(t).forEach(trt => {
+				const name = trt[0];
+				const value = trt[1];
+				systemData.traits[name].xp += value;
+				
+				//the traits will need to actually be added to the sheet, you know?
+			});
+			Object.entries(s).forEach(skl => {
+				const name = skl[0];
+				const value = skl[1];
+				systemData.skills[name].xp += value;
+				
+				//custom skills will need to be added to the sheet too! This could be harder than you though...
+			});
+		});*/
+		systemData.xp_spent += moduleXP;
 				
 		//special case for primary language
 		const lang_primary = systemData.details.lang_primary;
 		if(lang_primary != undefined && lang_primary != "")
 			systemData.skills["language"][lang_primary].xp = 570;
-		
-		//Age additions!
-		//if(systemData.calcAge)
-		//	this.CalculateAgeModifiers();
-	//it goes fuckin recursive for some reason, can't work out why
 		
 		//Ok, get the levels!
 		this.CalculateAttributeLevels(systemData);
@@ -135,6 +277,8 @@ export class BTActor extends Actor {
 		systemData.damage.max = Math.max(1, systemData.attributes.bod.level * 2);
 		systemData.fatigue.max = Math.max(1, systemData.attributes.wil.level * 2);
 		systemData.luck.max = systemData.attributes.edg.level;
+		//MP will be here somewhere. Will do it in a moment.
+		//Don't forget to add a theoretical encumbrance.
 		
 		this.render();
 	}

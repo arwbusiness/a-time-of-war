@@ -32,6 +32,9 @@ export class BTItem extends Item {
 		case "property":
 			
 			break;
+		case "lifepath_module":
+		
+			break;
 		default:
 			break;
 	}
@@ -56,7 +59,8 @@ export class BTItem extends Item {
 	this._getEquipmentRollData(rollData);
 	this._getVehicleWeaponRollData(rollData);
 	this._getVehicleEquipmentRollData(rollData);
-	this._getPropertyRollData(rollData);*/
+	this._getPropertyRollData(rollData);
+	this._getLifepathModuleRollData(rollData);*/
 
     return rollData;
   }

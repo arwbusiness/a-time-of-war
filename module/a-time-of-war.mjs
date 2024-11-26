@@ -6,6 +6,7 @@ import { BTPersonActorSheet } from './sheets/bt-personactor-sheet.mjs';
 import { BTVehicleActorSheet } from './sheets/bt-vehicleactor-sheet.mjs';
 import { BTPersonItemSheet } from './sheets/bt-personitem-sheet.mjs';
 import { BTVehicleItemSheet } from './sheets/bt-vehicleitem-sheet.mjs';
+import { BTLifepathModuleItemSheet } from './sheets/bt-lifepathmoduleitem-sheet.mjs';
 import { BTPropertySheet } from './sheets/bt-property-sheet.mjs';
 
 // Import helper/utility classes and constants.
@@ -75,6 +76,11 @@ Hooks.once('init', function () {
     types: ["property"],
     makeDefault: true,
     label: 'BT.SheetLabels.Property',
+  });
+  Items.registerSheet('bt', BTLifepathModuleItemSheet, {
+    types: ["lifepath_module"],
+    makeDefault: true,
+    label: 'BT.SheetLabels.LifepathModule',
   });
 
   // Preload Handlebars templates.

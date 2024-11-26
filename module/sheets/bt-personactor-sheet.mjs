@@ -48,6 +48,9 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		const dt = data;
 		console.log("DROP_ITEM | event: {0}, data: {1}", ev, dt);
+		
+		//ah, then we probably push to an inventory property on the character template
+		
 		return await super._onDropItem(ev, dt);
 	}
 	
@@ -1019,9 +1022,9 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		switch(rollType) {
 			case "attribute":
-				return this.RollAttribute(element, dataset, actorData, systemData, rollData);
+				return this.RollAttribute(dataset, actorData, systemData, rollData);
 			case "skill":
-				return this.RollSkill(element, dataset, actorData, systemData, rollData);
+				return this.RollSkill(dataset, actorData, systemData, rollData);
 			default:
 				console.error("RollType " + rollType + " not recognised!");
 				return null;
@@ -1061,7 +1064,7 @@ export class BTPersonActorSheet extends ActorSheet {
 			return Math.min(5, Math.floor(level/3));
 	}
 	
-	async RollAttribute(element, dataset, actorData, systemData, rollData) {
+	async RollAttribute(dataset, actorData, systemData, rollData) {
 		//Figure out the link modifier.
 		let linkText = dataset.link.split("+");
 		
@@ -1143,7 +1146,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		return msg;
 	}
 	
-	async RollSkill(element, dataset, actorData, systemData, rollData) {
+	async RollSkill(dataset, actorData, systemData, rollData) {
 		const name = dataset.label;
 		const baseSkill = dataset.baseskill;
 		console.log("TRYING TO ROLL SKILL {0}", name);

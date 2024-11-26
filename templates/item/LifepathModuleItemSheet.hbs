@@ -1,0 +1,37 @@
+<form class="{{cssClass}} {{item.type}} flexcol" autocomplete="off">
+	<header class="sheet-header">
+		<div class="header-fields">
+			<table>
+				<tr>
+					{{#if (in system.type "affiliation" "subaffiliation")}}
+					<td>
+						<img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" height="100" width="100"/>
+					</td>
+					{{/if}}
+					<td>
+						<table>
+							<tr>
+								<h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
+							</tr>
+							<tr>
+								<td>
+									<span class="resource-label">Type:</span>
+								</td>
+								<td>
+									<select id="module-type">
+										<option data-for="0" value="affiliation">{{localize "affiliation"}}</option>
+										<option data-for="1" value="subaffiliation">{{localize "subaffiliation"}}</option>
+										<option data-for="2" value="early_childhood">{{localize "early_childhood"}}</option>
+										<option data-for="3" value="late_childhood">{{localize "late_childhood"}}</option>
+										<option data-for="4" value="schooling">{{localize "schooling"}}</option>
+										<option data-for="5" value="adult_life">{{localize "adult_life"}}</option>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</header>
+</form>{{localize "liao"}}

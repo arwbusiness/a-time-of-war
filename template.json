@@ -29,7 +29,11 @@
           "climb": 1,
           "swim": 1,
           "crawl": 1
-        }
+        },
+		"weight": {
+			"carried": 0,
+			"max": 100
+		}
       }
     },
     "npc": {
@@ -52,11 +56,7 @@
 		"early_years": "",
 		"adult_life": ""
 	  },
-      "advancement": {
-        "xp_total": 0,
-        "xp_spent": 0,
-        "xp_unspent": 0
-      },
+	  "xp_spent": 0,
 	  "advanceMaker": {
 		  "type": "attribute",
 		  "name": "",
@@ -77,6 +77,9 @@
 			},
 			"adult_life": {
 				
+			},
+			"modules": {
+				
 			}
 		},
       "attributes": {
@@ -89,7 +92,9 @@
         "cha": { "level": 0, "xp": 0, "mod": -4 },
         "edg": { "level": 0, "xp": 0, "mod": -4 }
       },
-	  "traits": {},
+	  "traits": {
+		  
+	  },
       "skills": {
         "acrobatics_freefall": { "xp": 0, "mod": 0, "level": -1, "link": "rfl", "tn": 7, "type": "SB" },
         "acrobatics_gymnastics": { "xp": 0, "mod": 0, "level": -1, "link": "rfl", "tn": 7, "type": "SB" },
@@ -227,7 +232,7 @@
     }
   },
   "Item": {
-    "types": ["weapon", "armour", "equipment", "vehicle_weapon", "vehicle_equipment", "property"],
+    "types": ["weapon", "armour", "equipment", "vehicle_weapon", "vehicle_equipment", "property", "lifepath_module"],
     "templates": {
       "base": {
         "description": "",
@@ -281,6 +286,27 @@
     },
     "vehicle_equipment": {
       "templates": ["vehiclebase"]
-    }
+    },
+	"lifepath_module": {
+		"id": "",
+		"type": "affiliation",
+		"cost": 0,
+		"attributes": {
+			"str": 0,
+			"bod": 0,
+			"dex": 0,
+			"rfl": 0,
+			"wil": 0,
+			"int": 0,
+			"cha": 0,
+			"edg": 0
+		},
+		"traits": {
+			"animal_empathy": 0
+		},
+		"skills": {
+			"administration": 0
+		}
+	}
   }
 }

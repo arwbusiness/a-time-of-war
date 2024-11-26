@@ -235,6 +235,9 @@ export class BTVehicleActorSheet extends ActorSheet {
 	
 	this.ActivateSheetListeners(html);
 
+    // Rollable abilities.
+    html.on('click', '.rollable', this._onRoll.bind(this));
+
     // Render the item sheet for viewing/editing prior to the editable check.
     /*html.on('click', '.item-edit', (ev) => {
       const li = $(ev.currentTarget).parents('.item');
@@ -267,9 +270,6 @@ export class BTVehicleActorSheet extends ActorSheet {
       onManageActiveEffect(ev, document);
     });
 
-    // Rollable abilities.
-    html.on('click', '.rollable', this._onRoll.bind(this));
-
     // Drag events for macros.
     if (this.actor.isOwner) {
       let handler = (ev) => this._onDragStart(ev);
@@ -287,9 +287,12 @@ export class BTVehicleActorSheet extends ActorSheet {
 		
 		//Bind buttons and stuff.
 		html.on('change', '#vehicle-type', this.ChangeVehicleType.bind(this));
+		html.on('dblclick', '#pilot-fake', this.TogglePilotSheet.bind(this));
 		
 		//Check the pilot id, update with the current version of the actor if found and hide the real pilot elements.
 		this.RefreshPilot(html, actorData, systemData);
+		html.on('click', '#refresh-pilot', this.RefreshPilotManual.bind(this));
+		html.on('click', '#delete-pilot', this.DeletePilot.bind(this));
 		
 		//Try to make the lists default pick the thing they're supposed to, because they just default to the first option in the list otherwise.
 		let typeList = document.getElementById("vehicle-type");
@@ -328,7 +331,7 @@ export class BTVehicleActorSheet extends ActorSheet {
 		//systemData["system.details.class"] = weight <= 35 ? "Light" : weight <= 55 ? "Medium" : weight <= 75 ? "Heavy" : "Assault";
 		let updateData = {};
 		updateData["system.details.class"] = weight <= 35 ? "Light" : weight <= 55 ? "Medium" : weight <= 75 ? "Heavy" : "Assault";
-		this.update(updateData);
+		this.actor.update(updateData);
 	}
 	
 	ChangeVehicleType(event) {
@@ -340,26 +343,59 @@ export class BTVehicleActorSheet extends ActorSheet {
 		this.actor.update(updateData);
 	}
 	
+	//Opens the pilot's character sheet, if any.
+	TogglePilotSheet(event) {
+		const element = document.getElementById("pilot-real");
+		const value = element.value;
+		
+		const pilot = game.actors.get(value);
+		if(pilot != undefined && pilot != "");
+			pilot.sheet.render(true);
+	}
+	
+	RefreshPilotManual(event) {
+		const actorData = this.document.toObject(false);
+		const systemData = actorData.system;
+		this.RefreshPilot(null, actorData, systemData);
+	}
+	
+	DeletePilot(event) {
+		let updateData = {};
+		updateData["system.pilot"] = "";
+		updateData["system.pilot_skills"] = {
+			piloting: 3,
+			gunnery: 4,
+			comms: 2,
+			computers: 2,
+			perception: 3,
+			sensorops: 3
+		};
+		
+		this.actor.update(updateData);
+	}
+	
 	RefreshPilot(html, actorData, systemData) {
 		const pilot = systemData.pilot;
 		if(pilot != undefined && pilot != "") {
 			console.log("pilot: {0}", pilot);
 		}
 		
-		const list = Object.entries(html[0]);
 		let real = null;
 		let fake = null;
-		//let img = null;
-		list.forEach(elem => {
-			const id = elem[1].id;
-			if(id == "pilot-real")
-				real = elem[1];
-			if(id == "pilot-fake")
-				fake = elem[1];
-			//if(id == "pilot-fake-img")
-			//	img = elem[1];
-		});
-		//console.log(img);
+		if(html != null) {
+			const list = Object.entries(html[0]);
+			list.forEach(elem => {
+				const id = elem[1].id;
+				if(id == "pilot-real")
+					real = elem[1];
+				if(id == "pilot-fake")
+					fake = elem[1];
+			});
+		}
+		else {
+			real = document.getElementById("pilot-real");
+			fake = document.getElementById("pilot-fake");
+		}
 		
 		if(real.value != undefined && real.value != "") {
 			const pilotActor = game.actors.get(real.value);
@@ -402,35 +438,127 @@ export class BTVehicleActorSheet extends ActorSheet {
     return await Item.create(itemData, { parent: this.actor });
   }
 
-  /**
-   * Handle clickable rolls.
-   * @param {Event} event   The originating click event
-   * @private
-   */
-  _onRoll(event) {
-    event.preventDefault();
-    const element = event.currentTarget;
-    const dataset = element.dataset;
-
-    // Handle item rolls.
-    if (dataset.rollType) {
-      if (dataset.rollType == 'item') {
-        const itemId = element.closest('.item').dataset.itemId;
-        const item = this.actor.items.get(itemId);
-        if (item) return item.roll();
-      }
-    }
-
-    // Handle rolls that supply the formula directly.
-    if (dataset.roll) {
-      let label = dataset.label ? `[ability] ${dataset.label}` : '';
-      let roll = new Roll(dataset.roll, this.actor.getRollData());
-      roll.toMessage({
-        speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-        flavor: label,
-        rollMode: game.settings.get('core', 'rollMode'),
-      });
-      return roll;
-    }
-  }
+	/**
+	* Handle clickable rolls.
+	* @param {Event} event   The originating click event
+	* @private
+	*/
+	_onRoll(event) {
+		event.preventDefault();
+		const ev = event;
+		const element = event.currentTarget;
+		const dataset = element.dataset;
+		console.log("rollEvent: {0}", ev);
+		
+		const request = dataset.for;
+		
+		switch(dataset.rolltype) {
+			case "skill":
+				return this.RollSkill(request);
+			case "vehicle_weapon":
+				return this.RollAttack(request);
+			case "critical":
+				return this.RollCriticalSlot(request);
+			default:
+				console.error("RollType {0} was not recognised!", dataset.rolltype);
+				return null;
+		}
+	}
+	
+	async RollSkill(which) {
+		if(which == undefined) {
+			console.error("Expected a string skill name; got undefined");
+			return;
+		}
+		
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		const rollData = actorData.getRollData();
+		
+		const hasPilot = systemData.pilot != undefined && systemData.pilot != "";
+		const pilotData = game.actors.get(systemData.pilot);
+		
+		const skill = systemData.pilot_skills[which];
+		const untrained = skill == -1;
+		let tn = 8;
+		
+		console.log("Skill {0} {1} vs TN {2}", which, skill, tn);
+		
+		let formula = "{2d6+" + skill + "}cs>=" + tn;
+		//if(untrained) //THIS STILL NEEDS DOING
+		console.log(formula);
+		let roll = await new Roll(formula, rollData).evaluate();
+		
+		let total = skill == -1 ? 0 : skill;
+		const results = roll.dice[0].results;
+		Object.entries(results).forEach(entry => { total += entry[1].result; });
+		const margin = (total >= tn ? "+" : "") + (total - tn);
+		
+		let msgData = {
+			name: which,
+			dice1: results[0].result,
+			dice2: results[1].result,
+			dice3: results[2] ? results[2].result : "",
+			rollMod: skill,
+			speaker: (hasPilot ? pilotData.name : actorData.name),
+			untrained: untrained,
+			tn: tn,
+			isSuccess: roll.total >= tn,
+			successOrFail: margin < 0 ? "FAILED" : "SUCCESS",
+			actionType: "SA",
+			rollType: "skill",
+			result: total,
+			margin: margin,
+			img: (hasPilot ? pilotData.img : actorData.img),
+			baseSkill: "none"
+		}
+		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
+		
+		const render = await renderTemplate("systems/a-time-of-war/templates/chat/StatRoll.hbs", msgData);
+		const msg = await ChatMessage.create({
+			content: render,
+			sound: CONFIG.sounds.dice
+		});
+		
+		return msg;
+	}
+	
+	async RollAttack(id) {
+		if(id == undefined) {
+			console.error("Expected an attack weapon id or lpunch, rpunch, kick; got undefined");
+			return;
+		}
+		
+		if(id == "lpunch" || id == "rpunch" || id == "kick") {
+			//special handling
+		}
+		console.log("requested weapon id: {0}", id);
+		
+		//some kind of attack type submenu goes here, at the end
+		//this.RollSkill("gunnery");
+		//this.RollSkill("piloting");
+	}
+	
+	async RollCriticalSlot(location, destroy = "message") {
+		if(location == undefined) {
+			console.error("Expected an string vehicle location; got undefined");
+			return;
+		}
+		
+		//destroy is "message" by default so you can roll a random crit slot on your mech for fidgeting purposes
+		
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		
+		//If destroy is only "destroy" or "message", do the respective; if destroy is "both", do both in the correct order to produce a valid return value
+		if(destroy == "destroy" || destroy == "both") {
+			//let updateData = {};
+			//updateData["system.items[" + hitId + "]".status"] = "destroyed";
+			//this.actor.update(updateData);
+		}
+		if (destroy == "message") {
+			//produce a chat message
+			//return msg;
+		}
+	}
 }
