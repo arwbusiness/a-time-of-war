@@ -28,7 +28,7 @@ Hooks.once('init', function () {
 
   // Add custom constants for configuration.
   CONFIG.BT = BT;
-  Roll.CHAT_TEMPLATE = "systems/a-time-of-war/templates/roll/roll.hbs";
+  //Roll.CHAT_TEMPLATE = "systems/a-time-of-war/templates/roll/roll.hbs";
 
   /**
    * Set an initiative formula for the system

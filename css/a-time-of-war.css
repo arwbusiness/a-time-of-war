@@ -8,12 +8,14 @@
 	width:20px;
 	border:2px solid black;
 	margin-right:3px;
-	margin-top:3px
+	margin-top:3px;
 }
 
-.chatDice .dropped {
-	border:2px solid grey !important;
+.chatDice.dropped {
+	border:1px dashed grey !important;
 	color:grey !important;
+	font-weight:normal !important;
+	padding-top:1px !important;
 }
 
 .chatTN {

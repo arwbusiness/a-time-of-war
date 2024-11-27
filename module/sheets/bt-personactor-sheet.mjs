@@ -944,10 +944,14 @@ export class BTPersonActorSheet extends ActorSheet {
 			return;
 		}
 		
+		let subtitle = "";
 		let advanceName = advanceMaker.name;
 		if(advanceMaker.type == "trait") {
+			console.log("advanceMaker: {0}", advanceMaker);
+			console.log("trait: {0}", systemData.traits[advanceMaker.name]);
 			advanceName = systemData.traits[advanceMaker.name].name;
-			console.log(advanceName);
+			subtitle = systemData.traits[advanceMaker.name].subtitle;
+			console.log("Subtitle: {0}", subtitle);
 		}
 		
 		//Make an advance schema with an appropriate name and fill it with the data from the advance maker
@@ -959,18 +963,22 @@ export class BTPersonActorSheet extends ActorSheet {
 			free: advanceMaker.free,
 			traitId: advanceMaker.type == "trait" ? advanceMaker.name : undefined,
 			id: id+i,
-			baseSkill: advanceMaker.baseSkill
+			baseSkill: advanceMaker.baseSkill,
+			subtitle: subtitle
+			
 		};
 		console.log(updateData);
 		
 		//Reset the advance maker
 		updateData["system.advanceMaker"] = {
-			type: "attribute",
 			name: "",
+			type: "attribute",
 			xp: "",
 			free: false,
+			traitId: "",
 			id: "",
-			baseSkill: undefined
+			baseSkill: undefined,
+			subtitle: ""
 		}
 		
 		this.actor.update(updateData);
@@ -1011,7 +1019,6 @@ export class BTPersonActorSheet extends ActorSheet {
 	*/
 	_onRoll(event) {
 		event.preventDefault();
-		console.log("HEY");
 		const element = event.currentTarget;
 		const dataset = element.dataset;
 
@@ -1090,53 +1097,66 @@ export class BTPersonActorSheet extends ActorSheet {
 			tn = 18;
 		else
 			tn = 12;
-		
-		/*link = 0;
-		for(var t = 0; t < linkText.length; t++) {
-			var lin = linkText[t];
-			var ageMod = systemData.agemods[lin];
-			var normalXP = systemData.attributes[lin].xp;
-			var result = Math.floor((parseInt(ageMod) + normalXP)/100);
 			
-			link += this.GetAttributeMod(result, systemData);
-		}*/
+		//Build the roll manually because we can't have nice things.
+		let dice = {};
+		let num = 2;
+		let total = 0;
+		for(var i = 0; i < num; i++) {
+			let roll = await new Roll('1d6', rollData).evaluate();
+			const value = roll.dice[0].results[0].result;
+			console.log(value);
+			dice[i] = value;
+			total += value;
 			
-		const formula = "{2d6+" + link + "}cs>=" + tn;
-		let roll = await new Roll(formula, rollData).evaluate();
+			//If you get two 6s, it explodes and further 6s explode; ergo while you're on 2d6, a 12 explodes, but while you're on 3d6, an 18 (6+6+6) would explode.
+			if(value == 6 && sixes < 5) {
+				sixes++;
+				if(sixes >= 2)
+					num++;
+			}
+		}
+		const isStunning = sixes >= 2;
+		const isFumble = total == 2;
 		
-		const results = roll.dice[0].results;
-		const dice1 = results[0].result;
-		const dice2 = results[1].result;
-		const dice3 = results[2] != null && results[2] != undefined ? results[2].result : "";
-		const droppedDie = Math.min(dice1,dice2,dice3) == dice1 ? 1 : Math.min(dice2,dice3) ? 2 : 3;
+		//Add the rollmod:
+		total += link;
 		
-		const total = (dice3 ? dice1+dice2+dice3-Math.min(dice1,dice2,dice3) : dice1+dice2)+link;
+		//Let modifiers kick in.
+		let modifiers = {};
+		Object.entries(modifiers).forEach(entry => {
+			let modifier = entry[1];
+			console.log(modifier);
+			//total += modifier;
+		});
 		
-		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
+		//Calculate the MoS/F:
 		const margin = (total >= tn ? "+" : "") + (total - tn);
 		
-		let label = dataset.label;
-		if(twoAttributes)
-			label = linkText[0].toUpperCase() + "+" + linkText[1].toUpperCase();
-		//const flavor = "Rolling " + name + ":";
+		//Establish the message data.
 		let msgData = {
-			name: label,
-			dice1: dice1,
-			dice2: dice2,
-			dice3: dice3,
-			droppedDie: droppedDie,
-			rollMod: link == 0 ? "+0" : link,
+			name: name,
+			dice: dice,
+			lowest: -1,
+			rollMod: link,
 			speaker: actorData.name,
-			margin: margin,
+			untrained: false,
 			tn: tn,
-			isSuccess: roll.total >= tn,
-			successOrFail: margin < 0 ? "fail" : "success",
+			isSuccess: total >= tn,
+			successOrFail: margin < 0 ? "Failed" : "Succeeded",
+			actionType: "SB",
 			rollType: "attribute",
 			result: total,
-			img: actorData.img
-		};
+			margin: margin,
+			img: actorData.img,
+			baseSkill: "none",
+			isFumble: isFumble,
+			isStunning: isStunning
+		}
+		//Apply the chat roll mode.
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
 		
+		//Render the message and send it to the chat window.
 		const render = await renderTemplate("systems/a-time-of-war/templates/chat/StatRoll.hbs", msgData);
 		const msg = await ChatMessage.create({
 			content: render,
@@ -1158,45 +1178,98 @@ export class BTPersonActorSheet extends ActorSheet {
 		const tn = isTrained ? skill.tn : (link.toString().includes("+") ? 18 : 12);
 		const actionType = skill.type;
 		
+		//NaturalAptitude calcs
+		const neededTP = actionType.slice(1,1) == "A" ? 5 : 3;
+		let traitLevel = 0;
+		Object.entries(systemData.traits).forEach(entry => {
+			const trait = entry[1];
+			const traitName = trait.name;
+			const subtitle = trait.subtitle;
+			const level = trait.level;
+			
+			if(traitName == "natural_aptitude") {
+				let subname = subtitle.replace("/","_").replace("'","").replace(" ","_").toLowerCase();
+				if(subname == name) {
+					traitLevel = level >= traitLevel ? level : traitLevel;
+				}
+			}
+		});
+		const hasNaturalAptitude = traitLevel >= neededTP;
+		
+		//Build the roll manually because we can't have nice things.
+		let dice = {};
+		let num = hasNaturalAptitude ? 3 : 2;
+		let lowest = hasNaturalAptitude ? 7 : 0;
+		let lowestIndex = 0;
+		let total = 0;
+		let sixes = 0;
+		for(var i = 0; i < num; i++) {
+			let roll = await new Roll('1d6', rollData).evaluate();
+			const value = roll.dice[0].results[0].result;
+			dice[i] = value;
+			total += value;
+				
+			//Calculate the index and value of the lowest die roll
+			if(value < lowest) {
+				lowestIndex = i;
+				lowest = value;
+			}
+			
+			//If you get two 6s, it explodes and further 6s explode; ergo while you're on 2d6, a 12 explodes, but while you're on 3d6, an 18 (6+6+6) would explode.
+			if(value == 6 && sixes < 5) {
+				sixes++;
+				if(sixes >= 2)
+					num++;
+			}
+		}
+		const isStunning = sixes >= 2;
+		const isFumble = total == 2;
+		
+		//If the pilot has natural aptitude, drop the lowest die and record the value.
+		if(hasNaturalAptitude)
+			total -= dice[lowestIndex];
+		else
+			lowestIndex = -1;
+		
+		//Add the rollmod:
 		const rollMod = this.GetLinkMod(link.split("+"), systemData, !isTrained) + (isTrained ? level : 0);
+		total += rollMod;
 		
-		const formula = "{2d6+" + rollMod + "}cs>=" + tn;
-		console.log(formula);
-		let roll = await new Roll(formula, rollData).evaluate();
+		//Let modifiers kick in.
+		let modifiers = {};
+		Object.entries(modifiers).forEach(entry => {
+			let modifier = entry[1];
+			console.log(modifier);
+			//total += modifier;
+		});
 		
-		const results = roll.dice[0].results;
-		const dice1 = results[0].result;
-		const dice2 = results[1].result;
-		const dice3 = results[2] != null && results[2] != undefined ? results[2].result : "";
-		const droppedDie = Math.min(dice1,dice2,dice3) == dice1 ? 1 : Math.min(dice2,dice3) ? 2 : 3;
-		
-		const total = (dice3 ? dice1+dice2+dice3-Math.min(dice1,dice2,dice3) : dice1+dice2) + rollMod;
-		//keeps highest 2 by default but there's probably a negative trait that makes you roll 3 keep the two lowest, so I should account for that.
-		
-		//This should round the (Total - TN / 2) down towards zero (if positive) and up towards zero (if negative)
+		//Calculate the MoS/F:
 		const margin = (total >= tn ? "+" : "") + (total - tn);
 		
+		//Establish the message data.
 		let msgData = {
-			name: dataset.label,
-			dice1: results[0].result,
-			dice2: results[1].result,
-			dice3: results[2] ? results[2].result : "",
-			droppedDie: droppedDie,
-			rollMod: rollMod == 0 ? "+0" : rollMod,
+			name: name,
+			dice: dice,
+			lowest: lowestIndex,
+			rollMod: rollMod,
 			speaker: actorData.name,
-			untrained: level == -1,
-			margin: margin,
+			untrained: !isTrained,
 			tn: tn,
-			isSuccess: roll.total >= tn,
-			successOrFail: margin < 0 ? "FAILED" : "SUCCESS",
+			isSuccess: total >= tn,
+			successOrFail: margin < 0 ? "Failed" : "Succeeded",
 			actionType: actionType,
 			rollType: "skill",
 			result: total,
+			margin: margin,
 			img: actorData.img,
-			baseSkill: baseSkill == undefined ? "none" : baseSkill
-		};
+			baseSkill: baseSkill,
+			isFumble: isFumble,
+			isStunning: isStunning
+		}
+		//Apply the chat roll mode.
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
 		
+		//Render the message and send it to the chat window.
 		const render = await renderTemplate("systems/a-time-of-war/templates/chat/StatRoll.hbs", msgData);
 		const msg = await ChatMessage.create({
 			content: render,

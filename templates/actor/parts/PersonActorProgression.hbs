@@ -1,49 +1,3 @@
-<!--<div class="flexrow">
-	<h3>Life Path</h3>
-	<span>Show Selectors: </span>
-	<input id="lifepath-show-selectors" type="checkbox" />
-	<span>Show Modules: </span>
-	<input id="lifepath-show-modules" type="checkbox" />
-</div>
-<div id="lifepath-selectors" style="display:none">-->
-	<!--Affiliation-->
-	<!--<div class="flexrow">
-		<label class="resource-label" style="text-align:center;">Life Module 0: Affiliation ({{system.lifepath.affiliation.cost}} XP)</label>
-		<select id="affiliation-select" onfocus="this.selectedIndex = -1;">
-			<option dataset-cost="150" value="liao">Capellan Confederation (House Liao)</option>
-			<option dataset-cost="150" dataset-attributes="str,dex" dataset-attributevalues="100,50" value="kurita">Draconis Combine (House Kurita)</option>
-			<option value="davion">Federated Suns (House Davion)</option>
-			<option value="marik">Free Worlds League (House Marik)</option>
-			<option value="steiner">Lyran Alliance (House Steiner)</option>
-			<option value="rasalhague">Free Rasalhague Republic</option>
-			<option value="minor_periphery">Minor Periphery</option>
-			<option value="major_periphery">Major Periphery State</option>
-			<option value="deep_periphery">Deep Periphery</option>
-			<option value="terran">Terran</option>
-			<option value="independent">Independent</option>
-			<option value="comstar">ComStar/Word of Blake</option>
-		</select>-->
-		<!--Subaffiliation-->
-		<!--{{#unless (eq system.lifepath.affiliation.name undefined)}}
-		<select id="subaffiliation-select" onfocus="this.selectedIndex = -1;">
-		{{#if (eq system.lifepath.affiliation.name "liao")}}
-			<option value="capellan_com">Capellan Commonality</option>
-			<option value="liao_com">Liao Commonality</option>
-			<option value="sian_com">Sian Commonality</option>
-			<option value="stives_com">St. Ives Commonality</option>
-			<option value="victoria_com">Victoria Commonality</option>
-		{{else if (eq system.lifepath.affiliation.name "kurita")}}
-			<option value="azami">Azami</option>
-			<option value="benjamin">Benjamin District</option>
-			<option value="dieron">Dieron District</option>
-			<option value="galedon">New Samarkand (Galedon) District</option>
-			<option value="pesht">Pesht District</option>
-		{{/if}}
-		</select>
-		{{/unless}}
-	</div>
-</div>-->
-
 <!--Advance maker-->
 <table id="advanceMaker" style="width:100%" class="items-list">
 	<caption><h3>Submit New Advance</h3></caption>
@@ -78,12 +32,12 @@
 						<option value="edg">EDG</option>
 					{{else if (eq system.advanceMaker.type "trait")}}
 						{{#each system.traits as |trait key|}}
-							<option value="{{trait.id}}">{{trait.name}}</option>
+							<option value="{{trait.id}}">{{localize trait.name}}{{#if trait.subtitle}}/{{/if}}{{trait.subtitle}}</option>
 						{{/each}}
 					{{else if (eq system.advanceMaker.type "skill")}}
 						{{#each system.skills as |skill key|}}
 						{{#unless (in key 'art' 'career' 'interest' 'language' 'protocol' 'science' 'streetwise' 'survival' 'piloting_protomech')}}
-							<option value="{{key}}">{{key}}</option>
+							<option value="{{key}}">{{localize key}}</option>
 						{{/unless}}
 						{{/each}}
 						{{#each system.skills.art as |skill key|}}
@@ -142,7 +96,7 @@
 		{{#each system.advances as |advance key|}}
 		<tr>
 			<td>{{localize advance.type}}</td>
-			<td>{{localize advance.name}}</td>
+			<td>{{localize advance.name}}{{#unless (eq advance.subtitle "")}}: {{advance.subtitle}}{{/unless}}</td>
 			<td>{{#if advance.free}}(free){{/if}} {{advance.xp}}</td>
 			<td>
 				<input type="button" class="delete-advance" data-type="{{advance.type}}" data-name="{{advance.name}}" data-xp="{{advance.xp}}" id="{{advance.id}}" value="Delete" />

@@ -112,7 +112,7 @@
         "tracking_wilds": { "xp": 0, "mod": 0, "level": -1, "link": "int+wil", "tn": 8, "type": "SA" },
         "zero_g_operations": { "xp": 0, "mod": 0, "level": -1, "link": "rfl", "tn": 7, "type": "SB" },
         "artillery": { "xp": 0, "mod": 0, "level": -1, "link": "int+wil", "tn": 8, "type": "SA" },
-        "comms_conventional": { "xp": 0, "mod": 0, "level": -1, "link": "int", "tn": 7, "type": "sb" },
+        "comms_conventional": { "xp": 0, "mod": 0, "level": -1, "link": "int", "tn": 7, "type": "SB" },
         "comms_hpg": { "xp": 0, "mod": 0, "level": -1, "link": "int", "tn": 8, "type": "SB" },
         "comms_blackbox": { "xp": 0, "mod": 0, "level": -1, "link": "int", "tn": 8, "type": "SB" },
         "driving_ground": { "xp": 0, "mod": 0, "level": -1, "link": "rfl+dex", "tn": 8, "type": "SA" },

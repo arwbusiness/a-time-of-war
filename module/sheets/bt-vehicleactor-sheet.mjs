@@ -480,40 +480,114 @@ export class BTVehicleActorSheet extends ActorSheet {
 		
 		const skill = systemData.pilot_skills[which];
 		const untrained = skill == -1;
-		let tn = 8;
+		let tn = untrained ? (('piloting','gunnery','sensorops').includes(which) ? 18 : 12) : 8;
 		
-		console.log("Skill {0} {1} vs TN {2}", which, skill, tn);
+		//Special case for vehicles, there's some weirdness with the naming conventions that needs to be solved and it's easier to do it manually.
+		let name = "";
+		if(which == "gunnery" && systemData.type == "rail")
+			name = "gunnery_turret";
+		else if(which == "piloting" && (systemData.type == "ground" || systemData.type == "rail" || systemData.type == "sea"))
+			name = "driving_" + systemData.type;
+		else if(which == "piloting" || which == "gunnery")
+			name = which + "_" + systemData.type;
+		else if(which == "comms")
+			name = "comms_conventional";
+		else
+			name = which;
 		
-		let formula = "{2d6+" + skill + "}cs>=" + tn;
-		//if(untrained) //THIS STILL NEEDS DOING
-		console.log(formula);
-		let roll = await new Roll(formula, rollData).evaluate();
+		//NaturalAptitude calcs
+		const neededTP = ('piloting','gunnery','sensorops','computers').includes(which) ? 5 : 3;
+		let traitLevel = 0;
+		Object.entries(pilotData.system.traits).forEach(entry => {
+			const trait = entry[1];
+			const traitName = trait.name;
+			const subtitle = trait.subtitle;
+			const level = trait.level;
+			
+			if(traitName == "natural_aptitude") {
+				let subname = subtitle.replace("/","_").replace("'","").replace(" ","_").toLowerCase();
+				if(subname == name) {
+					traitLevel = level >= traitLevel ? level : traitLevel;
+				}
+			}
+		});
+		const hasNaturalAptitude = traitLevel >= neededTP;
 		
-		let total = skill == -1 ? 0 : skill;
-		const results = roll.dice[0].results;
-		Object.entries(results).forEach(entry => { total += entry[1].result; });
+		//Build the roll manually because we can't have nice things.
+		let dice = {};
+		let num = hasNaturalAptitude ? 3 : 2;
+		let lowest = hasNaturalAptitude ? 7 : 0;
+		let lowestIndex = 0;
+		let total = 0;
+		let sixes = 0;
+		for(var i = 0; i < num; i++) {
+			let roll = await new Roll('1d6', rollData).evaluate();
+			const value = roll.dice[0].results[0].result;
+			dice[i] = value;
+			total += value;
+				
+			//Calculate the index and value of the lowest die roll
+			if(value < lowest) {
+				lowestIndex = i;
+				lowest = value;
+			}
+			
+			//If you get two 6s, it explodes and further 6s explode; ergo while you're on 2d6, a 12 explodes, but while you're on 3d6, an 18 (6+6+6) would explode.
+			if(value == 6 && sixes < 5) {
+				sixes++;
+				console.log(sixes);
+				if(sixes >= 2)
+					num++;
+			}
+		}
+		const isStunning = sixes >= 2;
+		const isFumble = total == 2;
+		
+		//If the pilot has natural aptitude, drop the lowest die and record the value.
+		if(hasNaturalAptitude)
+			total -= dice[lowestIndex];
+		else
+			lowestIndex = -1;
+		
+		//Add skill or attribute bonus to the total.
+		let linkMod = 0;
+		total += untrained ? linkMod : skill;
+		
+		//Let modifiers kick in.
+		let modifiers = {};
+		Object.entries(modifiers).forEach(entry => {
+			let modifier = entry[1];
+			console.log(modifier);
+			//total += modifier;
+		});
+		
+		//Calculate the MoS/F:
 		const margin = (total >= tn ? "+" : "") + (total - tn);
 		
+		//Establish the message data.
 		let msgData = {
-			name: which,
-			dice1: results[0].result,
-			dice2: results[1].result,
-			dice3: results[2] ? results[2].result : "",
+			name: name,
+			dice: dice,
+			lowest: lowestIndex,
 			rollMod: skill,
 			speaker: (hasPilot ? pilotData.name : actorData.name),
 			untrained: untrained,
 			tn: tn,
-			isSuccess: roll.total >= tn,
-			successOrFail: margin < 0 ? "FAILED" : "SUCCESS",
+			isSuccess: total >= tn,
+			successOrFail: margin < 0 ? "Failed" : "Succeeded",
 			actionType: "SA",
 			rollType: "skill",
 			result: total,
 			margin: margin,
 			img: (hasPilot ? pilotData.img : actorData.img),
-			baseSkill: "none"
+			baseSkill: "none",
+			isFumble: isFumble,
+			isStunning: isStunning
 		}
+		//Apply the chat roll mode.
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
 		
+		//Render the message and send it to the chat window.
 		const render = await renderTemplate("systems/a-time-of-war/templates/chat/StatRoll.hbs", msgData);
 		const msg = await ChatMessage.create({
 			content: render,

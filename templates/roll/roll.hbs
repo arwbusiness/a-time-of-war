@@ -20,7 +20,7 @@
 		{{/if}}:
 	</span>
 	<br>
-		<div class="chatDice">
+		<!--<div class="chatDice">
 			{{#if (eq droppedDie 1)}}
 				<div class="chatDice dropped">{{dice1}}</div>
 			{{else}}
@@ -49,7 +49,19 @@
 				{{dice3}}
 				{{#if (eq dice3 "6")}}</div>{{else if (eq dice3 "1")}}</div>{{/if}}
 			{{/if}}
-		{{/if}}
+		{{/if}}-->
+		<!--{{dice}}
+		{{#each dice as |die key|}}
+		{{#unless (eq key null)}}
+		<div class="chatDice">
+			{{key}}
+		</div>
+		{{/unless}}
+		{{/each}}-->
+		<!--{{#each dice as |die key|}}
+		<div>hey</div>
+		{{/each}}-->
+		
 		<div class="chatRollMod">
 			<span>{{#if (gt rollMod 0)}}+{{/if}}{{rollMod}}</span>
 			<span style="padding-left:12px !important">{{#if (ge result tn)}}<span style="color:darkgreen">{{else}}<span style="color:darkred">{{/if}} = {{result}}</span></span>
