@@ -166,6 +166,8 @@ export class BTPersonActorSheet extends ActorSheet {
       // as well as any items
       this.actor.allApplicableEffects()
     );*/
+	
+	console.log("Render triggers getData()");
 
     return context;
   }
@@ -210,8 +212,6 @@ export class BTPersonActorSheet extends ActorSheet {
 			
 			return 100-remainder;
 		});
-		
-		//DERIVED DATA
 	}
   
 	//Prepare the stuff that isn't in template.json (usually because it's temporary or user-defined).
@@ -297,9 +297,13 @@ export class BTPersonActorSheet extends ActorSheet {
 	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
+		
+		console.log("Render triggers activateListeners()");
 
 		//Activate progression listeners
-		this.listenForSheetButtons(html);
+		this.ListenForSheetButtons(html);
+		
+		this.UpdateAdvanceMaker();
 
 		// Render the item sheet for viewing/editing prior to the editable check.
 		/*html.on('click', '.item-edit', (ev) => {
@@ -344,29 +348,13 @@ export class BTPersonActorSheet extends ActorSheet {
 		}*/
 	}
 	
-	Update(updateData, ...keys) {
-		this.actor.update(updateData);
-		let systemData = this.getData().actor.system;
-		let thing = systemData;
-		for(var i = 0; i < keys.length; i++) {
-			//console.log("Keys[i]: {0}", keys[i]);
-			if(i < keys.length-1)
-				thing = thing[keys[i]];
-			else
-				thing = updateData;
-		}
-		//console.log("Thing: {0}", thing);
-		//console.log("systemData: {0}", systemData);
-		this.RefreshSheet();
-	}
-	
 	RefreshSheet() {
 		this.document.prepareDerivedData();
 		this.render();
 	}
 
 	//These listeners make the advance maker work.
-	listenForSheetButtons(html) {
+	ListenForSheetButtons(html) {
 		//fields
 		html.on('change', '#lang-primary', this.ChangeLangPrimary.bind(this));
 		html.on('change', '#age', this.ChangeAge.bind(this));
@@ -392,16 +380,34 @@ export class BTPersonActorSheet extends ActorSheet {
 		document.getElementById("dual-attribute-roll").value = "";
 		
 		//Bind the advance creation sequence.
-		html.on('click', '.advance-free', this._onAdvanceFreeToggle.bind(this));
-		html.on('change','.advance-type', this._onAdvanceUpdate.bind(this));
-		html.on('change','.advance-name', this._onAdvanceUpdate.bind(this));
-		html.on('blur','.advance-xp', this._onAdvanceUpdate.bind(this));
-		html.on('click', '.advance-finish', this._onAdvanceFinish.bind(this));
-		document.getElementById("advance-name").value = "";
+		html.on('click', '#advance-free', this._onAdvanceFreeToggle.bind(this));
+		html.on('change','#advance-type', this._onAdvanceUpdate.bind(this));
+		html.on('change','#advance-name', this._onAdvanceUpdate.bind(this));
+		html.on('blur','#advance-xp', this._onAdvanceUpdate.bind(this));
+		html.on('click', '#advance-finish', this._onAdvanceFinish.bind(this));
 		
 		//Lifepath stuff
 		html.on('change', '#affiliation-select', this.ChangeLifepath.bind(this));
 		html.on('change', '#subaffiliation-select', this.ChangeLifepath.bind(this));
+		
+		//this.CleanAdvanceMaker();
+	}
+	
+	CleanAdvanceMaker() {
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		const advanceMaker = systemData.advanceMaker;
+		
+		advanceMaker.name = "";
+		advanceMaker.type = "";
+		advanceMaker.xp = "";
+		advanceMaker.free = false;
+		advanceMaker.traitId = "";
+		advanceMaker.baseSkill = undefined;
+		advanceMaker.subtitle = "";
+		advanceMaker.id = "";
+		
+		this.render();
 	}
 	
 	ChangeLifepath(event) {
@@ -789,6 +795,21 @@ export class BTPersonActorSheet extends ActorSheet {
 		return msg;
 	}
 	
+	_onDualAttributeRollToggle(event) {
+		const element = event.currentTarget;
+		
+		const dar = document.getElementById("dual-attribute-roll");
+		if(element.checked) {
+			dar.classList.remove("hidden");
+			document.getElementById("dual-attribute-divider").classList.add("hidden");
+		}
+		else {
+			dar.value = "";
+			dar.classList.add("hidden");
+			document.getElementById("dual-attribute-divider").classList.remove("hidden");
+		}
+	}
+	
 	async DeleteAdvance(event) {
 		const element = event.currentTarget;
 		const targetId = element.id;
@@ -827,28 +848,14 @@ export class BTPersonActorSheet extends ActorSheet {
 		});
 		
 		await this.actor.update(updateData);
-	}
-	
-	_onDualAttributeRollToggle(event) {
-		const element = event.currentTarget;
-		
-		const dar = document.getElementById("dual-attribute-roll");
-		if(element.checked) {
-			dar.classList.remove("hidden");
-			document.getElementById("dual-attribute-divider").classList.add("hidden");
-		}
-		else {
-			dar.value = "";
-			dar.classList.add("hidden");
-			document.getElementById("dual-attribute-divider").classList.remove("hidden");
-		}
+		this.CleanAdvanceMaker();
 	}
 	
 	//When you click the free XP toggle/checkbox, it calls this function.
 	_onAdvanceFreeToggle(event) {
 		const element = event.currentTarget;
 		
-		const actorData = this.getData().actor;
+		const actorData = this.actor;
 		const systemData = actorData.system;
 		const advanceMaker = systemData.advanceMaker;
 		
@@ -857,11 +864,143 @@ export class BTPersonActorSheet extends ActorSheet {
 		console.log("Advances: {0}", this.getData().actor.system.advances);
 	}
 	
-	async _onAdvanceUpdate(event) {
+	_onAdvanceUpdate(event) {
 		const element = event.currentTarget;
+		const value = element.value;
+		const id = element.id;
+		const selectedIndex = element.dataset.index;
+		
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		const advanceMaker = systemData.advanceMaker;
+		
+		//if id = "advance-type" then id.split('-')[1] = type;
+		const which = id.split('-')[1];
+		
+		advanceMaker[which] = value;
+		console.log(advanceMaker);
+		
+		/*let updateData = {};
+		updateData["system.advanceMaker"] = {
+			"type": advanceMaker,
+			"name": "",
+			"xp": 0,
+			"free": false,
+			"baseSkill": null,
+			"subtitle": "",
+			"traitId": "",
+			"id": ""
+		};*/
+		
+		this.render();
+		
+		//Save values from the inputs before rendering!
+		//const savedType = "attribute";
+		//const savedName = "cha";
+		//const savedXP = 50;
+		
+		//let thing = document.querySelector('#advance-type option[value='+advanceMaker.type+']');
+		//console.log(thing);
+		
+		//this.render();
+		
+		/*console.log(document.getElementById("advance-type").selectedIndex);
+		document.getElementById("advance-type").selectedIndex = 1;
+		console.log(document.getElementById("advance-type").selectedIndex);
+		document.getElementById("advance-type")[thing.dataset.index].selected = "selected";
+		
+		document.getElementById("advance-type").selectedIndex = 0;
+		document.getElementById("advance-name").selectedIndex = 6;
+		document.getElementById("advance-xp").value = savedXP;
+		console.log(document.getElementById("advance-type"));
+		console.log(document.getElementById("advance-type")[thing.dataset.index]);*/
+		
+		//document.querySelector('#advance-'+which+' option[value='+value+']');
+		
+		/*let updateData = {};
+		updateData["system.advanceMaker"] = {
+			"type": value,
+			"name": "",
+			"xp": 0,
+			"free": false,
+			"baseSkill": null,
+			"subtitle": "",
+			"traitId": "",
+			"id": ""
+		}
+		this.actor.update(updateData);*/
+	}
+	
+	//async _onAdvanceUpdate(event) {
+		//event.preventDefault();
+		/*const element = event.currentTarget;
 		const id = element.id;
 		let value = element.value;
-		const updateTarget = "system.advanceMaker";
+		
+		const actorData = this.actor;
+		const systemData = actorData.system;*/
+		
+		/*const which = id.split('advance-')[1];
+		switch(which) {
+			case "type":
+				systemData.advanceMaker.type = value;
+				systemData.advanceMaker.name = undefined;
+				systemData.advanceMaker.xp = undefined;
+				systemData.advanceMaker.baseSkill = undefined;
+				systemData.advanceMaker.traitId = undefined;
+				systemData.advanceMaker.id = undefined;
+				break;
+			case "name":
+				if(value.includes('/')) {
+					let baseSkill = value.split('/')[0];
+					value = value.split('/')[1];
+					systemData.advanceMaker.baseSkill = baseSkill;
+					systemData.advanceMaker.name = value;
+				}
+				else {
+					systemData.advanceMaker.baseSkill = undefined;
+					systemData.advanceMaker.name = value;
+				}
+				systemData.advanceMaker.xp = undefined;
+				break;
+			case "xp":
+				systemData.advanceMaker.xp = parseInt(value);
+				break;
+			default:
+				break;
+		}
+		console.log("advanceMaker: ", systemData.advanceMaker);*/
+		
+		/*let updateData = {};
+		updateData["system.advanceMaker"] = {
+			"type": systemData.advanceMaker.type,
+			"name": systemData.advanceMaker.name,
+			"xp": systemData.advanceMaker.xp,
+			"free": systemData.advanceMaker.free,
+			"baseSkill": systemData.advanceMaker.baseSkill,
+			"subtitle": systemData.advanceMaker.subtitle,
+			"traitId": systemData.advanceMaker.traitId,
+			"id": systemData.advanceMaker.id
+		}
+		console.log("updateData: ", updateData);
+		
+		this.actor.update(updateData);*/
+		
+		//reset the dropdown selectors because, I dunno, rendering makes them blank but doesn't change their values or something weird.
+		/*let selectedOption = document.querySelector("#advance-type option[value="+value+"]");
+		document.getElementById("advance-type").selectedIndex = selectedOption.dataset.index;
+		selectedOption = document.querySelector("#advance-name option[value="+value+"]");
+		document.getElementById("advance-name").selectedIndex = selectedOption.dataset.index;*/
+		
+		//if(which == "type" || which == "name") {
+			//let selectedOption = document.querySelector('#advance-'+which+' option[value='+value+']');
+			//let index = selectedOption.dataset.index;
+			//console.log(index);
+			
+		//}
+		//document.getElementById("advance-type").selectedIndex = 
+		
+		/*const updateTarget = "system.advanceMaker";
 		
 		console.log(value);
 		
@@ -908,17 +1047,17 @@ export class BTPersonActorSheet extends ActorSheet {
 				break;
 		}
 		
-		await this.actor.update(updateData);
+		await this.actor.update(updateData);*/
 		
-		document.getElementById("advance-type").value = orig[0];
+		/*document.getElementById("advance-type").value = orig[0];
 		document.getElementById("advance-name").value = orig[1];
 		document.getElementById("advance-xp").value = parseInt(orig[2]);
-		document.getElementById("advance-free").checked = orig[3];
-	}
+		document.getElementById("advance-free").checked = orig[3];*/
+	//}
 	
 	//When you click the submit button on the advance maker, it calls this function.
 	_onAdvanceFinish(event) {
-		const actorData = this.getData().actor;
+		const actorData = this.actor;
 		const systemData = actorData.system;
 		const advanceMaker = systemData.advanceMaker;
 		let id = "advance-";
@@ -970,6 +1109,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		console.log(updateData);
 		
 		//Reset the advance maker
+		this.CleanAdvanceMaker();
 		updateData["system.advanceMaker"] = {
 			name: "",
 			type: "attribute",
@@ -983,6 +1123,18 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		this.actor.update(updateData);
 		this.render();
+	}
+	
+	async UpdateAdvanceMaker() {
+		const actorData = this.document.toObject(false);
+		const systemData = actorData.system;
+		const advanceMaker = systemData.advanceMaker;
+		console.log("UpdateAdvanceMaker says advanceMaker is ", advanceMaker);
+		
+		document.getElementById("advance-xp").value = advanceMaker.xp;
+		document.getElementById("advance-type").value = advanceMaker.type;
+		document.getElementById("advance-name").value = advanceMaker.name;
+		document.getElementById("advance-free").checked = advanceMaker.free;
 	}
 
   /**
@@ -1102,6 +1254,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		let dice = {};
 		let num = 2;
 		let total = 0;
+		let sixes = 0;
 		for(var i = 0; i < num; i++) {
 			let roll = await new Roll('1d6', rollData).evaluate();
 			const value = roll.dice[0].results[0].result;

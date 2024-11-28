@@ -1,7 +1,29 @@
-2024/11/28-10:31:14.374 6490 Recovering log #154
-2024/11/28-10:31:14.377 6490 Delete type=0 #154
-2024/11/28-10:31:14.377 6490 Delete type=3 #152
-2024/11/28-10:33:43.299 6994 Level-0 table #159: started
-2024/11/28-10:33:43.299 6994 Level-0 table #159: 0 bytes OK
-2024/11/28-10:33:43.300 6994 Delete type=0 #157
-2024/11/28-10:33:43.300 6994 Manual compaction at level-0 from 'undefined' @ 72057594037927935 : 1 .. 'undefined' @ 0 : 0; will stop at (end)
+2024/11/28-10:41:06.256 aec Recovering log #161
+2024/11/28-10:41:06.260 aec Delete type=0 #23
+2024/11/28-10:41:06.260 aec Delete type=0 #46
+2024/11/28-10:41:06.260 aec Delete type=0 #66
+2024/11/28-10:41:06.260 aec Delete type=0 #75
+2024/11/28-10:41:06.260 aec Delete type=0 #87
+2024/11/28-10:41:06.260 aec Delete type=0 #89
+2024/11/28-10:41:06.261 aec Delete type=0 #91
+2024/11/28-10:41:06.261 aec Delete type=0 #101
+2024/11/28-10:41:06.261 aec Delete type=0 #103
+2024/11/28-10:41:06.261 aec Delete type=0 #111
+2024/11/28-10:41:06.261 aec Delete type=0 #125
+2024/11/28-10:41:06.261 aec Delete type=0 #129
+2024/11/28-10:41:06.261 aec Delete type=0 #144
+2024/11/28-10:41:06.261 aec Delete type=0 #161
+2024/11/28-10:41:06.261 aec Delete type=3 #22
+2024/11/28-10:41:06.262 aec Delete type=3 #44
+2024/11/28-10:41:06.262 aec Delete type=3 #64
+2024/11/28-10:41:06.262 aec Delete type=3 #74
+2024/11/28-10:41:06.262 aec Delete type=3 #86
+2024/11/28-10:41:06.262 aec Delete type=3 #88
+2024/11/28-10:41:06.262 aec Delete type=3 #90
+2024/11/28-10:41:06.262 aec Delete type=3 #100
+2024/11/28-10:41:06.262 aec Delete type=3 #102
+2024/11/28-10:41:06.262 aec Delete type=3 #110
+2024/11/28-10:41:06.262 aec Delete type=3 #124
+2024/11/28-10:41:06.263 aec Delete type=3 #128
+2024/11/28-10:41:06.263 aec Delete type=3 #142
+2024/11/28-10:41:06.263 aec Delete type=3 #160

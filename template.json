@@ -61,7 +61,11 @@
 		  "type": "attribute",
 		  "name": "",
 		  "xp": 0,
-		  "free": false
+		  "free": false,
+		  "baseSkill": null,
+		  "subtitle": "",
+		  "traitId": "",
+		  "id": ""
 	  },
 	  "advances": {
 		  

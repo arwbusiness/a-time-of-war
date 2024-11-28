@@ -274,10 +274,31 @@ export class BTActor extends Actor {
 		this.CalculateTraitLevels(systemData);
 		
 		//Derived values!
-		systemData.damage.max = Math.max(1, systemData.attributes.bod.level * 2);
-		systemData.fatigue.max = Math.max(1, systemData.attributes.wil.level * 2);
+		let hasToughness = false;
+		let hasFit = false;
+		Object.entries(systemData.traits).forEach(entry => {
+			const trait = entry[1];
+			
+			if(trait.name == "Fit" && trait.level >= 2)
+				hasFit = true;
+			else if(trait.name == "Toughness" && trait.level >= 3)
+				hasToughness = true;
+			
+			if(hasFit && hasToughness)
+				return;
+		});
+		systemData.damage.max = Math.max(1, systemData.attributes.bod.level * 2 * (hasToughness ? 2 : 1));
+		systemData.fatigue.max = Math.max(1, systemData.attributes.wil.level * 2 * (hasFit ? 2 : 1));
 		systemData.luck.max = systemData.attributes.edg.level;
+		
 		//MP will be here somewhere. Will do it in a moment.
+		systemData.mp.walk = Math.max(1, systemData.attributes.str.level + systemData.attributes.rfl.level);
+		systemData.mp.run = Math.max(1, 10 + systemData.attributes.str.level + systemData.attributes.rfl.level + Math.max(0,systemData.skills.running.level));
+		systemData.mp.sprint = Math.max(1, systemData.mp.run * 2);
+		systemData.mp.climb = Math.max(1, Math.ceil(systemData.mp.walk/2)+Math.max(0,systemData.skills.climbing) / (systemData.skills.climbing.level == -1 ? 2 : 1));
+		systemData.mp.crawl = Math.max(1, Math.ceil(systemData.mp.walk/4));
+		systemData.mp.swim = Math.max(1, systemData.mp.walk + Math.max(0,systemData.skills.swimming.level) / (systemData.skills.swimming.level == -1 ? 2 : 1));
+		
 		//Don't forget to add a theoretical encumbrance.
 		
 		this.render();
