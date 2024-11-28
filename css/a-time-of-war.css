@@ -81,6 +81,9 @@
   font-family: "Roboto", sans-serif;
 }
 
+.clickable {
+	border:0px;
+}
 .rollable:hover, .rollable:focus, .clickable:hover, .clickable:focus {
   color: #000;
   text-shadow: 0 0 10px red;

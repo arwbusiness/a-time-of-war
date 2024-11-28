@@ -657,7 +657,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		element.value = "";
 		
-		if(baseSkill != undefined) {
+		if(baseSkill != undefined && baseSkill != "") {
 			this.actor.update({
 				["system.skills."+baseSkill+"."+newSkillName]: updateData
 			});
@@ -781,8 +781,8 @@ export class BTPersonActorSheet extends ActorSheet {
 			flavour: flavour,
 			speaker: actorData.name,
 			subtitle: data.subtitle,
-			description: data.description
-			
+			description: data.description,
+			level: data.level
 		};
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
 		
@@ -1093,6 +1093,13 @@ export class BTPersonActorSheet extends ActorSheet {
 			console.log("Subtitle: {0}", subtitle);
 		}
 		
+		//BaseSkill for custom skills;
+		if(advanceMaker.type == "skill" && advanceName.includes('/')) {
+			//This means you're dealing with a custom skill, because the others all use underscores in their naming ID.
+			advanceMaker.baseSkill = advanceName.split('/')[0];
+			advanceName = advanceName.split('/')[1];
+		}
+		
 		//Make an advance schema with an appropriate name and fill it with the data from the advance maker
 		let updateData = {};
 		updateData["system.advances."+id+i] = {
@@ -1104,25 +1111,24 @@ export class BTPersonActorSheet extends ActorSheet {
 			id: id+i,
 			baseSkill: advanceMaker.baseSkill,
 			subtitle: subtitle
-			
 		};
-		console.log(updateData);
+		console.log(advanceMaker.baseSkill);
 		
 		//Reset the advance maker
-		this.CleanAdvanceMaker();
 		updateData["system.advanceMaker"] = {
 			name: "",
-			type: "attribute",
+			type: "",
 			xp: "",
 			free: false,
 			traitId: "",
 			id: "",
-			baseSkill: undefined,
+			baseSkill: null,
 			subtitle: ""
 		}
+		console.log(updateData);
 		
 		this.actor.update(updateData);
-		this.render();
+		this.RefreshSheet();
 	}
 	
 	async UpdateAdvanceMaker() {

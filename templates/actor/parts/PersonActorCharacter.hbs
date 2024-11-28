@@ -106,9 +106,9 @@
 			{{#each system.traits as |trait key|}}
 			<tr>
 				<td>
-					<input id="{{trait.id}}" class="trait-to-chat" type="button" img="systems/a-time-of-war/icons/toChat.png" style="width:32px; height:23px;"/>
+					<img id="{{trait.id}}" class="trait-to-chat clickable" src="systems/a-time-of-war/icons/toChat.png" style="width:32px; height:23px;"/>
 				</td>
-				<td>
+				<td style="text-align:center">
 					{{localize trait.name}}
 				</td>
 				<td>

@@ -26,7 +26,7 @@
 		</div>
 		{{/each}}
 		<div class="chatRollMod">
-			<span>{{#if (gt rollMod 0)}}+{{/if}}{{rollMod}}</span>
+			<span>{{#if (ge rollMod 0)}}+{{/if}}{{rollMod}}</span>
 			<span style="padding-left:12px !important">{{#if (ge result tn)}}<span style="color:darkgreen">{{else}}<span style="color:darkred">{{/if}} = {{result}}</span></span>
 		</div>
 		<div class="chatTN">
