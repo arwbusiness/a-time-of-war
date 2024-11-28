@@ -145,4 +145,32 @@
 			</table>
 		</div>
 	</header>
+	{{!-- Sheet Tab Navigation --}}
+	<nav class="sheet-tabs tabs" data-group="primary">
+	{{!-- Default tab is specified in actor-sheet.mjs --}}
+
+	<a class="item" data-tab="gameplay">Gameplay</a>
+	<a class="item" data-tab="mechlab">MechLab</a>
+	<a class="item" data-tab="options">Options</a>
+
+	</nav>
+	<section class="sheet-body">
+		<div class="tab gameplay" data-group="primary" data-tab="gameplay">
+			<table style="table-layout:fixed; width:100%;">
+				<tr>
+					<td style="width:30%; padding-right:10px;">
+						
+					</td>
+					<!--Armour diagrams-->
+					<td style="width:500px;">
+						{{> "systems/a-time-of-war/templates/actor/parts/VehicleActorArmourDiagram.hbs"}}
+					</td>
+					<!--Heat gauge-->
+					<td style="width:20%; padding-left:10px;">
+						{{> "systems/a-time-of-war/templates/actor/parts/VehicleActorHeatGauge.hbs"}}
+					</td>
+				</tr>
+			</table>
+		</div>
+	</section>
 </form>

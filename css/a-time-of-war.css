@@ -38,6 +38,44 @@
 	display:none;
 }
 
+.heat-cube {
+	border:1px solid black;
+	background-color: grey;
+	width:12px;
+	height:12px;
+}
+
+.circle-armour { /* this class just counts armour circles */ }
+.circle-structure { /* this class just counts internal structure circles */ }
+.circle-blank-armour {
+	content:url("../icons/circle-blank-armour.png");
+	width:16px;
+	height:16px;
+	float:left;
+	border:0px;
+}
+.circle-filled-armour {
+	content:url("../icons/circle-filled-armour.png");
+	width:16px;
+	height:16px;
+	float:left;
+	border:0px;
+}
+.circle-blank-structure {
+	content:url("../icons/circle-blank-structure.png");
+	width:16px;
+	height:16px;
+	float:left;
+	border:0px;
+}
+.circle-filled-structure {
+	content:url("../icons/circle-filled-structure.png");
+	width:16px;
+	height:16px;
+	float:left;
+	border:0px;
+}
+
 /* Global styles */
 .window-app {
   font-family: "Roboto", sans-serif;

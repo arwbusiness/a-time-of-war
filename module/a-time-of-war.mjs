@@ -119,6 +119,10 @@ Handlebars.registerHelper('le', (a, b) => a <= b);
 Handlebars.registerHelper('lt', (a, b) => a < b);
 Handlebars.registerHelper('ge', (a, b) => a >= b);
 Handlebars.registerHelper('gt', (a, b) => a > b);
+Handlebars.registerHelper('plus', (a, b) => a + b);
+Handlebars.registerHelper('minus', (a, b) => a - b);
+Handlebars.registerHelper('times', (a, b) => a * b);
+Handlebars.registerHelper('divide', (a, b) => a / b);
 
 //Capitalisation helper
 Handlebars.registerHelper('cap', function(key) {
@@ -136,6 +140,19 @@ Handlebars.registerHelper('cap', function(key) {
 		});
 		return tempKey;
 	}
+});
+
+//For loop helper
+Handlebars.registerHelper('loop', function(n, block) {
+    var accum = '';
+    for(var i = 0; i < n; ++i) {
+        block.data.index = i;
+        block.data.first = i === 0;
+        block.data.last = i === (n - 1);
+		block.data.length = n;
+        accum += block.fn(this);
+    }
+    return accum;
 });
 
 /*Handlebars.registerHelper('ifEqual', function (a, b, options) {

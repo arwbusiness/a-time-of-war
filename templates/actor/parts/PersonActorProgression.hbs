@@ -96,7 +96,19 @@
 		{{#each system.advances as |advance key|}}
 		<tr>
 			<td>{{localize advance.type}}</td>
-			<td>{{localize advance.name}}{{#unless (eq advance.subtitle "")}}: {{advance.subtitle}}{{/unless}}</td>
+			<td>
+			{{#if (eq advance.type "skill")}}
+				{{#unless (eq advance.baseSkill "none")}}
+					{{localize advance.baseSkill}}/{{advance.name}}
+				{{else}}
+					{{localize advance.name}}
+				{{/unless}}
+			{{/if}}
+			
+			{{#if (eq advance.type "trait")}}
+			{{#unless (eq advance.subtitle "")}}: {{advance.subtitle}}{{/unless}}
+			{{/if}}
+			</td>
 			<td>{{#if advance.free}}(free){{/if}} {{advance.xp}}</td>
 			<td>
 				<input type="button" class="delete-advance" data-type="{{advance.type}}" data-name="{{advance.name}}" data-xp="{{advance.xp}}" id="{{advance.id}}" value="Delete" />

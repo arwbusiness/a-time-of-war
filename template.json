@@ -214,7 +214,8 @@
       },
       "stats": {
         "cost": 0,
-        "bv": 0
+        "bv": 0,
+		"heat": 0
       },
       "pilot_skills": {
         "gunnery": 4,
@@ -228,7 +229,150 @@
         "walk": 0,
         "run": 0,
         "jump": 0
-      }
+      },
+	  "hasTurret": false,
+	  "locations": {
+		  "mech": {
+			  "head": {
+				  "armour": {
+					  "value": 18,
+					  "max": 18,
+					  "possible": 18
+				  },
+				  "structure": {
+					  "value": 9,
+					  "max": 9,
+					  "possible": 9
+				  }
+			  },
+			  "rear_l": {
+				  "armour": {
+					  "value": 5,
+					  "max": 5,
+					  "possible": 5
+				  }
+			  },
+			  "rear_r": {
+				  "armour": {
+					  "value": 5,
+					  "max": 5,
+					  "possible": 5
+				  }
+			  },
+			  "rear_c": {
+				  "armour": {
+					  "value": 7,
+					  "max": 7,
+					  "possible": 7
+				  }
+			  },
+			  "torso_l": {
+				  "armour": {
+					  "value": 16,
+					  "max": 16,
+					  "possible": 16
+				  },
+				  "structure": {
+					  "value": 12,
+					  "max": 12,
+					  "possible": 12
+				  }
+			  },
+			  "torso_r": {
+				  "armour": {
+					  "value": 16,
+					  "max": 16,
+					  "possible": 16
+				  },
+				  "structure": {
+					  "value": 12,
+					  "max": 12,
+					  "possible": 12
+				  }
+			  },
+			  "torso_c": {
+				  "armour": {
+					  "value": 18,
+					  "max": 18,
+					  "possible": 18
+				  },
+				  "structure": {
+					  "value": 16,
+					  "max": 16,
+					  "possible": 16
+				  }
+			  },
+			  "arm_l": {
+				  "armour": {
+					  "value": 16,
+					  "max": 16,
+					  "possible": 16
+				  },
+				  "structure": {
+					  "value": 8,
+					  "max": 8,
+					  "possible": 8
+				  }
+			  },
+			  "arm_r": {
+				  "armour": {
+					  "value": 16,
+					  "max": 16,
+					  "possible": 16
+				  },
+				  "structure": {
+					  "value": 8,
+					  "max": 8,
+					  "possible": 8
+				  }
+			  },
+			  "leg_l": {
+				  "armour": {
+					  "value": 22,
+					  "max": 22,
+					  "possible": 22
+				  },
+				  "structure": {
+					  "value": 12,
+					  "max": 12,
+					  "possible": 12
+				  }
+			  },
+			  "leg_r": {
+				  "armour": {
+					  "value": 22,
+					  "max": 22,
+					  "possible": 22
+				  },
+				  "structure": {
+					  "value": 12,
+					  "max": 12,
+					  "possible": 12
+				  }
+			  }
+		  },
+		  "ground": {
+			  
+		  },
+		  "sea": {
+			  
+		  },
+		  "air": {
+			  
+		  },
+		  "rail": {
+			  
+		  },
+		  "aerospace": {
+			  
+		  },
+		  "spacecraft": {
+			  
+		  },
+		  "battlesuit": {
+			  
+		  }
+	  }
     }
   },
   "Item": {

@@ -15,11 +15,11 @@ export class BTVehicleActorSheet extends ActorSheet {
       width: 750,
       height: 650,
       tabs: [
-        /*{
+        {
           navSelector: '.sheet-tabs',
           contentSelector: '.sheet-body',
-          initial: 'features',
-        },*/
+          initial: 'gameplay',
+        },
       ],
     });
   }
@@ -160,24 +160,7 @@ export class BTVehicleActorSheet extends ActorSheet {
 	}
 	
 	PrepareDerivedData(actorData, systemData) {
-		/*if(systemData.pilot != undefined && systemData.pilot != null) {
-			//this.UpdatePilot(systemData.pilot);
-			
-			const doc = this.document;
-			const sheet = doc._sheet;
-			const form = sheet.form;
-			console.log(form);
-			const real = document.getElementById("pilot-real");
-			const fake = document.getElementById("pilot-fake");
-			const img = document.getElementById("pilot-fake-img");
-			console.log(real);
-			if(real != null) {
-				console.log("HEY");
-				real.style.display = "none";
-				fake.style.display = "block";
-				img.style.display = "block";
-			}
-		}*/
+		
 	}
 
   /**
@@ -328,10 +311,24 @@ export class BTVehicleActorSheet extends ActorSheet {
 		//Update the class based on tonnage
 		//This will need reworking to accommodate non-mech vehicles, which don't use these brackets to determine their light/medium/heavy/superheavy class.
 		const weight = systemData.tonnage;
-		//systemData["system.details.class"] = weight <= 35 ? "Light" : weight <= 55 ? "Medium" : weight <= 75 ? "Heavy" : "Assault";
 		let updateData = {};
 		updateData["system.details.class"] = weight <= 35 ? "Light" : weight <= 55 ? "Medium" : weight <= 75 ? "Heavy" : "Assault";
 		this.actor.update(updateData);
+		
+		//Prep heat.
+		let heat = systemData.stats.heat;
+		if(heat > 1) {
+			for(var i = 29; i >= 30-heat; i--) {
+				let hex = parseInt((256/30) * (i)).toString(16);
+				let colour = "#ff" + (hex < 10 ? "0" : "") + hex + "00";
+				const elem = document.getElementById("heat-"+i);
+				elem.style.backgroundColor = colour;
+			}
+		}
+		
+		//Prep armour and structure circles with their bound listeners.
+		html.on('click', '.circle-armour', this.ToggleArmourCircle.bind(this));
+		html.on('click', '.circle-structure', this.ToggleArmourCircle.bind(this));
 	}
 	
 	ChangeVehicleType(event) {
@@ -409,6 +406,31 @@ export class BTVehicleActorSheet extends ActorSheet {
 			img.style.display = "block";
 			img.src = pilotActor.img;
 		}
+	}
+
+	ToggleArmourCircle(event) {
+		const element = event.currentTarget;
+		
+		const actorData = this.document.toObject(false);
+		const systemData = actorData.system;
+		
+		const split = element.dataset.for.split('-');
+		if(split[0] != systemData.type)
+		{
+			console.error("circle type {0} does not match vehicle type {1}!", type, systemData.type);
+			return;
+		}
+		const location = split[1];
+		const type = split[2];
+		console.log("Clicked circle is {0}-{1}-{2}-{3}", systemData.type, location, type);
+		
+		let updateData = {};
+		const state = element.classList.contains("circle-filled-" + type) && !element.classList.contains("circle-blank-" + type) ? "destroyed" : "intact";
+		const value = systemData.locations[split[0]][location][type].value;
+		
+		updateData["system.locations."+systemData.type+"."+location+"."+type+".value"] = value + (state == "intact" ? -1 : +1);
+		
+		this.actor.update(updateData);
 	}
 
   /**
@@ -573,14 +595,14 @@ export class BTVehicleActorSheet extends ActorSheet {
 			speaker: (hasPilot ? pilotData.name : actorData.name),
 			untrained: untrained,
 			tn: tn,
-			isSuccess: total >= tn,
-			successOrFail: margin < 0 ? "Failed" : "Succeeded",
 			actionType: "SA",
 			rollType: "skill",
-			result: total,
-			margin: margin,
 			img: (hasPilot ? pilotData.img : actorData.img),
 			baseSkill: "none",
+			result: total,
+			margin: (isFumble ? (total-tn > -10 ? "-10" : margin) : (isStunning ? (total-tn < 10 ? "+10" : margin) : margin)),
+			isSuccess: (total >= tn && !isFumble) || isStunning,
+			successOrFail: (!isFumble && !isStunning ? (margin < 0 ? "Failed" : "Succeeded") : isStunning ? "Succeeded" : "Failed"),
 			isFumble: isFumble,
 			isStunning: isStunning
 		}
