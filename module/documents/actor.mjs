@@ -97,7 +97,7 @@ export class BTActor extends Actor {
 			}
 			
 			if(type == "skill") {
-				console.log("baseSkill: {0}, name: {1}", baseSkill, name);
+				//console.log("baseSkill: {0}, name: {1}", baseSkill, name);
 				if(baseSkill == undefined || baseSkill == "") {
 					systemData.skills[name].xp += xp;
 				}

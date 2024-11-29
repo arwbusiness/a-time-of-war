@@ -1,4 +1,48 @@
-<ol class='items-list'>
+<table style="table-layout:fixed;">
+	<thead>
+		<caption>
+			<div class="flexrow">
+				<h4>Weapons</h4>
+				<div></div>
+				<div></div>
+				<div></div>
+				<input style="float:right;" type="button" value="Add New Weapon" class="item-create" id="weapon" />
+			</div>
+		</caption>
+		<tr>
+			<th style="width:15%;">Name</th><!--Item name-->
+			<th style="width:15%;">Model</th>
+			<th style="width:5%;">Equipped</th>
+			<th style="width:35%;">Description</th>
+			<th style="width:10%;">Weight (kg)</th>
+			<th style="width:10%;">Ref pg.</th>
+			<th style="width:10%;"></th><!--Delete button-->
+		</tr>
+	</thead>
+	<tbody>
+		{{#each inventory.weapons as |item key|}}
+		<tr class="item" data-id="{{item.id}}">
+			<td>
+				<div style="float:left;">
+					<img src="systems/a-time-of-war/icons/edit.png" class="clickable item-edit" id="{{item.id}}" style="width:16px;height:16px;" />
+				</div>
+				<div style="padding-left:5px; float:left;">{{item.name}}</div>
+			</td>
+			<td>{{item.model}}</td>
+			<td>
+				<input type="checkbox" id="{{item.id}}" class="item-equip weapon" />
+			</td>
+			<td>{{item.description}}</td>
+			<td>{{item.tonnage}}</td>
+			<td>{{item.ref}}</td>
+			<td>
+				<input type="button" value="Delete" id="{{item.id}}" class="item-delete weapon" />
+			</td>
+		</tr>
+		{{/each}}
+	</tbody>
+</table>
+<!--<ol class='items-list'>
   <li class='item flexrow items-header'>
     <div class='item-name'>{{localize 'Name'}}</div>
     <div class='item-formula'>{{localize 'Roll Formula'}}</div>
@@ -45,4 +89,4 @@
       </div>
     </li>
   {{/each}}
-</ol>
+</ol>-->

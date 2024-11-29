@@ -86,6 +86,12 @@
 				
 			}
 		},
+		"inventory": {
+			"weapon": {},
+			"armour": {},
+			"equipment": {},
+			"property": {}
+		},
       "attributes": {
         "str": { "level": 0, "xp": 0, "mod": -4 },
         "bod": { "level": 0, "xp": 0, "mod": -4 },
@@ -410,10 +416,12 @@
       }
     },
     "weapon": {
-      "templates": ["base"]
+      "templates": ["base"],
+	  "equipped": false
     },
     "armour": {
-      "templates": ["base"]
+      "templates": ["base"],
+	  "equipped": false
     },
     "equipment": {
       "templates": ["base"]
@@ -437,24 +445,11 @@
     },
 	"lifepath_module": {
 		"id": "",
-		"type": "affiliation",
+		"type": "",
 		"cost": 0,
-		"attributes": {
-			"str": 0,
-			"bod": 0,
-			"dex": 0,
-			"rfl": 0,
-			"wil": 0,
-			"int": 0,
-			"cha": 0,
-			"edg": 0
-		},
-		"traits": {
-			"animal_empathy": 0
-		},
-		"skills": {
-			"administration": 0
-		}
+		"attributes": {},
+		"traits": {},
+		"skills": {}
 	}
   }
 }

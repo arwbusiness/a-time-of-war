@@ -23,6 +23,229 @@ export class BTPersonActorSheet extends ActorSheet {
       ],
     });
   }
+
+  /* -------------------------------------------- */
+
+  /** @override */
+  getData() {
+    // Retrieve the data structure from the base sheet. You can inspect or log
+    // the context variable to see the structure, but some key properties for
+    // sheets are the actor object, the data object, whether or not it's
+    // editable, the items array, and the effects array.
+    const context = super.getData();
+
+    // Use a safe clone of the actor data for further operations.
+    const actorData = this.document.toObject(false);
+
+    // Add the actor's data to context.data for easier access, as well as flags.
+    context.system = actorData.system;
+    context.flags = actorData.flags;
+
+    // Adding a pointer to CONFIG.BOILERPLATE
+    context.config = CONFIG.BT;
+
+    // Prepare character data and items.
+    if (actorData.type == 'pc') {
+		this._preparePCData(context);
+    }
+
+    // Prepare NPC data and items.
+    if (actorData.type == 'npc') {
+		this._prepareNPCData(context);
+    }
+	
+	this.SortItemsToInventory(context);
+	//console.log(context);
+
+    return context;
+  }
+  
+  /** @override */
+  /*getData() {
+	  const actor = this.actor;
+	  const systemData = actor.system;
+	  const items = actor.items;
+	  const sheetData = {};
+	  
+	  sheetData.enrichedDescription = await TextEditor.enrichHTML(this.actor.system.description, { secrets: this.actor.isOwner, entities: true });
+	  
+	  const data = {
+		  actor,
+		  system: systemData,
+		  owner: actor.isOwner,
+		  options: this.options,
+		  editable: this.isEditable,
+		  cssClass: actor.isOwner ? "editable" : "locked",
+		  config: CONFIG.BT,
+		  rollData: this.actor.getRollData.bind(this.actor),
+		  ...sheetData
+	  }
+	  console.log(data);
+	  return data;
+  }*/
+
+	/**
+	* Character-specific context modifications
+	*
+	* @param {object} context The context object to mutate
+	*/
+	_preparePCData(context) {
+		// This is where you can enrich character-specific editor fields
+		// or setup anything else that's specific to this type
+
+		//this._prepareVariables(context);
+
+		//Calc handlebars
+		Handlebars.registerHelper('calcXPForNextSL', function(xp) {
+			if(xp >= 570)
+				return 0;
+			
+			let sl = -1;
+			let mult = 1;
+			for(var l = 20; l < 570; mult++) {
+				if(xp < l)
+					break;
+				else {
+					l += (10*mult);
+					sl++;
+				}
+			}
+			
+			const remainder = l-xp;
+			return remainder;
+		});
+		Handlebars.registerHelper('calcXPForNextTP', function(xp) {
+			if(xp == 0)
+				return 100;
+			
+			const level_sub = Math.floor(xp/100); //2 for 299
+			const level_over = level_sub + 1;
+			const remainder = xp - level_sub * 100 //(299 - 200 = 99)
+			
+			return 100-remainder;
+		});
+	}
+
+	/**
+	* Character-specific context modifications
+	*
+	* @param {object} context The context object to mutate
+	*/
+	_prepareNPCData(context) {
+		// This is where you can enrich character-specific editor fields
+		// or setup anything else that's specific to this type
+	}
+
+	//Organize and classify Items for Actor sheets.
+	/*_prepareItems(context) {
+		const weapons = [];
+		const armour = [];
+		const equipment = [];
+		const properties = [];
+		const modules = [];
+		
+		for (let i of context.items) {
+			//Near as I can tell, this lets the item retain its img or use the default icon if it doesn't have one of its own.
+			i.img = i.img || Item.DEFAULT_ICON;
+			
+			//Now append it to the appropriate array.
+			switch(i.type) {
+				case "weapon":
+					weapons.push(i);
+					break;
+				case "armour":
+					armour.push(i);
+					break;
+				case "equipment":
+					equipment.push(i);
+					break;
+				case "property":
+					properties.push(i);
+					break;
+				case "lifepath_module":
+					modules.push(i);
+					break;
+				default:
+					console.error("Item i {0} type {1} not recognised", i, i.type);
+					break;
+			}
+		}
+		
+		//Push this data to context so that handlebars can access it.
+		context.inventory = { weapons: {}, armour: {}, equipment: {}, properties: {}, modules: {} };
+		context.inventory["weapons"] = weapons;
+		context.inventory["armour"] = armour;
+		context.inventory["equipment"] = equipment;
+		context.inventory["properties"] = properties;
+		context.inventory["modules"] = modules;
+	}*/
+	
+	SortItemsToInventory(context = null) {
+		const weapons = [];
+		const armour = [];
+		const equipment = [];
+		const properties = [];
+		const modules = [];
+		
+		for (let i of this.actor.items) {
+			//Near as I can tell, this lets the item retain its img or use the default icon if it doesn't have one of its own.
+			i.img = i.img || Item.DEFAULT_ICON;
+			
+			//Now append it to the appropriate array.
+			switch(i.type) {
+				case "weapon":
+					weapons.push(i);
+					break;
+				case "armour":
+					armour.push(i);
+					break;
+				case "equipment":
+					equipment.push(i);
+					break;
+				case "property":
+					properties.push(i);
+					break;
+				case "lifepath_module":
+					modules.push(i);
+					break;
+				default:
+					console.error("Item i {0} type {1} not recognised", i, i.type);
+					break;
+			}
+		}
+		
+		let inventory = {
+			weapons: {},
+			armour: {},
+			equipment: {},
+			properties: {},
+			modules: {}
+		};
+		
+		if(context != null)
+		{
+			context.inventory = inventory;
+			
+			context.inventory["weapons"] = weapons;
+			context.inventory["armour"] = armour;
+			context.inventory["equipment"] = equipment;
+			context.inventory["properties"] = properties;
+			context.inventory["modules"] = modules;
+			
+			return null;
+		}
+		else {
+			inventory["weapons"] = weapons;
+			inventory["armour"] = armour;
+			inventory["equipment"] = equipment;
+			inventory["properties"] = properties;
+			inventory["modules"] = modules;
+			
+			return inventory;
+		}
+	}
+
+	/* -------------------------------------------- */
   
 	/*async _onDrop(event) {
 		console.log("event: {0}", event);
@@ -38,20 +261,80 @@ export class BTPersonActorSheet extends ActorSheet {
 		return await super._onDrop(event);
 	}*/
 	
-	async _onDropItem(event, data) {
+	/** @override */
+	/*async _onDropItem(event, data) {
 		const ev = event;
-		if(ev.target.classList.contains("droppable-items")) {
-			console.log("Congratulations, you hit the target!");
-		}
-		else
-			return;
-		
 		const dt = data;
+		const uuid = dt.uuid.split("Item.")[1];
 		console.log("DROP_ITEM | event: {0}, data: {1}", ev, dt);
 		
-		//ah, then we probably push to an inventory property on the character template
+		let item = foundry.utils.deepClone(game.items.get(uuid));
+		console.log(item);
+		
+		const itemData = item.system;
+		console.log(itemData);
+		this.actor.createEmbeddedDocuments("Item", [itemData]);
+		console.log(this.actor);
 		
 		return await super._onDropItem(ev, dt);
+	}*/
+	
+	/** @override */
+	async _onDropItemCreate(itemData) {
+		//Forge an array from whatever is in itemData.
+		let items = itemData instanceof Array ? itemData : [itemData];
+		
+		//Initialise an empty array, toCreate, which we'll push into the embedded documents at the end.
+		const toCreate = [];
+		//For each "item" in the items arrays,
+		for (const item of items ) {
+			//Call our custom handler function, which tells us if it's ok to drop that item onto the sheet.
+			const result = await this.ValidateDroppedItem(item);
+			//If we get back a decent result, push that result into the toCreate array!
+			if( result )
+				toCreate.push(result);
+		}
+		
+		//Push the newly-made items onto the character sheet.
+		return this.actor.createEmbeddedDocuments("Item", toCreate);
+	}
+	
+	//Handler to determine if dropped items are valid
+	async ValidateDroppedItem(itemData) {
+		const inventory = this.SortItemsToInventory();
+		
+		//When dropping in a new module, if it's one of the ones that needs to be replaced, first delete the existing modules of that type.
+		if(itemData.type == "lifepath_module") {
+			const type = itemData.system.type;
+			switch(type) {
+				case "late_childhood":
+				case "early_childhood":
+				case "subaffiliation":
+				case "affiliation":
+					const modules = inventory.modules;
+					let ids = [];
+					let index = 0;
+					for (var i = 0; i < modules.length; i++) {
+						const module = modules[i];
+						const data = module.system;
+						if(data.type == type)
+							ids[index++] = module.id;
+					}
+					this.actor.deleteEmbeddedDocuments("Item", ids);
+					break;
+				case "real_life":
+				case "schooling":
+					break;
+				default:
+					console.error("Module type {0} not recognised!", type);
+					return false;
+			}
+		}
+		else {
+			//Other validation methods go here.
+		}
+		
+		return itemData;
 	}
 	
 	async _onDropActor(event, data) {
@@ -114,220 +397,20 @@ export class BTPersonActorSheet extends ActorSheet {
 
   /* -------------------------------------------- */
 
-  /** @override */
-  getData() {
-    // Retrieve the data structure from the base sheet. You can inspect or log
-    // the context variable to see the structure, but some key properties for
-    // sheets are the actor object, the data object, whether or not it's
-    // editable, the items array, and the effects array.
-    const context = super.getData();
-
-    // Use a safe clone of the actor data for further operations.
-    const actorData = this.document.toObject(false);
-
-    // Add the actor's data to context.data for easier access, as well as flags.
-    context.system = actorData.system;
-    context.flags = actorData.flags;
-
-    // Adding a pointer to CONFIG.BOILERPLATE
-    context.config = CONFIG.BT;
-
-    // Prepare character data and items.
-    if (actorData.type == 'pc') {
-		this._preparePCData(context);
-      //this._prepareItems(context);
-    }
-
-    // Prepare NPC data and items.
-    if (actorData.type == 'npc') {
-		this._prepareNPCData(context);
-      //this._prepareItems(context);
-    }
-
-    // Enrich biography info for display
-    // Enrichment turns text like `[[/r 1d20]]` into buttons
-    /*context.enrichedBiography = await TextEditor.enrichHTML(
-      this.actor.system.biography,
-      {
-        // Whether to show secret blocks in the finished html
-        secrets: this.document.isOwner,
-        // Necessary in v11, can be removed in v12
-        async: true,
-        // Data to fill in for inline rolls
-        rollData: this.actor.getRollData(),
-        // Relative UUID resolution
-        relativeTo: this.actor,
-      }
-    );*/
-
-    // Prepare active effects
-    /*context.effects = prepareActiveEffectCategories(
-      // A generator that returns all effects stored on the actor
-      // as well as any items
-      this.actor.allApplicableEffects()
-    );*/
-	
-	console.log("Render triggers getData()");
-
-    return context;
-  }
-
-	/**
-	* Character-specific context modifications
-	*
-	* @param {object} context The context object to mutate
-	*/
-	_preparePCData(context) {
-		// This is where you can enrich character-specific editor fields
-		// or setup anything else that's specific to this type
-
-		//this._prepareVariables(context);
-
-		//Calc handlebars
-		Handlebars.registerHelper('calcXPForNextSL', function(xp) {
-			if(xp >= 570)
-				return 0;
-			
-			let sl = -1;
-			let mult = 1;
-			for(var l = 20; l < 570; mult++) {
-				if(xp < l)
-					break;
-				else {
-					l += (10*mult);
-					sl++;
-				}
-			}
-			
-			const remainder = l-xp;
-			return remainder;
-		});
-		Handlebars.registerHelper('calcXPForNextTP', function(xp) {
-			if(xp == 0)
-				return 100;
-			
-			const level_sub = Math.floor(xp/100); //2 for 299
-			const level_over = level_sub + 1;
-			const remainder = xp - level_sub * 100 //(299 - 200 = 99)
-			
-			return 100-remainder;
-		});
-	}
-  
-	//Prepare the stuff that isn't in template.json (usually because it's temporary or user-defined).
-	/*_prepareVariables(context) {
-		console.log("Preparing variables.");
-		const systemData = context.system;
-		
-		if(systemData.traits == undefined)
-			systemData.traits = {};
-		if(systemData.advances == undefined)
-			systemData.advances = {};
-		
-		//define advanceMaker
-		if(systemData.advanceMaker == undefined) {
-			systemData.advanceMaker = {
-				type: "",
-				name: "",
-				xp: 0,
-				free: false
-			}
-		}
-	}*/
-
-	/**
-	* Character-specific context modifications
-	*
-	* @param {object} context The context object to mutate
-	*/
-	_prepareNPCData(context) {
-		// This is where you can enrich character-specific editor fields
-		// or setup anything else that's specific to this type
-	}
-
-  /**
-   * Organize and classify Items for Actor sheets.
-   *
-   * @param {object} context The context object to mutate
-   */
-  _prepareItems(context) {
-    // Initialize containers.
-    /*const gear = [];
-    const features = [];
-    const spells = {
-      0: [],
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      7: [],
-      8: [],
-      9: [],
-    };
-
-    // Iterate through items, allocating to containers
-    for (let i of context.items) {
-      i.img = i.img || Item.DEFAULT_ICON;
-      // Append to gear.
-      if (i.type === 'item') {
-        gear.push(i);
-      }
-      // Append to features.
-      else if (i.type === 'feature') {
-        features.push(i);
-      }
-      // Append to spells.
-      else if (i.type === 'spell') {
-        if (i.system.spellLevel != undefined) {
-          spells[i.system.spellLevel].push(i);
-        }
-      }
-    }
-
-    // Assign and return
-    context.gear = gear;
-    context.features = features;
-    context.spells = spells;*/
-  }
-
-  /* -------------------------------------------- */
-
 	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
-		
-		console.log("Render triggers activateListeners()");
+
+		// -------------------------------------------------------------
+		// Everything below here is only needed if the sheet is editable
+		if (!this.isEditable) return;
 
 		//Activate progression listeners
 		this.ListenForSheetButtons(html);
 		
 		this.UpdateAdvanceMaker();
 
-		// Render the item sheet for viewing/editing prior to the editable check.
-		/*html.on('click', '.item-edit', (ev) => {
-		  const li = $(ev.currentTarget).parents('.item');
-		  const item = this.actor.items.get(li.data('itemId'));
-		  item.sheet.render(true);
-		});*/
-
-		// -------------------------------------------------------------
-		// Everything below here is only needed if the sheet is editable
-		if (!this.isEditable) return;
-
-		// Add Inventory Item
-		/*html.on('click', '.item-create', this._onItemCreate.bind(this));
-
-		// Delete Inventory Item
-		html.on('click', '.item-delete', (ev) => {
-		  const li = $(ev.currentTarget).parents('.item');
-		  const item = this.actor.items.get(li.data('itemId'));
-		  item.delete();
-		  li.slideUp(200, () => this.render(false));
-		});
-
-		// Active Effect management
+		/*// Active Effect management
 		html.on('click', '.effect-control', (ev) => {
 		  const row = ev.currentTarget.closest('li');
 		  const document =
@@ -390,7 +473,48 @@ export class BTPersonActorSheet extends ActorSheet {
 		html.on('change', '#affiliation-select', this.ChangeLifepath.bind(this));
 		html.on('change', '#subaffiliation-select', this.ChangeLifepath.bind(this));
 		
-		//this.CleanAdvanceMaker();
+	//INVENTORY STUFF
+		// Render the item sheet for viewing/editing prior to the editable check.
+		html.on('click', '.item-edit', (event) => {
+			const li = $(event.currentTarget).parents(".item")[0];
+			const item = this.actor.items.get(li.dataset.id);
+			item.sheet.render(true);
+		});
+
+		// Add Inventory Item
+		html.on('click', '.item-create', this.CreateNewItem.bind(this));
+
+		// Delete Inventory Item
+		html.on('click', '.item-delete', (event) => {
+			//Recursively look up whichever of the clicked button's various parents has the item class.
+			const li = $(event.currentTarget).parents(".item")[0];
+			const item = this.actor.items.get(li.dataset.id);
+			item.delete();
+		});
+	}
+
+	//Handler method for creating new items on the sheet using the "Add New" button instead of drag-and-drop.
+	async CreateNewItem(event) {
+		const element = event.currentTarget;
+		const type = element.id;
+		const dataset = element.dataset;
+		
+		const name = "New " + type;
+		const data = {
+			model: "",
+			equipped: false,
+			description: "",
+			tonnage: 0,
+			ref: "N/A"
+		};
+		const itemData = {
+			name: name,
+			type: type,
+			system: data
+		}
+		
+		const newItem = await Item.create(itemData, { parent: this.actor });
+		return this.actor.items.get(newItem.id).sheet.render(true);
 	}
 	
 	CleanAdvanceMaker() {
@@ -1135,40 +1259,12 @@ export class BTPersonActorSheet extends ActorSheet {
 		const actorData = this.document.toObject(false);
 		const systemData = actorData.system;
 		const advanceMaker = systemData.advanceMaker;
-		console.log("UpdateAdvanceMaker says advanceMaker is ", advanceMaker);
 		
 		document.getElementById("advance-xp").value = advanceMaker.xp;
 		document.getElementById("advance-type").value = advanceMaker.type;
 		document.getElementById("advance-name").value = advanceMaker.name;
 		document.getElementById("advance-free").checked = advanceMaker.free;
 	}
-
-  /**
-   * Handle creating a new Owned Item for the actor using initial data defined in the HTML dataset
-   * @param {Event} event   The originating click event
-   * @private
-   */
-  async _onItemCreate(event) {
-    event.preventDefault();
-    const header = event.currentTarget;
-    // Get the type of item to create.
-    const type = header.dataset.type;
-    // Grab any data associated with this control.
-    const data = duplicate(header.dataset);
-    // Initialize a default name.
-    const name = `New ${type.capitalize()}`;
-    // Prepare the item object.
-    const itemData = {
-      name: name,
-      type: type,
-      system: data,
-    };
-    // Remove the type from the dataset since it's in the itemData.type prop.
-    delete itemData.system['type'];
-
-    // Finally, create the item!
-    return await Item.create(itemData, { parent: this.actor });
-  }
 
 	/**
 	* Handle clickable rolls.

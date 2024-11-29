@@ -155,10 +155,10 @@ Handlebars.registerHelper('loop', function(n, block) {
     return accum;
 });
 
-/*Handlebars.registerHelper('ifEqual', function (a, b, options) {
-    if (a == b) { return options.fn(this); }
-    return options.inverse(this);
-});*/
+//fall-through localise call
+Handlebars.registerHelper('tryLocalize', function(key) {
+	return game.i18n.localize(key);
+});
 
 /* -------------------------------------------- */
 /*  Hooks	                                    */
