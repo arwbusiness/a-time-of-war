@@ -1,6 +1,6 @@
 <div class="character" style="width:100%; border:10px;">
 	<div class="">
-		<table style="width:65%; table-layout:fixed; float:left">
+		<!--<table style="width:65%; table-layout:fixed; float:left">
 			<caption>
 				<h3>Life Path</h3>
 			</caption>
@@ -78,6 +78,79 @@
 					<table>
 					{{#each system.lifepath.adult_life as |life key|}}
 						<tr><td>{{key}}</td></tr>
+					{{/each}}
+					</table>
+				</td>
+			</tr>
+		</table>-->
+		<table style="width:65%; table-layout:fixed; float:left">
+			<caption>
+				<h3>Life Path</h3>
+			</caption>
+			<tr>
+				<td class="resource-label">Affiliation:</td>
+				<td>
+				{{#each inventory.modules as |module key|}}
+					{{#if (eq module.system.type "affiliation")}}
+						{{module.name}}
+					{{/if}}
+				{{/each}}
+				</td>
+			</tr>
+			<tr>
+				<td class="resource-label">Sub-affiliation:</td>
+				<td>
+				{{#each inventory.modules as |module key|}}
+					{{#if (eq module.system.type "subaffiliation")}}
+						{{module.name}}
+					{{/if}}
+				{{/each}}
+				</td>
+			</tr>
+			<tr>
+				<td class="resource-label">Early Childhood:</td>
+				<td>
+				{{#each inventory.modules as |module key|}}
+					{{#if (eq module.system.type "early_childhood")}}
+						{{module.name}}
+					{{/if}}
+				{{/each}}
+				</td>
+			</tr>
+			<tr>
+				<td class="resource-label">Late Childhood:</td>
+				<td>
+				{{#each inventory.modules as |module key|}}
+					{{#if (eq module.system.type "late_childhood")}}
+						{{module.name}}
+					{{/if}}
+				{{/each}}
+				</td>
+			</tr>
+			<tr>
+				<td class="resource-label">Schooling:</td>
+				<td>
+					<table>
+					{{#each inventory.modules as |module key|}}
+						{{#if (eq module.system.type "schooling")}}
+						<tr>
+							<td>{{module.name}}</td>
+						</tr>
+						{{/if}}
+					{{/each}}
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="resource-label">Adult Life:</td>
+				<td>
+					<table>
+					{{#each inventory.modules as |module key|}}
+						{{#if (eq module.system.type "adult_life")}}
+						<tr>
+							<td>{{module.name}}</td>
+						</tr>
+						{{/if}}
 					{{/each}}
 					</table>
 				</td>

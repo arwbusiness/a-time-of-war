@@ -45,13 +45,29 @@ export class BTLifepathModuleItemSheet extends ItemSheet {
 		
 	}
 	
+	// Generate a random UUID
+	UUID() {
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+		.replace(/[xy]/g, function (c) {
+			const r = Math.random() * 16 | 0, 
+				v = c == 'x' ? r : (r & 0x3 | 0x8);
+			return v.toString(16);
+		});
+	}
+	
 	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
 		
-		html.on('click', '.rollable', this._onRoll.bind(this));
+		if(!this.isEditable)
+			return;
 		
 		html.on('change', '#module-type', this.ChangeModuleType.bind(this));
+		html.on('blur', '#description', this.ChangeDescription.bind(this));
+		html.on('change', '.subtitle', this.ChangeSubtitle.bind(this));
+		html.on('change', '.xp', this.ChangeXP.bind(this));
+		html.on('click', '.add', this.AddXP.bind(this));
+		html.on('click', '.delete', this.DeleteXP.bind(this));
 		
 		this.SetSelectIndexes();
 	}
@@ -63,7 +79,146 @@ export class BTLifepathModuleItemSheet extends ItemSheet {
 		//Update the system
 		let updateData = {};
 		updateData["system.type"] = value;
+		console.log(updateData);
 		this.item.update(updateData);
+		//this.render();
+	}
+	
+	ChangeDescription(event) {
+		const element = event.currentTarget;
+		const value = element.value;
+		
+		let updateData = {};
+		updateData["system.description"] = value;
+		this.item.update(updateData);
+		//No need to re-render.
+	}
+	
+	ChangeSubtitle(event) {
+		const element = event.currentTarget;
+		const type = element.id.split("@")[0];
+		const id = element.id.split("@")[1];
+		const value = element.value;
+		
+		let updateData = {};
+		updateData["system." + type + "s." + id + ".subtitle"] = value;
+		this.item.update(updateData);
+	}
+	
+	ChangeXP(event) {
+		const element = event.currentTarget;
+		const type = element.id.split("@")[0];
+		const id = element.id.split("@")[1];
+		const value = element.value;
+		
+		let updateData = {};
+		updateData["system." + type + "s." + id + ".xp"] = value;
+		this.item.update(updateData);
+		this.CountXP();
+	}
+	
+	AddXP(event) {
+		const type = event.currentTarget.id;
+		const element = $('#select-' + type)[0];
+		const value = element.value;
+		
+		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
+		const customTraits = ['alternate_id', 'bloodmark', 'citizenship', 'compulsion', 'connections', 'custom_vehicle', 'dark_secret', 'dependents', 'design_quirk', 'enemy', 'exceptional_attribute', 'extra, income', 'implant_prosthetic', 'in_for_life', 'lost_limb', 'natural_aptitude', 'property', 'rank', 'reputation', 'title', 'vehicle'];
+		let updateData = {};
+		const uuid = this.UUID();
+		updateData["system." + type + "s." + uuid] = {
+			id: uuid,
+			name: value,
+			xp: 0,
+			hasSubtitle: (type == "skill" ? customSkills.includes(value) : type == "trait" ? customTraits.includes(value) : false),
+			subtitle: ""
+		};
+		console.log(updateData);
+		
+		this.item.update(updateData);
+		this.CountXP();
+	}
+	
+	async DeleteXP(event) {
+		const element = event.currentTarget;
+		const type = element.id.split("@")[0];
+		const id = element.id.split("@")[1];
+		
+		if(type == "attribute") {
+			const list = foundry.utils.duplicate(this.item.system.attributes);
+			
+			let updateData = {};
+			let target = "system.attributes";
+			updateData[target] = [];
+			await this.item.update(updateData);
+			
+			updateData = {};
+			Object.entries(list).forEach(entry => {
+				let i = entry[0];
+				if(i == id)
+					return;
+				
+				let data = entry[1];
+				updateData[target + "." + i] = data;
+			});
+			
+			await this.item.update(updateData);
+			await this.CountXP();
+		}
+		else if(type == "skill") {
+			const list = foundry.utils.duplicate(this.item.system.skills);
+			
+			let updateData = {};
+			let target = "system.skills";
+			updateData[target] = [];
+			await this.item.update(updateData);
+			
+			updateData = {};
+			Object.entries(list).forEach(entry => {
+				let i = entry[0];
+				if(i == id)
+					return;
+				
+				let data = entry[1];
+				updateData[target + "." + i] = data;
+			});
+			
+			await this.item.update(updateData);
+			await this.CountXP();
+		}
+		else if(type == "trait") {
+			const list = foundry.utils.duplicate(this.item.system.traits);
+			
+			let updateData = {};
+			let target = "system.traits";
+			updateData[target] = [];
+			await this.item.update(updateData);
+			
+			updateData = {};
+			Object.entries(list).forEach(entry => {
+				let i = entry[0];
+				if(i == id)
+					return;
+				
+				let data = entry[1];
+				updateData[target + "." + i] = data;
+			});
+			
+			await this.item.update(updateData);
+			await this.CountXP();
+		}
+	}
+	
+	async CountXP() {
+		let list = $(".xp");
+		
+		let updateData = {};
+		let xp = 0;
+		for(var i = 0; i < list.length; i++) {
+			xp += parseInt(list[i].value);
+		}
+		updateData["system.cost"] = xp;
+		await this.item.update(updateData);
 	}
 	
 	SetSelectIndexes() {
@@ -93,20 +248,5 @@ export class BTLifepathModuleItemSheet extends ItemSheet {
 			default:
 				break;
 		}
-	}
-	
-	/* * * * */
-	
-	/**
-	* Handle clickable rolls.
-	* @param {Event} event   The originating click event
-	* @private
-	*/
-	_onRoll(event) {
-		event.preventDefault();
-		const ev = event;
-		const element = event.currentTarget;
-		const dataset = element.dataset;
-		console.log("rollEvent: {0}", ev);
 	}
 }

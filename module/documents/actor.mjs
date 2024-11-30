@@ -29,7 +29,7 @@ export class BTActor extends Actor {
 	*/
 	prepareDerivedData() {
 		const actorData = this;
-		const systemData = actorData.system;
+		//const systemData = actorData.system;
 		const flags = actorData.flags.bt || {};
 
 		// Make separate methods for each Actor type (character, npc, etc.) to keep
@@ -45,6 +45,8 @@ export class BTActor extends Actor {
 	_preparePcData(actorData) {
 		if (actorData.type !== 'pc')
 			return;
+		
+		console.log(this);
 		
 		const systemData = actorData.system;
 		
@@ -96,18 +98,28 @@ export class BTActor extends Actor {
 				systemData.attributes[name].xp += xp;
 			}
 			
-			if(type == "skill") {
+			/*if(type == "skill") {
 				//console.log("baseSkill: {0}, name: {1}", baseSkill, name);
 				if(baseSkill == undefined || baseSkill == "") {
 					systemData.skills[name].xp += xp;
 				}
 				else if (customSkills.includes(baseSkill)) {
-					console.log(systemData.skills);
-					console.log("your baseSkill: {0}", systemData.skills[baseSkill]);
+					//console.log(systemData.skills);
+					//console.log("your baseSkill: {0}", systemData.skills[baseSkill]);
 					systemData.skills[baseSkill][name].xp += xp;
 				}
 				else {
 					console.error("baseSkill: {0} not recognised!", baseSkill);
+				}
+			}*/
+			if(type == "skill") {
+				//console.log("advance" + advance[0] + ", baseSkill: {0}, name: {1}", baseSkill, name);
+				
+				if(baseSkill == undefined || baseSkill == "") {
+					systemData.skills[name].xp += xp;
+				}
+				else {
+					systemData.skills[baseSkill][name].xp += xp;
 				}
 			}
 			
@@ -232,45 +244,71 @@ export class BTActor extends Actor {
 		systemData.attributes["int"].xp += ageXp["int"];
 		systemData.attributes["cha"].xp += ageXp.cha;
 		
-		//Ok, let's get the XP modifiers from 
+		//Ok, let's get the XP modifiers from modules
 		let moduleXP = 0;
-		/*Object.entries(systemData.lifepath.modules).forEach(entry => {
-			const module = entry[1].system;
-			const a = module.attributes;
-			const t = module.traits;
-			const s = module.skills;
-			moduleXP += module.cost;
+		for(let item of this.items) {
+			if(item.type != "lifepath_module")
+				return;
 			
-			Object.entries(a).forEach(att => {
-				const name = att[0];
-				const value = att[1];
-				systemData.attributes[name].xp += value;
-			});
-			Object.entries(t).forEach(trt => {
-				const name = trt[0];
-				const value = trt[1];
-				systemData.traits[name].xp += value;
+			const data = item.system;
+			
+			for(let entry of Object.entries(data.attributes)) {
+				const id = entry[0];
+				const data = entry[1];
+				const name = data.name;
+				const xp = parseInt(data.xp);
+				systemData.attributes[name].xp += xp;
+			}
+			for(let entry of Object.entries(data.skills)) {
+				const id = entry[0];
+				const data = entry[1];
+				const name = data.name;
+				const xp = parseInt(data.xp);
 				
-				//the traits will need to actually be added to the sheet, you know?
-			});
-			Object.entries(s).forEach(skl => {
-				const name = skl[0];
-				const value = skl[1];
-				systemData.skills[name].xp += value;
+				if(data.hasSubtitle) {
+					const subtitle = data.subtitle;
+					systemData.skills[name][subtitle].xp += xp;
+				}
+				else {
+					systemData.skills[name].xp += xp;
+				}
+			}
+			for(let entry of Object.entries(data.traits)) {
+				const id = entry[0];
+				const data = entry[1];
+				const name = data.name;
+				const xp = parseInt(data.xp);
+				const subtitle = data.subtitle;
 				
-				//custom skills will need to be added to the sheet too! This could be harder than you though...
-			});
-		});*/
+				let served = false;
+				Object.entries(systemData.traits).forEach(en => {
+					if(served)
+						return;
+					
+					const trait = en[1];
+					
+					if(trait.name == name && (!data.hasSubtitle || trait.subtitle == subtitle)) {
+						served = true;
+						const traitId = trait.id;
+						systemData.traits[id].xp += xp;
+					}
+				});
+			}
+			
+			if(data.type == "affiliation" || data.type == "subaffiliation") {
+				systemData.lifepath.img = item.img;
+			}
+			
+			moduleXP += data.cost;
+			console.log(moduleXP);
+		}
+		
 		systemData.xp_spent += moduleXP;
-				
-		//special case for primary language
-		const lang_primary = systemData.details.lang_primary;
-		if(lang_primary != undefined && lang_primary != "")
-			systemData.skills["language"][lang_primary].xp = 570;
+		console.log(systemData.xp_spent);
 		
 		//Ok, get the levels!
 		this.CalculateAttributeLevels(systemData);
-		this.CalculateSkillLevels(systemData);
+		this.CalculateSkillLevels();
 		this.CalculateTraitLevels(systemData);
 		
 		//Derived values!
@@ -301,10 +339,15 @@ export class BTActor extends Actor {
 		
 		//Don't forget to add a theoretical encumbrance.
 		
-		this.render();
+		//this.render();
+				
+		//special case for primary language
+		/*const lang_primary = systemData.details.lang_primary;
+		if(lang_primary != undefined && lang_primary != "")
+			systemData.skills["language"][lang_primary].xp = 0;*/
 	}
 	
-	CalculateAttributeLevels(systemData) {
+	/*CalculateAttributeLevels(systemData) {
 		const attributes = systemData.attributes;
 		
 		let updateData = {};
@@ -318,6 +361,130 @@ export class BTActor extends Actor {
 		});
 		
 		this.update(updateData);
+	}*/
+	
+	CalculateAttributeLevels() {
+		const systemData = this.system;
+		
+		Object.entries(systemData.attributes).forEach(entry => {
+			const name = entry[0];
+			const data = entry[1];
+			const xp = data.xp;
+			const level = this.CalcTP(xp);
+			const mod = this.GetAttributeMod(level);
+			systemData.attributes[name] = {
+				level: level,
+				xp: xp,
+				mod: mod
+			}
+		});
+	}
+	
+	CalculateSkillLevels() {
+		const systemData = this.system;
+		
+		const tieredSkills = ["computers,dex+int,CA", "martial_arts,rfl+dex,SA", "melee_weapons,rfl+dex,SA", "pickpocket,rfl+dex,SA", "sleightofhand,rfl+dex,SA", "quickdraw,rfl+dex,SA", "art,dex+int,CA", "interest,int+wil,CA"];
+		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
+		
+		Object.entries(customSkills).forEach(entry => {
+			const skills = systemData.skills[entry[1]];
+			Object.entries(skills).forEach(skill => {
+				const name = skill[0];
+				const data = skill[1];
+				
+				const xp = data.xp;
+				const level = this.CalcSL(xp);
+				let linkText = data.link != undefined ? data.link.split("+") : "none";
+				const linkA = linkText != "none" ? systemData.attributes[linkText[0]].mod : 0;
+				const linkB = linkText != "none" ? (linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0) : 0;
+				const linkMod = linkText != "none" ? linkA + linkB : 0;
+				const mod = level + linkMod;
+				
+				//Handle tiered skills
+				let served = false;
+				Object.entries(tieredSkills).forEach(t => {
+					const tieredSkill = t[1].split(",");
+					const n = tieredSkill[0];
+					if(entry[1] != n || level < 4)
+						return;
+					
+					const type = tieredSkill[2];
+					console.log(type);
+					linkText = tieredSkill[1].split("+");
+					const link = systemData.attributes[linkText[0]].mod + (linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0);
+					
+					systemData.skills[entry[1]][name] = {
+						xp: xp,
+						mod: parseInt(level + link),
+						level: level,
+						link: tieredSkill[1],
+						tn: parseInt(data.tn) + 1,
+						type: type
+					};
+					served = true;
+				});
+				
+				if(!served) {
+					systemData.skills[entry[1]][name] = {
+						xp: xp,
+						mod: mod,
+						level: level,
+						link: data.link,
+						tn: data.tn,
+						type: data.type
+					};
+				}
+			});
+		});
+		
+		Object.entries(systemData.skills).forEach(entry => {
+			const name = entry[0];
+			const data = entry[1];
+			if(customSkills.includes(name))
+				return;
+			
+			const xp = data.xp;
+			const level = this.CalcSL(xp);
+			let linkText = data.link.split("+");
+			const linkA = systemData.attributes[linkText[0]].mod;
+			const linkB = linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0;
+			const linkMod = linkA + linkB;
+			const mod = level + linkMod;
+			
+			//Handle tiered skills
+			let served = false;
+			Object.entries(tieredSkills).forEach(t => {
+				const tieredSkill = t[1].split(",");
+				const n = tieredSkill[0];
+				if(name != n || level < 4)
+					return;
+				
+				const type = tieredSkill[2];
+				linkText = tieredSkill[1].split("+");
+				const link = systemData.attributes[linkText[0]].mod + (linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0);
+				
+				systemData.skills[name] = {
+					xp: xp,
+					mod: level + link,
+					level: level,
+					link: tieredSkill[1],
+					tn: parseInt(data.tn) + 1,
+					type: type
+				};
+				served = true;
+			});
+			
+			if(!served) {
+				systemData.skills[name] = {
+					xp: xp,
+					mod: mod,
+					level: level,
+					link: data.link,
+					tn: data.tn,
+					type: data.type
+				};
+			}
+		});
 	}
 	
 	CalculateTraitLevels(systemData) {
@@ -332,152 +499,6 @@ export class BTActor extends Actor {
 		});
 		
 		this.update(updateData);
-	}
-	
-	CalculateSkillLevels(systemData) {
-		const tieredSkills = ["computers", "martial_arts", "melee_weapons", "pickpocket", "sleightofhand", "quickdraw", "art", "interest"];
-		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
-		
-		const skills = systemData.skills;
-		
-		let updateData = {};
-		let list = Object.entries(skills);
-		list.forEach(skill => {
-			let data = skill[1];
-			
-			let isCustomSkill = false;
-			if(customSkills.includes(skill[0])) {
-				isCustomSkill = true;
-				Object.entries(data).forEach(customSkill => {
-					let newData = customSkill[1];
-					if(newData.link == undefined)
-						return;
-					newData.level = this.CalcSL(newData.xp);
-					let linkText = newData.link.split("+");
-					const linkA = systemData.attributes[linkText[0]].mod;
-					const linkB = linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0;
-					const linkMod = linkA + linkB;
-					newData.mod = newData.level + linkMod;
-					updateData["system.skills."+skill[0]+"."+customSkill[0]] = newData;
-				});
-			}
-			else {
-				data.level = this.CalcSL(data.xp);
-				let linkText = data.link.split("+");
-				const linkA = systemData.attributes[linkText[0]].mod;
-				const linkB = linkText.length == 2 ? systemData.attributes[linkText[1]].mod : 0;
-				const linkMod = linkA + linkB;
-				data.mod = data.level + linkMod;
-				updateData["system.skills."+skill[0]] = data;
-			}
-		});
-		
-		this.update(updateData);
-	}
-	
-	CalculateAgeModifiers() {
-		const systemData = this.system;
-		systemData.calcAge = false;
-		if(systemData.attributes == undefined || systemData.attributes.str == undefined)
-				return;
-			
-		const age = systemData.details.age;
-		systemData.attributes.str.xp == undefined ? 0 : systemData.attributes.str.xp;
-		systemData.attributes.bod.xp == undefined ? 0 : systemData.attributes.bod.xp;
-		systemData.attributes.dex.xp == undefined ? 0 : systemData.attributes.dex.xp;
-		systemData.attributes.rfl.xp == undefined ? 0 : systemData.attributes.rfl.xp;
-		systemData.attributes.wil.xp == undefined ? 0 : systemData.attributes.wil.xp;
-		systemData.attributes.int.xp == undefined ? 0 : systemData.attributes.int.xp;
-		systemData.attributes.cha.xp == undefined ? 0 : systemData.attributes.cha.xp;
-		systemData.attributes.edg.xp == undefined ? 0 : systemData.attributes.edg.xp;
-		
-		if(age >= 25 && age < 31) {
-			systemData.attributes.str.xp += 100;
-			systemData.attributes.bod.xp += 100;
-			systemData.attributes.rfl.xp += 100;
-			systemData.attributes.int.xp += 100;
-			systemData.attributes.wil.xp += 100;
-			systemData.attributes.cha.xp += 50;
-		}
-		else if(age >= 31 && age < 41) {
-			systemData.attributes.str.xp += 100;
-			systemData.attributes.bod.xp += 100;
-			systemData.attributes.rfl.xp -= 100;
-			systemData.attributes.int.xp += 100;
-			systemData.attributes.wil.xp += 100;
-		}
-		else if(age >= 41 && age < 51) {
-			systemData.attributes.dex.xp -= 50;
-			systemData.attributes.cha.xp -= 25;
-		}
-		else if(age >= 51 && age < 61) {
-			systemData.attributes.bod.xp -= 100;
-			systemData.attributes.rfl.xp -= 100;
-			systemData.attributes.cha.xp -= 50;
-		}
-		else if(age >= 61 && age < 71) {
-			systemData.attributes.str.xp -= 100;
-			systemData.attributes.bod.xp -= 100;
-			systemData.attributes.dex.xp -= 100;
-			systemData.attributes.int.xp += 50;
-			systemData.attributes.cha.xp -= 50;
-		}
-		else if(age >= 71 && age < 81) {
-			systemData.attributes.str.xp -= 100;
-			systemData.attributes.bod.xp -= 125;
-			systemData.attributes.rfl.xp -= 100;
-			systemData.attributes.int.xp -= 50;
-			systemData.attributes.cha.xp -= 75;
-		}
-		else if(age >= 81 && age < 91) {
-			systemData.attributes.str.xp -= 150;
-			systemData.attributes.bod.xp -= 150;
-			systemData.attributes.dex.xp -= 100;
-			systemData.attributes.rfl.xp -= 100;
-			systemData.attributes.wil.xp -= 100;
-			systemData.attributes.int.xp -= 50;
-			systemData.attributes.cha.xp -= 100;
-		}
-		else if(age >= 91 && age < 101) {
-			systemData.attributes.str.xp -= 150;
-			systemData.attributes.bod.xp -= 175;
-			systemData.attributes.dex.xp -= 150;
-			systemData.attributes.rfl.xp -= 125;
-			systemData.attributes.wil.xp -= 150;
-			systemData.attributes.int.xp -= 100;
-			systemData.attributes.cha.xp -= 100;
-		}
-		else if(age >= 101) {
-			systemData.attributes.str.xp -= 200;
-			systemData.attributes.bod.xp -= 200;
-			systemData.attributes.dex.xp -= 200;
-			systemData.attributes.rfl.xp -= 150;
-			systemData.attributes.wil.xp -= 200;
-			systemData.attributes.int.xp -= 100;
-			systemData.attributes.cha.xp -= 150;
-		}
-	}
-	
-	AddCustomSkill(systemData, baseSkill, skillName, linkA, linkB) {
-		const skills = Object.entries(systemData.skills);
-		const skill = {
-				xp: 0,
-				mod: 0,
-				level: -1,
-				link: linkA + (linkB != "" ? ("+" + linkB) : ""),
-				tn: 7,
-				type: "SB"
-		}
-		systemData.skills[baseSkill][skillName] = skill;
-	}
-	
-	CreateAdvance(systemData, name, type, xp, free = false) {
-		systemData.advances["name"] = {
-			name: name,
-			type: type,
-			xp: xp,
-			free: free
-		};
 	}
 	
 	CalcTP(xp) {

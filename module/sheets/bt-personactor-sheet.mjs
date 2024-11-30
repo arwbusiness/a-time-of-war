@@ -26,39 +26,109 @@ export class BTPersonActorSheet extends ActorSheet {
 
   /* -------------------------------------------- */
 
-  /** @override */
-  getData() {
-    // Retrieve the data structure from the base sheet. You can inspect or log
-    // the context variable to see the structure, but some key properties for
-    // sheets are the actor object, the data object, whether or not it's
-    // editable, the items array, and the effects array.
-    const context = super.getData();
+	/** @override */
+	getData() {
+		// Retrieve the data structure from the base sheet. You can inspect or log
+		// the context variable to see the structure, but some key properties for
+		// sheets are the actor object, the data object, whether or not it's
+		// editable, the items array, and the effects array.
+		const context = super.getData();
 
-    // Use a safe clone of the actor data for further operations.
-    const actorData = this.document.toObject(false);
+		// Use a safe clone of the actor data for further operations.
+		const actorData = this.document.toObject(false);
+		const systemData = actorData.system;
 
-    // Add the actor's data to context.data for easier access, as well as flags.
-    context.system = actorData.system;
-    context.flags = actorData.flags;
+		// Add the actor's data to context.data for easier access, as well as flags.
+		context.system = actorData.system;
+		context.flags = actorData.flags;
 
-    // Adding a pointer to CONFIG.BOILERPLATE
-    context.config = CONFIG.BT;
+		// Adding a pointer to CONFIG.BOILERPLATE
+		context.config = CONFIG.BT;
 
-    // Prepare character data and items.
-    if (actorData.type == 'pc') {
-		this._preparePCData(context);
-    }
+		// Prepare character data and items.
+		if (actorData.type == 'pc') {
+			this._preparePCData(context);
+		}
 
-    // Prepare NPC data and items.
-    if (actorData.type == 'npc') {
-		this._prepareNPCData(context);
-    }
+		// Prepare NPC data and items.
+		if (actorData.type == 'npc') {
+			this._prepareNPCData(context);
+		}
+
+		this.SortItemsToInventory(context);
+		//console.log(context);
+
+		/*console.log("We're having to process skill advances here because for some reason custom skills go recursive in the main stack.");
+		const contextSystem = context.actor.system;
+		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
+		let updateData = {};
+		//Reset XP to 0
+		Object.entries(customSkills).forEach(entry => {
+			Object.entries(contextSystem.skills[entry[1]]).forEach(skill => {
+				const name = skill[0];
+				const data = skill[1];
+				
+				updateData["system.skills." + entry[1] + "." + name + ".xp"] = parseInt(0);
+			});
+		});
+		this.actor.update(updateData);
+
+		updateData = {};
+		Object.entries(contextSystem.advances).forEach(entry => {
+			const advance = entry[1];
+
+			if(advance.type == "skill" && advance.baseSkill != null) {
+				const target = "system.skills." + advance.baseSkill + "." + advance.name;
+
+				const skill = contextSystem.skills[advance.baseSkill][advance.name];
+				const xp = 0 + parseInt(skill.xp + advance.xp);
+				updateData[target + ".xp"] = xp;
+				//updateData[target + ".level"] = this.CalcSL(xp);
+				let linkText = skill.link.split("+");
+				const linkA = contextSystem.attributes[linkText[0]].mod;
+				const linkB = linkText.length == 2 ? contextSystem.attributes[linkText[1]].mod : 0;
+				const linkMod = linkA + linkB;
+				updateData[target + ".mod"] = linkMod;
+			}
+		});
+
+		console.log(updateData);
+		context.actor.update(updateData);
+		console.log(context);*/
+		
+		/*const contextSystem = context.actor.system;
+		contextSystem.skills.language["Urdu"].xp = contextSystem.skills.language["Urdu"].xp + 5;
+		console.log(context);*/
+
+		return context;
+	}
 	
-	this.SortItemsToInventory(context);
-	//console.log(context);
-
-    return context;
-  }
+	_onUpdate(changed, options, userId) {
+		console.log(changed);
+		console.log(options);
+		
+		super._onUpdate(changed, options, userId);
+	}
+	
+	CalcSL(xp) {
+		if(xp >= 570)
+			return 10;
+		
+		let sl = -1;
+		let mult = 1;
+		for(var l = 20; l <= 570; mult++) {
+			if(xp >= l)
+			{
+				l += (10*mult);
+				sl++;
+			}
+			else {
+				break;
+			}
+		}
+		
+		return sl;
+	}
   
   /** @override */
   /*getData() {
@@ -221,6 +291,12 @@ export class BTPersonActorSheet extends ActorSheet {
 			properties: {},
 			modules: {}
 		};
+			
+		/*this.actor.system["inventory"]["weapons"] = weapons;
+		this.actor.system["inventory"]["armour"] = armour;
+		this.actor.system["inventory"]["equipment"] = equipment;
+		this.actor.system["inventory"]["properties"] = properties;
+		this.actor.system["inventory"]["modules"] = modules;*/
 		
 		if(context != null)
 		{
@@ -409,6 +485,8 @@ export class BTPersonActorSheet extends ActorSheet {
 		this.ListenForSheetButtons(html);
 		
 		this.UpdateAdvanceMaker();
+		
+		//this.DoSkills();
 
 		/*// Active Effect management
 		html.on('click', '.effect-control', (ev) => {
@@ -430,6 +508,45 @@ export class BTPersonActorSheet extends ActorSheet {
 		  });
 		}*/
 	}
+	
+	/*async DoSkills() {
+		console.log("We're having to process skill advances here because for some reason custom skills go recursive in the main stack.");
+		const contextSystem = this.actor.system;
+		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
+		let updateData = {};
+		//Reset XP to 0
+		Object.entries(customSkills).forEach(entry => {
+			Object.entries(contextSystem.skills[entry[1]]).forEach(skill => {
+				const name = skill[0];
+				const data = skill[1];
+				
+				updateData["system.skills." + entry[1] + "." + name + ".xp"] = parseInt(0);
+			});
+		});
+		await this.actor.update(updateData);
+
+		updateData = {};
+		Object.entries(contextSystem.advances).forEach(entry => {
+			const advance = entry[1];
+
+			if(advance.type == "skill" && advance.baseSkill != null) {
+				const target = "system.skills." + advance.baseSkill + "." + advance.name;
+
+				const skill = contextSystem.skills[advance.baseSkill][advance.name];
+				const xp = 0 + parseInt(skill.xp + advance.xp);
+				updateData[target + ".xp"] = xp;
+				updateData[target + ".level"] = this.CalcSL(xp);
+				let linkText = skill.link.split("+");
+				const linkA = contextSystem.attributes[linkText[0]].mod;
+				const linkB = linkText.length == 2 ? contextSystem.attributes[linkText[1]].mod : 0;
+				const linkMod = linkA + linkB;
+				updateData[target + ".mod"] = linkMod;
+			}
+		});
+
+		console.log(updateData);
+		await this.actor.update(updateData);
+	}*/
 	
 	RefreshSheet() {
 		this.document.prepareDerivedData();
@@ -616,7 +733,6 @@ export class BTPersonActorSheet extends ActorSheet {
 	
 	ChangeAge(event) {
 		const element = event.currentTarget;
-		console.log(element);
 		
 		let updateData = {};
 		updateData["system.details.age"] = element.value;
@@ -994,6 +1110,9 @@ export class BTPersonActorSheet extends ActorSheet {
 		const id = element.id;
 		const selectedIndex = element.dataset.index;
 		
+		if(selectedIndex == -1 || (value == undefined || value == null || value == ""))
+			return;
+		
 		const actorData = this.actor;
 		const systemData = actorData.system;
 		const advanceMaker = systemData.advanceMaker;
@@ -1236,7 +1355,6 @@ export class BTPersonActorSheet extends ActorSheet {
 			baseSkill: advanceMaker.baseSkill,
 			subtitle: subtitle
 		};
-		console.log(advanceMaker.baseSkill);
 		
 		//Reset the advance maker
 		updateData["system.advanceMaker"] = {
@@ -1252,7 +1370,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		console.log(updateData);
 		
 		this.actor.update(updateData);
-		this.RefreshSheet();
+		//this.RefreshSheet();
 	}
 	
 	async UpdateAdvanceMaker() {

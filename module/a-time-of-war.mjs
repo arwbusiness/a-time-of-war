@@ -108,10 +108,10 @@ Handlebars.registerHelper('toLowerCaseNested', function(array, value) {
 	return str.toLowerCase(array[value]);
 });
 
+//String in list
 Handlebars.registerHelper('in', function(key, ...list) {
 	return list.includes(key);
 });
-//toLowerCaseNested 
 
 //Operator helpers
 Handlebars.registerHelper('eq', (a, b) => a == b);
