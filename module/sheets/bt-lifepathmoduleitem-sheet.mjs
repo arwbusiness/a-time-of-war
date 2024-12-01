@@ -63,7 +63,8 @@ export class BTLifepathModuleItemSheet extends ItemSheet {
 			return;
 		
 		html.on('change', '#module-type', this.ChangeModuleType.bind(this));
-		html.on('blur', '#description', this.ChangeDescription.bind(this));
+		html.on('blur', '#description', this.ChangeTextArea.bind(this));
+		html.on('blur', '#flex', this.ChangeTextArea.bind(this));
 		html.on('change', '.subtitle', this.ChangeSubtitle.bind(this));
 		html.on('change', '.xp', this.ChangeXP.bind(this));
 		html.on('click', '.add', this.AddXP.bind(this));
@@ -84,12 +85,13 @@ export class BTLifepathModuleItemSheet extends ItemSheet {
 		//this.render();
 	}
 	
-	ChangeDescription(event) {
+	ChangeTextArea(event) {
 		const element = event.currentTarget;
+		const id = element.id;
 		const value = element.value;
 		
 		let updateData = {};
-		updateData["system.description"] = value;
+		updateData["system." + id] = value;
 		this.item.update(updateData);
 		//No need to re-render.
 	}
@@ -112,7 +114,7 @@ export class BTLifepathModuleItemSheet extends ItemSheet {
 		const value = element.value;
 		
 		let updateData = {};
-		updateData["system." + type + "s." + id + ".xp"] = value;
+		updateData["system." + type + "s." + id + ".xp"] = parseInt(value);
 		this.item.update(updateData);
 		this.CountXP();
 	}
@@ -133,7 +135,6 @@ export class BTLifepathModuleItemSheet extends ItemSheet {
 			hasSubtitle: (type == "skill" ? customSkills.includes(value) : type == "trait" ? customTraits.includes(value) : false),
 			subtitle: ""
 		};
-		console.log(updateData);
 		
 		this.item.update(updateData);
 		this.CountXP();

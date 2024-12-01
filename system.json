@@ -20,7 +20,7 @@
       "thumbnail": "systems/a-time-of-war/assets/setup.png"
     }
   ],
-  "version": "1.1.7",
+  "version": "1.1.8",
   "compatibility": {
     "minimum": "11",
     "verified": "12"
@@ -69,7 +69,12 @@
       "name": "npcs_basic",
       "label": "NPCs (Basic)",
       "type": "Actor"
-    }
+    },
+	{
+		"name": "life_modules",
+		"label": "Life Modules",
+		"type": "Item"
+	}
   ],
   "packFolders": [],
   "socket": false,

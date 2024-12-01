@@ -82,7 +82,7 @@ Hooks.once('init', function () {
     makeDefault: true,
     label: 'BT.SheetLabels.LifepathModule',
   });
-
+  
   // Preload Handlebars templates.
   return preloadHandlebarsTemplates();
 });

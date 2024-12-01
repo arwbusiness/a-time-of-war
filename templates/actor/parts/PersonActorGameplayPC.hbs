@@ -3,6 +3,7 @@
 	<h3 style="float:center">Attributes</h3>
 	<table>
 		<tr>
+			<th style="width:50px"></th>
 			{{#each system.attributes as |attribute key|}}
 			<th>
 				<label for="system.attributes.{{key}}.level" class="resource-label rollable align-left" data-rolltype="attribute" data-tn="12" data-link="{{key}}" data-label="{{toUpperCase key}}">{{toUpperCase key}}</label>
@@ -10,9 +11,26 @@
 			{{/each}}
 		</tr>
 		<tr>
+			<td class="resource-label">Level</td>
 			{{#each system.attributes as |attribute key|}}
 			<td>
-				<div class="align-center" id="system.attributes.{{key}}.level">{{attribute.level}}</div>
+				<div class="align-center rollable" id="system.attributes.{{key}}.level" data-rolltype="attribute" data-tn="12" data-link="{{key}}" data-label="{{toUpperCase key}}">{{attribute.level}}</div>
+			</td>
+			{{/each}}
+		</tr>
+		<tr>
+			<td class="resource-label">Modifier</td>
+			{{#each system.attributes as |attribute key|}}
+			<td>
+				<div class="align-center" id = "system.attributes.{{key}}.mod">{{attribute.mod}}</div>
+			</td>
+			{{/each}}
+		</tr>
+		<tr>
+			<td class="resource-label">XP for Level</td>
+			{{#each system.attributes as |attribute key|}}
+			<td>
+				<div class="align-center" id = "system.attributes.{{key}}.xp_remaining">{{calcXPForNextTP attribute.xp}}</div>
 			</td>
 			{{/each}}
 		</tr>

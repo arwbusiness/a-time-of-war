@@ -17,6 +17,12 @@ export class BTActor extends Actor {
 		// Data modifications in this step occur before processing embedded
 		// documents or derived data.
 	}
+	
+	/*_onCreate(data, options, userId) {
+		super._onCreate(data, options, userId);
+
+		console.log("HEY");
+	}*/
 
 	/**
 	* @override
@@ -46,9 +52,8 @@ export class BTActor extends Actor {
 		if (actorData.type !== 'pc')
 			return;
 		
-		console.log(this);
-		
 		const systemData = actorData.system;
+		//systemData["needsRefresh"] = false;
 		
 		//Reset skills by setting their XP to 0.
 		const skills = Object.entries(systemData.skills);
@@ -95,39 +100,114 @@ export class BTActor extends Actor {
 			const baseSkill = data.baseSkill;
 			
 			if(type == "attribute") {
-				systemData.attributes[name].xp += xp;
+				systemData.attributes[name].xp += parseInt(xp);
 			}
 			
-			/*if(type == "skill") {
-				//console.log("baseSkill: {0}, name: {1}", baseSkill, name);
-				if(baseSkill == undefined || baseSkill == "") {
-					systemData.skills[name].xp += xp;
-				}
-				else if (customSkills.includes(baseSkill)) {
-					//console.log(systemData.skills);
-					//console.log("your baseSkill: {0}", systemData.skills[baseSkill]);
-					systemData.skills[baseSkill][name].xp += xp;
-				}
-				else {
-					console.error("baseSkill: {0} not recognised!", baseSkill);
-				}
-			}*/
 			if(type == "skill") {
-				//console.log("advance" + advance[0] + ", baseSkill: {0}, name: {1}", baseSkill, name);
-				
 				if(baseSkill == undefined || baseSkill == "") {
-					systemData.skills[name].xp += xp;
+					systemData.skills[name].xp += parseInt(xp);
 				}
 				else {
-					systemData.skills[baseSkill][name].xp += xp;
+					if(systemData.skills[baseSkill][name] == undefined) {
+						systemData.skills[baseSkill][name] = {};
+						
+						const element = document.querySelector('input[data-baseskill="' + baseSkill + '"]');
+						
+						/*if(element == null)
+							systemData["needsRefresh"] = true;
+						else
+							systemData["needsRefresh"] = false;*/
+						/*
+						if(element == null) {
+							let link = "";
+							let tn = "";
+							let type = "";
+							switch(baseSkill) {
+								case "art":
+									link = "dex";
+									tn = 8;
+									type = "CB";
+									break;
+								case "career":
+									link = "int";
+									tn = 7;
+									type = "SB";
+									break;
+								case "interest":
+									link = "int";
+									tn = 8;
+									type = "CB";
+									break;
+								case "language":
+									link = "int+cha";
+									tn = 8;
+									type = "SA";
+									break;
+								case "protocol":
+									link = "wil+cha";
+									tn = 9;
+									type = "CA";
+									break;
+								case "science":
+									link = "int+wil";
+									tn = 9;
+									type = "CA";
+									break;
+								case "streetwise":
+									link = "cha";
+									tn = 8;
+									type = "CB";
+									break;
+								case "survival":
+									link = "bod+int";
+									tn = 9;
+									type = "CA";
+									break;
+								default:
+									return;
+							}
+							
+							systemData.skills[baseSkill][name] = {
+								name: name,
+								baseSkill: baseSkill,
+								level: -1,
+								mod: 0,
+								link: link,
+								tn: tn,
+								type: type,
+								xp: xp
+							};
+							console.error(systemData.skills[baseSkill][name]);
+							
+							return;
+						}
+						*/
+						const dataset = element.dataset;
+						const link = dataset.link;
+						const tn = dataset.tn;
+						const type = dataset.type;
+						
+						systemData.skills[baseSkill][name] = {
+							name: name,
+							baseSkill: baseSkill,
+							level: -1,
+							mod: 0,
+							link: link,
+							tn: tn,
+							type: type,
+							xp: parseInt(xp)
+						};
+					}
+					
+					systemData.skills[baseSkill][name].xp += parseInt(xp);
 				}
 			}
 			
 			if(type == "trait") {
-				systemData.traits[traitId].xp += xp;
+				systemData.traits[traitId].xp += parseInt(xp);
 			}
 			
-			systemData.xp_spent += data.free ? 0 : xp;
+			systemData.xp_spent += data.free ? 0 : parseInt(xp);
 		});
 		
 		//Special case for Age modifiers
@@ -236,14 +316,15 @@ export class BTActor extends Actor {
 		}
 		
 		//Ok, add the age XP now.
-		systemData.attributes["str"].xp += ageXp.str;
-		systemData.attributes["bod"].xp += ageXp.bod;
-		systemData.attributes["dex"].xp += ageXp.dex;
-		systemData.attributes["rfl"].xp += ageXp.rfl;
-		systemData.attributes["wil"].xp += ageXp.wil;
-		systemData.attributes["int"].xp += ageXp["int"];
-		systemData.attributes["cha"].xp += ageXp.cha;
+		systemData.attributes["str"].xp += parseInt(ageXp.str);
+		systemData.attributes["bod"].xp += parseInt(ageXp.bod);
+		systemData.attributes["dex"].xp += parseInt(ageXp.dex);
+		systemData.attributes["rfl"].xp += parseInt(ageXp.rfl);
+		systemData.attributes["wil"].xp += parseInt(ageXp.wil);
+		systemData.attributes["int"].xp += parseInt(ageXp["int"]);
+		systemData.attributes["cha"].xp += parseInt(ageXp.cha);
 		
+		/* * * MODULE XP * * */
 		//Ok, let's get the XP modifiers from modules
 		let moduleXP = 0;
 		for(let item of this.items) {
@@ -257,8 +338,9 @@ export class BTActor extends Actor {
 				const data = entry[1];
 				const name = data.name;
 				const xp = parseInt(data.xp);
-				systemData.attributes[name].xp += xp;
+				systemData.attributes[name].xp += parseInt(xp);
 			}
+			
 			for(let entry of Object.entries(data.skills)) {
 				const id = entry[0];
 				const data = entry[1];
@@ -267,12 +349,33 @@ export class BTActor extends Actor {
 				
 				if(data.hasSubtitle) {
 					const subtitle = data.subtitle;
-					systemData.skills[name][subtitle].xp += xp;
+					
+					if(systemData.skills[name][subtitle] == undefined) {
+						const element = document.querySelector('input[data-baseskill="' + name + '"]');
+						const dataset = element.dataset;
+						const link = dataset.link;
+						const tn = dataset.tn;
+						const type = dataset.type;
+						systemData.skills[name][subtitle] = {
+							name: subtitle,
+							baseSkill: name,
+							level: -1,
+							mod: 0,
+							link: link,
+							tn: tn,
+							type: type,
+							xp: parseInt(xp)
+						};
+					}
+					else {
+						systemData.skills[name][subtitle].xp += parseInt(xp);
+					}
 				}
 				else {
-					systemData.skills[name].xp += xp;
+					systemData.skills[name].xp += parseInt(xp);
 				}
 			}
+			
 			for(let entry of Object.entries(data.traits)) {
 				const id = entry[0];
 				const data = entry[1];
@@ -290,7 +393,7 @@ export class BTActor extends Actor {
 					if(trait.name == name && (!data.hasSubtitle || trait.subtitle == subtitle)) {
 						served = true;
 						const traitId = trait.id;
-						systemData.traits[id].xp += xp;
+						systemData.traits[id].xp += parseInt(xp);
 					}
 				});
 			}
@@ -299,12 +402,10 @@ export class BTActor extends Actor {
 				systemData.lifepath.img = item.img;
 			}
 			
-			moduleXP += data.cost;
-			console.log(moduleXP);
+			moduleXP += parseInt(data.cost);
 		}
 		
-		systemData.xp_spent += moduleXP;
-		console.log(systemData.xp_spent);
+		systemData.xp_spent += parseInt(moduleXP);
 		
 		//Ok, get the levels!
 		this.CalculateAttributeLevels(systemData);
@@ -325,9 +426,9 @@ export class BTActor extends Actor {
 			if(hasFit && hasToughness)
 				return;
 		});
-		systemData.damage.max = Math.max(1, systemData.attributes.bod.level * 2 * (hasToughness ? 2 : 1));
-		systemData.fatigue.max = Math.max(1, systemData.attributes.wil.level * 2 * (hasFit ? 2 : 1));
-		systemData.luck.max = systemData.attributes.edg.level;
+		systemData.damage.max = parseInt(Math.max(1, systemData.attributes.bod.level * 2 * (hasToughness ? 2 : 1)));
+		systemData.fatigue.max = parseInt(Math.max(1, systemData.attributes.wil.level * 2 * (hasFit ? 2 : 1)));
+		systemData.luck.max = parseInt(systemData.attributes.edg.level);
 		
 		//MP will be here somewhere. Will do it in a moment.
 		systemData.mp.walk = Math.max(1, systemData.attributes.str.level + systemData.attributes.rfl.level);
@@ -335,33 +436,11 @@ export class BTActor extends Actor {
 		systemData.mp.sprint = Math.max(1, systemData.mp.run * 2);
 		systemData.mp.climb = Math.max(1, Math.ceil(systemData.mp.walk/2)+Math.max(0,systemData.skills.climbing) / (systemData.skills.climbing.level == -1 ? 2 : 1));
 		systemData.mp.crawl = Math.max(1, Math.ceil(systemData.mp.walk/4));
-		systemData.mp.swim = Math.max(1, systemData.mp.walk + Math.max(0,systemData.skills.swimming.level) / (systemData.skills.swimming.level == -1 ? 2 : 1));
+		systemData.mp.swim = Math.max(1, Math.ceil(systemData.mp.walk + Math.max(0,systemData.skills.swimming.level)) / (systemData.skills.swimming.level == -1 ? 2 : 1));
 		
 		//Don't forget to add a theoretical encumbrance.
 		
-		//this.render();
-				
-		//special case for primary language
-		/*const lang_primary = systemData.details.lang_primary;
-		if(lang_primary != undefined && lang_primary != "")
-			systemData.skills["language"][lang_primary].xp = 0;*/
 	}
-	
-	/*CalculateAttributeLevels(systemData) {
-		const attributes = systemData.attributes;
-		
-		let updateData = {};
-		let list = Object.entries(attributes);
-		list.forEach(att => {
-			const attribute = att[1];
-			attribute.level = this.CalcTP(attribute.xp);
-			//age modifier
-			attribute.mod = this.GetAttributeMod(attribute.level);
-			updateData["system.attributes."+att[0]] = attribute;
-		});
-		
-		this.update(updateData);
-	}*/
 	
 	CalculateAttributeLevels() {
 		const systemData = this.system;
@@ -374,7 +453,7 @@ export class BTActor extends Actor {
 			const mod = this.GetAttributeMod(level);
 			systemData.attributes[name] = {
 				level: level,
-				xp: xp,
+				xp: parseInt(xp),
 				mod: mod
 			}
 		});
@@ -392,7 +471,7 @@ export class BTActor extends Actor {
 				const name = skill[0];
 				const data = skill[1];
 				
-				const xp = data.xp;
+				const xp = parseInt(data.xp);
 				const level = this.CalcSL(xp);
 				let linkText = data.link != undefined ? data.link.split("+") : "none";
 				const linkA = linkText != "none" ? systemData.attributes[linkText[0]].mod : 0;
@@ -443,7 +522,7 @@ export class BTActor extends Actor {
 			if(customSkills.includes(name))
 				return;
 			
-			const xp = data.xp;
+			const xp = parseInt(data.xp);
 			const level = this.CalcSL(xp);
 			let linkText = data.link.split("+");
 			const linkA = systemData.attributes[linkText[0]].mod;
@@ -494,7 +573,7 @@ export class BTActor extends Actor {
 		let list = Object.entries(traits);
 		list.forEach(tr => {
 			const trait = tr[1];
-			trait.level = this.CalcTP(trait.xp);
+			trait.level = this.CalcTP(parseInt(trait.xp));
 			updateData["system.traits."+tr[0]] = trait;
 		});
 		

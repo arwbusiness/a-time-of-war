@@ -1,173 +1,177 @@
 <form class="{{cssClass}} {{actor.type}} flexcol" autocomplete="off">
-  {{!-- Sheet Header --}}
-	<header class="sheet-header">
-		<img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
-		<div class="header-fields">
-		
-			<h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
-			{{!-- The grid classes are defined in scss/global/_grid.scss. To use,
-			use both the "grid" and "grid-Ncol" class where "N" can be any number
-			from 1 to 12 and will create that number of columns.  --}}
-			<div class="resources grid grid-3col">
+	{{!--#unless system.needsRefresh--}}
+	<div>
+		<header class="sheet-header">
+			<img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100" width="100"/>
+			<div class="header-fields">
+				<h1 class="charname"><input name="name" type="text" value="{{actor.name}}" placeholder="Name"/></h1>
+				{{!-- The grid classes are defined in scss/global/_grid.scss. To use,
+				use both the "grid" and "grid-Ncol" class where "N" can be any number
+				from 1 to 12 and will create that number of columns.  --}}
+				<div class="resources grid grid-3col">
 
-				{{!-- "flex-group-center" is also defined in the _grid.scss file
-				and it will add a small amount of padding, a border, and will
-				center all of its child elements content and text. --}}
-				<div class="resource flex-group-center">
-					<label for="gender" class="resource-label">Gender Identity: </label>
-					<div class="resource flexrow flex-center flex-between">
-						<input type="text" name="system.details.gender" placeholder="" value="{{system.details.gender}}"/>
+					{{!-- "flex-group-center" is also defined in the _grid.scss file
+					and it will add a small amount of padding, a border, and will
+					center all of its child elements content and text. --}}
+					<div class="resource flex-group-center">
+						<label for="gender" class="resource-label">Gender Identity: </label>
+						<div class="resource flexrow flex-center flex-between">
+							<input type="text" name="system.details.gender" placeholder="" value="{{system.details.gender}}"/>
+						</div>
 					</div>
-				</div>
-				
-				<!--<div class="resource flex-group-center">
-					<label for="build" class="resource-label">Build: </label>
-					<div class="resource flexrow flex-center flex-between">
-						<textarea type="text" name="system.details.build" placeholder="" value="{{system.details.build}}">{{system.details.build}}</textarea>
+					
+					<!--<div class="resource flex-group-center">
+						<label for="build" class="resource-label">Build: </label>
+						<div class="resource flexrow flex-center flex-between">
+							<textarea type="text" name="system.details.build" placeholder="" value="{{system.details.build}}">{{system.details.build}}</textarea>
+						</div>
+					</div>-->
+					
+					<div class="resource flex-group-center">
+						<label class="resource-label">Height:</label>
+						<input type="text" name="system.details.height" placeholder="" value="{{system.details.height}}" />
 					</div>
-				</div>-->
-				
-				<div class="resource flex-group-center">
-					<label class="resource-label">Height:</label>
-					<input type="text" name="system.details.height" placeholder="" value="{{system.details.height}}" />
-				</div>
-				
-				<div class="resource flex-group-center">
-					<label class="resource-label">Weight:</label>
-					<input type="text" name="system.details.weight" placeholder="" value="{{system.details.weight}}" />
-				</div>
+					
+					<div class="resource flex-group-center">
+						<label class="resource-label">Weight:</label>
+						<input type="text" name="system.details.weight" placeholder="" value="{{system.details.weight}}" />
+					</div>
 
-			</div>
-			<div class="resources grid grid-4col">
-				
-				<div class="resource flex-group-center" style="padding-left:100px; width:200px;">
-					<label for="system.details.age" class="resource-label">Age: </label>
-					<div class="resource flexrow flex-center flex-between">
-						<input type="text" name="system.details.age" id="age" placeholder="17" value="{{system.details.age}}"/>
-					</div>
 				</div>
-				
-				<!--put this divider behind the other clickable content-->
-				<div style="z-index:-1"></div>
+				<div class="resources grid grid-4col">
+					
+					<div class="resource flex-group-center" style="padding-left:100px; width:200px;">
+						<label for="system.details.age" class="resource-label">Age: </label>
+						<div class="resource flexrow flex-center flex-between">
+							<input type="text" name="system.details.age" id="age" placeholder="17" value="{{system.details.age}}"/>
+						</div>
+					</div>
+					
+					<!--put this divider behind the other clickable content-->
+					<div style="z-index:-1"></div>
 
-				<div class="resource flex-group-center">
-					<label for="system.damage.value" class="resource-label">Damage</label>
-					<div style="padding-left:40px; padding-right:40px;"  class="resource flexrow flex-center flex-between">
-						<input type="number" name="system.damage.value" value="{{system.damage.value}}"/>
-						<span style="padding-top:4px"> / </span>
-						<label style="padding-top:4px" for="system.damage.max">{{system.damage.max}}</label>
+					<div class="resource flex-group-center">
+						<label for="system.damage.value" class="resource-label">Damage</label>
+						<div style="padding-left:40px; padding-right:40px;"  class="resource flexrow flex-center flex-between">
+							<input type="number" name="system.damage.value" value="{{system.damage.value}}"/>
+							<span style="padding-top:4px"> / </span>
+							<label style="padding-top:4px" for="system.damage.max">{{system.damage.max}}</label>
+						</div>
 					</div>
-				</div>
 
-				<div class="resource flex-group-center">
-					<label for="system.fatigue.value" class="resource-label">Fatigue</label>
-					<div style="padding-left:40px; padding-right:40px;"  class="resource flexrow flex-center flex-between">
-						<input type="number" name="system.fatigue.value" value="{{system.fatigue.value}}"/>
-						<span style="padding-top:4px"> / </span>
-						<label style="padding-top:4px" for="system.fatigue.max">{{system.fatigue.max}}</label>
+					<div class="resource flex-group-center">
+						<label for="system.fatigue.value" class="resource-label">Fatigue</label>
+						<div style="padding-left:40px; padding-right:40px;"  class="resource flexrow flex-center flex-between">
+							<input type="number" name="system.fatigue.value" value="{{system.fatigue.value}}"/>
+							<span style="padding-top:4px"> / </span>
+							<label style="padding-top:4px" for="system.fatigue.max">{{system.fatigue.max}}</label>
+						</div>
 					</div>
+					
 				</div>
+				<div class="resources grid grid-2col">
 				
-			</div>
-			<div class="resources grid grid-2col">
-			
-				<div>
-					<table>
-						<tr><div style="font-size:12px; font-style:italic; text-align:center">Age Modifiers</div></tr>
-						<tr style="font-size:10px">
-							<th>STR</th>
-							<th>BOD</th>
-							<th>DEX</th>
-							<th>RFL</th>
-							<th>WIL</th>
-							<th>INT</th>
-							<th>CHA</th>
-						</tr>
-						<tr style="font-size:10px; text-align:center">
-							<td>{{system.agemods.str}}</td>
-							<td>{{system.agemods.bod}}</td>
-							<td>{{system.agemods.dex}}</td>
-							<td>{{system.agemods.rfl}}</td>
-							<td>{{system.agemods.wil}}</td>
-							<td>{{system.agemods.int}}</td>
-							<td>{{system.agemods.cha}}</td>
-						</tr>
-					</table>
-				</div>
-
-				<div class="resource flex-group-center">
-					<label for="system.luck.value" class="resource-label">Luck</label>
-					<div style="padding-left:120px; padding-right:120px;" class="resource flexrow flex-center flex-between">
-						<input type="number" name="system.luck.value" value="{{system.luck.value}}"/>
-						<span style="padding-top:4px"> / </span>
-						<label style="padding-top:4px" for="system.luck.max">{{system.luck.max}}</label>
-					</div>
-				</div>
-				
-			</div>
-			<div class="resources grid grid-2col">
-			
-				<div class="resource flex-group-center">
-					<label for="system.details.lang_primary" class="resource-label">Primary Language: </label>
-					<div class="resource flexrow flex-center flex-between">
-						<input type="text" name="system.details.lang_primary" id="lang-primary" placeholder="English" value="{{system.details.lang_primary}}"/>
-					</div>
-				</div>
-
-				<div class="resource flex-group-center">
-					<label class="resource-label">XP Spent:</label>
 					<div>
-						{{system.xp_spent}}
+						<table>
+							<tr><div style="font-size:12px; font-style:italic; text-align:center">Age Modifiers</div></tr>
+							<tr style="font-size:10px">
+								<th>STR</th>
+								<th>BOD</th>
+								<th>DEX</th>
+								<th>RFL</th>
+								<th>WIL</th>
+								<th>INT</th>
+								<th>CHA</th>
+							</tr>
+							<tr style="font-size:10px; text-align:center">
+								<td>{{system.agemods.str}}</td>
+								<td>{{system.agemods.bod}}</td>
+								<td>{{system.agemods.dex}}</td>
+								<td>{{system.agemods.rfl}}</td>
+								<td>{{system.agemods.wil}}</td>
+								<td>{{system.agemods.int}}</td>
+								<td>{{system.agemods.cha}}</td>
+							</tr>
+						</table>
 					</div>
+
+					<div class="resource flex-group-center">
+						<label for="system.luck.value" class="resource-label">Luck</label>
+						<div style="padding-left:120px; padding-right:120px;" class="resource flexrow flex-center flex-between">
+							<input type="number" name="system.luck.value" value="{{system.luck.value}}"/>
+							<span style="padding-top:4px"> / </span>
+							<label style="padding-top:4px" for="system.luck.max">{{system.luck.max}}</label>
+						</div>
+					</div>
+					
+				</div>
+				<div class="resources grid grid-2col">
+				
+					<div class="resource flex-group-center">
+						<label for="system.details.lang_primary" class="resource-label">Primary Language: </label>
+						<div class="resource flexrow flex-center flex-between">
+							<input type="text" name="system.details.lang_primary" id="lang-primary" placeholder="English" value="{{system.details.lang_primary}}"/>
+						</div>
+					</div>
+
+					<div class="resource flex-group-center">
+						<label class="resource-label">XP Spent:</label>
+						<div>
+							{{system.xp_spent}}
+						</div>
+					</div>
+					
 				</div>
 				
 			</div>
-			
+		</header>
+
+		{{!-- Sheet Tab Navigation --}}
+		<nav class="sheet-tabs tabs" data-group="primary">
+		{{!-- Default tab is specified in actor-sheet.mjs --}}
+
+		<a class="item" data-tab="gameplay">Gameplay</a>
+		<a class="item" data-tab="character">Character</a>
+		<a class="item" data-tab="equipment">Equipment</a>
+		{{#if (eq data.type "pc")}}
+		<a class="item" data-tab="progression">Progression</a>
+		{{/if}}
+		<a class="item" data-tab="options">Options</a>
+
+		</nav>
+
+		{{!-- Sheet Body --}}
+		<section class="sheet-body">
+
+		<div class="tab gameplay" data-group="primary" data-tab="gameplay">
+		{{#if (eq data.type "pc")}}
+			{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPC.hbs"}}
+		{{else if (eq data.type "npc")}}
+			{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayNPC.hbs"}}
+		{{/if}}
 		</div>
-	</header>
 
-  {{!-- Sheet Tab Navigation --}}
-  <nav class="sheet-tabs tabs" data-group="primary">
-    {{!-- Default tab is specified in actor-sheet.mjs --}}
-	
-    <a class="item" data-tab="gameplay">Gameplay</a>
-    <a class="item" data-tab="character">Character</a>
-    <a class="item" data-tab="equipment">Equipment</a>
-	{{#if (eq data.type "pc")}}
-	<a class="item" data-tab="progression">Progression</a>
-	{{/if}}
-    <a class="item" data-tab="options">Options</a>
-	
-  </nav>
+		<div class="tab character" data-group="primary" data-tab="character">
+			{{> "systems/a-time-of-war/templates/actor/parts/PersonActorCharacter.hbs"}}
+		</div>
 
-  {{!-- Sheet Body --}}
-  <section class="sheet-body">
+		<div class="tab equipment" data-group="primary" data-tab="equipment">
+			{{> "systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs"}}
+		</div>
 
-	<div class="tab gameplay" data-group="primary" data-tab="gameplay">
-	{{#if (eq data.type "pc")}}
-		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPC.hbs"}}
-	{{else if (eq data.type "npc")}}
-		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayNPC.hbs"}}
-	{{/if}}
+		{{#if (eq data.type "pc")}}
+		<div class="tab progression" data-group="primary" data-tab="progression">
+			{{> "systems/a-time-of-war/templates/actor/parts/PersonActorProgression.hbs"}}
+		</div>
+		{{/if}}
+
+		<div class="tab options flexcol" data-group="primary" data-tab="options">
+			{{> "systems/a-time-of-war/templates/actor/parts/PersonActorOptions.hbs"}}
+		</div>
+
+		</section>
 	</div>
-	
-    <div class="tab character" data-group="primary" data-tab="character">
-		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorCharacter.hbs"}}
-    </div>
-
-    <div class="tab equipment" data-group="primary" data-tab="equipment">
-		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs"}}
-    </div>
-
-	{{#if (eq data.type "pc")}}
-    <div class="tab progression" data-group="primary" data-tab="progression">
-		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorProgression.hbs"}}
-    </div>
-	{{/if}}
-
-    <div class="tab options flexcol" data-group="primary" data-tab="options">
-		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorOptions.hbs"}}
-    </div>
-
-  </section>
+	{{!--else--}}
+		<div>Please refresh the actor sheet <input id="refresh" type="button" value="Refresh" /></div>
+	{{!--/unless--}}
 </form>

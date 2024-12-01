@@ -56,58 +56,8 @@ export class BTPersonActorSheet extends ActorSheet {
 		}
 
 		this.SortItemsToInventory(context);
-		//console.log(context);
-
-		/*console.log("We're having to process skill advances here because for some reason custom skills go recursive in the main stack.");
-		const contextSystem = context.actor.system;
-		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
-		let updateData = {};
-		//Reset XP to 0
-		Object.entries(customSkills).forEach(entry => {
-			Object.entries(contextSystem.skills[entry[1]]).forEach(skill => {
-				const name = skill[0];
-				const data = skill[1];
-				
-				updateData["system.skills." + entry[1] + "." + name + ".xp"] = parseInt(0);
-			});
-		});
-		this.actor.update(updateData);
-
-		updateData = {};
-		Object.entries(contextSystem.advances).forEach(entry => {
-			const advance = entry[1];
-
-			if(advance.type == "skill" && advance.baseSkill != null) {
-				const target = "system.skills." + advance.baseSkill + "." + advance.name;
-
-				const skill = contextSystem.skills[advance.baseSkill][advance.name];
-				const xp = 0 + parseInt(skill.xp + advance.xp);
-				updateData[target + ".xp"] = xp;
-				//updateData[target + ".level"] = this.CalcSL(xp);
-				let linkText = skill.link.split("+");
-				const linkA = contextSystem.attributes[linkText[0]].mod;
-				const linkB = linkText.length == 2 ? contextSystem.attributes[linkText[1]].mod : 0;
-				const linkMod = linkA + linkB;
-				updateData[target + ".mod"] = linkMod;
-			}
-		});
-
-		console.log(updateData);
-		context.actor.update(updateData);
-		console.log(context);*/
-		
-		/*const contextSystem = context.actor.system;
-		contextSystem.skills.language["Urdu"].xp = contextSystem.skills.language["Urdu"].xp + 5;
-		console.log(context);*/
 
 		return context;
-	}
-	
-	_onUpdate(changed, options, userId) {
-		console.log(changed);
-		console.log(options);
-		
-		super._onUpdate(changed, options, userId);
 	}
 	
 	CalcSL(xp) {
@@ -129,30 +79,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		return sl;
 	}
-  
-  /** @override */
-  /*getData() {
-	  const actor = this.actor;
-	  const systemData = actor.system;
-	  const items = actor.items;
-	  const sheetData = {};
-	  
-	  sheetData.enrichedDescription = await TextEditor.enrichHTML(this.actor.system.description, { secrets: this.actor.isOwner, entities: true });
-	  
-	  const data = {
-		  actor,
-		  system: systemData,
-		  owner: actor.isOwner,
-		  options: this.options,
-		  editable: this.isEditable,
-		  cssClass: actor.isOwner ? "editable" : "locked",
-		  config: CONFIG.BT,
-		  rollData: this.actor.getRollData.bind(this.actor),
-		  ...sheetData
-	  }
-	  console.log(data);
-	  return data;
-  }*/
 
 	/**
 	* Character-specific context modifications
@@ -162,8 +88,6 @@ export class BTPersonActorSheet extends ActorSheet {
 	_preparePCData(context) {
 		// This is where you can enrich character-specific editor fields
 		// or setup anything else that's specific to this type
-
-		//this._prepareVariables(context);
 
 		//Calc handlebars
 		Handlebars.registerHelper('calcXPForNextSL', function(xp) {
@@ -205,50 +129,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		// This is where you can enrich character-specific editor fields
 		// or setup anything else that's specific to this type
 	}
-
-	//Organize and classify Items for Actor sheets.
-	/*_prepareItems(context) {
-		const weapons = [];
-		const armour = [];
-		const equipment = [];
-		const properties = [];
-		const modules = [];
-		
-		for (let i of context.items) {
-			//Near as I can tell, this lets the item retain its img or use the default icon if it doesn't have one of its own.
-			i.img = i.img || Item.DEFAULT_ICON;
-			
-			//Now append it to the appropriate array.
-			switch(i.type) {
-				case "weapon":
-					weapons.push(i);
-					break;
-				case "armour":
-					armour.push(i);
-					break;
-				case "equipment":
-					equipment.push(i);
-					break;
-				case "property":
-					properties.push(i);
-					break;
-				case "lifepath_module":
-					modules.push(i);
-					break;
-				default:
-					console.error("Item i {0} type {1} not recognised", i, i.type);
-					break;
-			}
-		}
-		
-		//Push this data to context so that handlebars can access it.
-		context.inventory = { weapons: {}, armour: {}, equipment: {}, properties: {}, modules: {} };
-		context.inventory["weapons"] = weapons;
-		context.inventory["armour"] = armour;
-		context.inventory["equipment"] = equipment;
-		context.inventory["properties"] = properties;
-		context.inventory["modules"] = modules;
-	}*/
 	
 	SortItemsToInventory(context = null) {
 		const weapons = [];
@@ -291,12 +171,6 @@ export class BTPersonActorSheet extends ActorSheet {
 			properties: {},
 			modules: {}
 		};
-			
-		/*this.actor.system["inventory"]["weapons"] = weapons;
-		this.actor.system["inventory"]["armour"] = armour;
-		this.actor.system["inventory"]["equipment"] = equipment;
-		this.actor.system["inventory"]["properties"] = properties;
-		this.actor.system["inventory"]["modules"] = modules;*/
 		
 		if(context != null)
 		{
@@ -486,7 +360,14 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		this.UpdateAdvanceMaker();
 		
-		//this.DoSkills();
+		this.actor.update({});
+		this.document.prepareDerivedData();
+		
+		/*if(this.actor.system["needsRefresh"]) {
+			console.error("DOIN IT");
+			this.actor.system["needsRefresh"] = false;
+			this.RefreshSheet();
+		}*/
 
 		/*// Active Effect management
 		html.on('click', '.effect-control', (ev) => {
@@ -509,52 +390,13 @@ export class BTPersonActorSheet extends ActorSheet {
 		}*/
 	}
 	
-	/*async DoSkills() {
-		console.log("We're having to process skill advances here because for some reason custom skills go recursive in the main stack.");
-		const contextSystem = this.actor.system;
-		const customSkills = ["art", "career", "interest", "language", "protocol", "science", "streetwise", "survival"];
-		let updateData = {};
-		//Reset XP to 0
-		Object.entries(customSkills).forEach(entry => {
-			Object.entries(contextSystem.skills[entry[1]]).forEach(skill => {
-				const name = skill[0];
-				const data = skill[1];
-				
-				updateData["system.skills." + entry[1] + "." + name + ".xp"] = parseInt(0);
-			});
-		});
-		await this.actor.update(updateData);
-
-		updateData = {};
-		Object.entries(contextSystem.advances).forEach(entry => {
-			const advance = entry[1];
-
-			if(advance.type == "skill" && advance.baseSkill != null) {
-				const target = "system.skills." + advance.baseSkill + "." + advance.name;
-
-				const skill = contextSystem.skills[advance.baseSkill][advance.name];
-				const xp = 0 + parseInt(skill.xp + advance.xp);
-				updateData[target + ".xp"] = xp;
-				updateData[target + ".level"] = this.CalcSL(xp);
-				let linkText = skill.link.split("+");
-				const linkA = contextSystem.attributes[linkText[0]].mod;
-				const linkB = linkText.length == 2 ? contextSystem.attributes[linkText[1]].mod : 0;
-				const linkMod = linkA + linkB;
-				updateData[target + ".mod"] = linkMod;
-			}
-		});
-
-		console.log(updateData);
-		await this.actor.update(updateData);
-	}*/
-	
 	RefreshSheet() {
 		this.document.prepareDerivedData();
 		this.render();
 	}
 
 	//These listeners make the advance maker work.
-	ListenForSheetButtons(html) {
+	async ListenForSheetButtons(html) {
 		//fields
 		html.on('change', '#lang-primary', this.ChangeLangPrimary.bind(this));
 		html.on('change', '#age', this.ChangeAge.bind(this));
@@ -590,8 +432,8 @@ export class BTPersonActorSheet extends ActorSheet {
 		html.on('change', '#affiliation-select', this.ChangeLifepath.bind(this));
 		html.on('change', '#subaffiliation-select', this.ChangeLifepath.bind(this));
 		
-	//INVENTORY STUFF
-		// Render the item sheet for viewing/editing prior to the editable check.
+		//EMBEDDED ITEM STUFF
+		// Render the item sheet for viewing/editing when you click on it.
 		html.on('click', '.item-edit', (event) => {
 			const li = $(event.currentTarget).parents(".item")[0];
 			const item = this.actor.items.get(li.dataset.id);
@@ -607,6 +449,40 @@ export class BTPersonActorSheet extends ActorSheet {
 			const li = $(event.currentTarget).parents(".item")[0];
 			const item = this.actor.items.get(li.dataset.id);
 			item.delete();
+		});
+		
+		//Render life modules for viewing/editing when you click on them..
+		html.on('dblclick', '.module.clickable', (event) => {
+			const element = $(event.currentTarget)[0];
+			const item = this.actor.items.get(element.id);
+			item.sheet.render(true);
+		});
+		
+		//Bind an event that lets you delete lifepath modules from your sheet by right-clicking them, with a simple dialog prompt.
+		html.on('contextmenu', '.module.clickable', async (event) => {
+			const element = $(event.currentTarget)[0];
+			const item = this.actor.items.get(element.id);
+			
+			const confirmation = await Dialog.confirm({
+				content: "Delete " + item.system.type + " (" + item.name + ")?"
+			});
+
+			if (confirmation) {
+				item.delete();
+			}
+		});
+		
+		html.on('setup', '#refresh', (event) => { console.error("HEY"); });
+		html.on('ready', '#refresh', (event) => { console.error("HEY"); });
+		html.on('DOMContentLoad', '#refresh', (event) => { console.error("HEY"); });
+		html.on('click', '#refresh', async (event) => {
+			/*const age = this.actor.system.details.age;
+			await this.ChangeAge({
+				currentTarget: {
+					value: age
+				}
+			});*/
+			//await this.close();
 		});
 	}
 
@@ -690,21 +566,9 @@ export class BTPersonActorSheet extends ActorSheet {
 		}
 		
 		document.getElementById("lifepath-img").src = "systems/a-time-of-war/assets/affiliations/"+value+".png";
+		
 		this.actor.update(updateData);
 	}
-	
-	/*ToggleShowLifepath(event) {
-		const element = event.currentTarget;
-		const id = element.id;
-		const value = element.checked;
-		
-		if(id.split("-show-")[1] == "selectors") {
-			document.getElementById("lifepath-selectors").style.display = value ? "block" : "none";
-		}
-		else if(id.split("-show-")[1] == "modules") {
-			document.getElementById("lifepath-modules").style.display = value ? "block" : "none";
-		}
-	}*/
 	
 	ChangeLangPrimary(event) {
 		const element = event.currentTarget;
@@ -715,22 +579,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		this.RefreshSheet();
 	}
 	
-	/*ChangeDetail(event) {
-		const element = event.currentTarget;
-		const dataset = element.dataset;
-		
-		let updateData = {};
-		if(dataset.for == "height") {
-			this.getData().actor.system.details.build = element.value;
-			updateData["system.details.build"] = element.value;
-		}
-		else if(dataset.for == "weight") {
-			this.getData().actor.system.details.gender = element.value;
-			updateData["system.details.gender"] = element.value;
-		}
-		this.actor.update(updateData);
-	}*/
-	
 	ChangeAge(event) {
 		const element = event.currentTarget;
 		
@@ -739,7 +587,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		//age mods
 		const age = updateData["system.details.age"];
-		//str
 		if(age < 25) {
 			updateData["system.agemods.str"] = "+0";
 			updateData["system.agemods.bod"] = "+0";
@@ -865,14 +712,12 @@ export class BTPersonActorSheet extends ActorSheet {
 			}
 		});
 		
-		console.log(updateData);
 		await this.actor.update(updateData);
 	}
 	
 	AddNewSkill(event) {
 		const element = event.currentTarget;
 		const dataset = element.dataset;
-		console.log(dataset);
 		
 		const actorData = this.getData().actor;
 		const systemData = actorData.system;
@@ -880,7 +725,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		const baseSkill = dataset.baseskill;
 		const newSkillName = element.value;
 		const link = dataset.link;
-		console.log(link);
 		
 		let updateData = {};
 		updateData = {
@@ -893,7 +737,6 @@ export class BTPersonActorSheet extends ActorSheet {
 			name: element.value,
 			baseSkill: baseSkill
 		};
-		console.log(updateData);
 		
 		element.value = "";
 		
@@ -907,11 +750,6 @@ export class BTPersonActorSheet extends ActorSheet {
 				["system.skills."+element.value]: updateData
 			});
 		}
-		
-		/*this.actor.update({
-			["system.skills."+baseSkill+"."+newSkillName]: updateData
-		});*/
-		//this.render();
 	}
 	
 	async ModifyTraitComponent(event) {
@@ -1100,8 +938,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		const advanceMaker = systemData.advanceMaker;
 		
 		advanceMaker.free = !advanceMaker.free;
-		
-		console.log("Advances: {0}", this.getData().actor.system.advances);
 	}
 	
 	_onAdvanceUpdate(event) {
@@ -1117,186 +953,12 @@ export class BTPersonActorSheet extends ActorSheet {
 		const systemData = actorData.system;
 		const advanceMaker = systemData.advanceMaker;
 		
-		//if id = "advance-type" then id.split('-')[1] = type;
 		const which = id.split('-')[1];
 		
 		advanceMaker[which] = value;
-		console.log(advanceMaker);
-		
-		/*let updateData = {};
-		updateData["system.advanceMaker"] = {
-			"type": advanceMaker,
-			"name": "",
-			"xp": 0,
-			"free": false,
-			"baseSkill": null,
-			"subtitle": "",
-			"traitId": "",
-			"id": ""
-		};*/
 		
 		this.render();
-		
-		//Save values from the inputs before rendering!
-		//const savedType = "attribute";
-		//const savedName = "cha";
-		//const savedXP = 50;
-		
-		//let thing = document.querySelector('#advance-type option[value='+advanceMaker.type+']');
-		//console.log(thing);
-		
-		//this.render();
-		
-		/*console.log(document.getElementById("advance-type").selectedIndex);
-		document.getElementById("advance-type").selectedIndex = 1;
-		console.log(document.getElementById("advance-type").selectedIndex);
-		document.getElementById("advance-type")[thing.dataset.index].selected = "selected";
-		
-		document.getElementById("advance-type").selectedIndex = 0;
-		document.getElementById("advance-name").selectedIndex = 6;
-		document.getElementById("advance-xp").value = savedXP;
-		console.log(document.getElementById("advance-type"));
-		console.log(document.getElementById("advance-type")[thing.dataset.index]);*/
-		
-		//document.querySelector('#advance-'+which+' option[value='+value+']');
-		
-		/*let updateData = {};
-		updateData["system.advanceMaker"] = {
-			"type": value,
-			"name": "",
-			"xp": 0,
-			"free": false,
-			"baseSkill": null,
-			"subtitle": "",
-			"traitId": "",
-			"id": ""
-		}
-		this.actor.update(updateData);*/
 	}
-	
-	//async _onAdvanceUpdate(event) {
-		//event.preventDefault();
-		/*const element = event.currentTarget;
-		const id = element.id;
-		let value = element.value;
-		
-		const actorData = this.actor;
-		const systemData = actorData.system;*/
-		
-		/*const which = id.split('advance-')[1];
-		switch(which) {
-			case "type":
-				systemData.advanceMaker.type = value;
-				systemData.advanceMaker.name = undefined;
-				systemData.advanceMaker.xp = undefined;
-				systemData.advanceMaker.baseSkill = undefined;
-				systemData.advanceMaker.traitId = undefined;
-				systemData.advanceMaker.id = undefined;
-				break;
-			case "name":
-				if(value.includes('/')) {
-					let baseSkill = value.split('/')[0];
-					value = value.split('/')[1];
-					systemData.advanceMaker.baseSkill = baseSkill;
-					systemData.advanceMaker.name = value;
-				}
-				else {
-					systemData.advanceMaker.baseSkill = undefined;
-					systemData.advanceMaker.name = value;
-				}
-				systemData.advanceMaker.xp = undefined;
-				break;
-			case "xp":
-				systemData.advanceMaker.xp = parseInt(value);
-				break;
-			default:
-				break;
-		}
-		console.log("advanceMaker: ", systemData.advanceMaker);*/
-		
-		/*let updateData = {};
-		updateData["system.advanceMaker"] = {
-			"type": systemData.advanceMaker.type,
-			"name": systemData.advanceMaker.name,
-			"xp": systemData.advanceMaker.xp,
-			"free": systemData.advanceMaker.free,
-			"baseSkill": systemData.advanceMaker.baseSkill,
-			"subtitle": systemData.advanceMaker.subtitle,
-			"traitId": systemData.advanceMaker.traitId,
-			"id": systemData.advanceMaker.id
-		}
-		console.log("updateData: ", updateData);
-		
-		this.actor.update(updateData);*/
-		
-		//reset the dropdown selectors because, I dunno, rendering makes them blank but doesn't change their values or something weird.
-		/*let selectedOption = document.querySelector("#advance-type option[value="+value+"]");
-		document.getElementById("advance-type").selectedIndex = selectedOption.dataset.index;
-		selectedOption = document.querySelector("#advance-name option[value="+value+"]");
-		document.getElementById("advance-name").selectedIndex = selectedOption.dataset.index;*/
-		
-		//if(which == "type" || which == "name") {
-			//let selectedOption = document.querySelector('#advance-'+which+' option[value='+value+']');
-			//let index = selectedOption.dataset.index;
-			//console.log(index);
-			
-		//}
-		//document.getElementById("advance-type").selectedIndex = 
-		
-		/*const updateTarget = "system.advanceMaker";
-		
-		console.log(value);
-		
-		let orig = ["1", "2", "3"];
-		orig[0] = document.getElementById("advance-type").value;
-		orig[1] = document.getElementById("advance-name").value;
-		orig[2] = document.getElementById("advance-xp").value;
-		orig[3] = document.getElementById("advance-free").checked;
-		
-		//const actorData = this.getData().actor;
-		//const systemData = actorData.system;
-		//const advanceMaker = systemData.advanceMaker;
-		
-		let updateData = {};
-		switch(id.split('advance-')[1]) {
-			case "type":
-				updateData[updateTarget] = {
-					type: value
-				}
-				break;
-			case "name":
-				if(value.includes('/'))
-				{
-					let baseSkill = value.split('/')[0];
-					value = value.split('/')[1];
-					updateData[updateTarget] = {
-						baseSkill: baseSkill,
-						name: value
-					}
-				}
-				else {
-					updateData[updateTarget] = {
-						baseSkill: undefined,
-						name: value
-					}
-				}
-				break;
-			case "xp":
-				updateData[updateTarget] = {
-					xp: parseInt(value)
-				}
-				break;
-			default:
-				break;
-		}
-		
-		await this.actor.update(updateData);*/
-		
-		/*document.getElementById("advance-type").value = orig[0];
-		document.getElementById("advance-name").value = orig[1];
-		document.getElementById("advance-xp").value = parseInt(orig[2]);
-		document.getElementById("advance-free").checked = orig[3];*/
-	//}
 	
 	//When you click the submit button on the advance maker, it calls this function.
 	_onAdvanceFinish(event) {
@@ -1329,11 +991,8 @@ export class BTPersonActorSheet extends ActorSheet {
 		let subtitle = "";
 		let advanceName = advanceMaker.name;
 		if(advanceMaker.type == "trait") {
-			console.log("advanceMaker: {0}", advanceMaker);
-			console.log("trait: {0}", systemData.traits[advanceMaker.name]);
 			advanceName = systemData.traits[advanceMaker.name].name;
 			subtitle = systemData.traits[advanceMaker.name].subtitle;
-			console.log("Subtitle: {0}", subtitle);
 		}
 		
 		//BaseSkill for custom skills;
@@ -1367,10 +1026,8 @@ export class BTPersonActorSheet extends ActorSheet {
 			baseSkill: null,
 			subtitle: ""
 		}
-		console.log(updateData);
 		
 		this.actor.update(updateData);
-		//this.RefreshSheet();
 	}
 	
 	async UpdateAdvanceMaker() {
@@ -1423,7 +1080,7 @@ export class BTPersonActorSheet extends ActorSheet {
 			link += !level ? this.GetAttributeMod(systemData.attributes[linkText].level) : systemData.attributes[linkText].level;
 		}
 		
-		return link;
+		return parseInt(link);
 	}
 	
 	GetAttributeMod(level) {

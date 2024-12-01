@@ -35,6 +35,14 @@
 									<span class="resource-label">Cost: </span>{{item.system.cost}}
 								</td>
 							</tr>
+							<tr>
+								<td>
+									<span class="resource-label">Flex: </span>
+								</td>
+								<td>
+									<textarea id="flex" placeholder="Enter flexible XPs here...">{{item.system.flex}}</textarea>
+								</td>
+							</tr>
 						</table>
 					</td>
 				</tr>
@@ -42,7 +50,7 @@
 		</div>
 	</header>
 	<body>
-		<input type="textarea" id="description" value="{{item.system.description}}" placeholder="Enter description here..." />
+		<textarea id="description" value="{{item.system.description}}" placeholder="Enter description here...">{{item.system.description}}</textarea>
 		<br>
 		<table>
 			<caption>
