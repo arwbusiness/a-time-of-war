@@ -8,24 +8,22 @@ import {
  * @extends {ActorSheet}
  */
 export class BTPersonActorSheet extends ActorSheet {
-  /** @override */
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ['bt', 'sheet', 'actor', 'person'],
-      width: 750,
-      height: 650,
-      tabs: [
-        {
-          navSelector: '.sheet-tabs',
-          contentSelector: '.sheet-body',
-          initial: 'gameplay',
-        },
-      ],
-    });
-  }
-
-  /* -------------------------------------------- */
-
+	/** @override */
+	static get defaultOptions() {
+		return foundry.utils.mergeObject(super.defaultOptions, {
+			classes: ['bt', 'sheet', 'actor', 'person'],
+			width: 750,
+			height: 650,
+			tabs: [
+				{
+					navSelector: '.sheet-tabs',
+					contentSelector: '.sheet-body',
+					initial: 'gameplay',
+				},
+			],
+		});
+	}
+	
 	/** @override */
 	getData() {
 		// Retrieve the data structure from the base sheet. You can inspect or log
@@ -59,6 +57,8 @@ export class BTPersonActorSheet extends ActorSheet {
 
 		return context;
 	}
+
+	/* -------------------------------------------- */
 	
 	CalcSL(xp) {
 		if(xp >= 570)
@@ -118,8 +118,11 @@ export class BTPersonActorSheet extends ActorSheet {
 			
 			return 100-remainder;
 		});
+		
+		/* * * DATA CALL IS HERE * * */
+		//this.CalculateData(context.actor.type);
 	}
-
+	
 	/**
 	* Character-specific context modifications
 	*
@@ -197,7 +200,8 @@ export class BTPersonActorSheet extends ActorSheet {
 
 	/* -------------------------------------------- */
   
-	/*async _onDrop(event) {
+	/** @override *
+	async _onDrop(event) {
 		console.log("event: {0}", event);
 		const target = event.target;
 		const data = event.dataTransfer.items;
@@ -209,24 +213,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		}
 		
 		return await super._onDrop(event);
-	}*/
-	
-	/** @override */
-	/*async _onDropItem(event, data) {
-		const ev = event;
-		const dt = data;
-		const uuid = dt.uuid.split("Item.")[1];
-		console.log("DROP_ITEM | event: {0}, data: {1}", ev, dt);
-		
-		let item = foundry.utils.deepClone(game.items.get(uuid));
-		console.log(item);
-		
-		const itemData = item.system;
-		console.log(itemData);
-		this.actor.createEmbeddedDocuments("Item", [itemData]);
-		console.log(this.actor);
-		
-		return await super._onDropItem(ev, dt);
 	}*/
 	
 	/** @override */
@@ -247,6 +233,9 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		//Push the newly-made items onto the character sheet.
 		return this.actor.createEmbeddedDocuments("Item", toCreate);
+		/*let updateData = {};
+		updateData["system.needsRefresh"] = true;
+		this.actor.update(updateData);*/
 	}
 	
 	//Handler to determine if dropped items are valid
@@ -350,24 +339,35 @@ export class BTPersonActorSheet extends ActorSheet {
 	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
+		
+		/*console.warn(this.actor.system["needsRefresh"]);
+		if(this.actor.system["needsRefresh"]) {
+			html.on('click', '#refresh', async (event) => {
+				const actorId = this.id;
+				await this.close();
+		
+				this.actor.system["needsRefresh"] = false;
+				let updateData = {};
+				updateData["system.needsRefresh"] = false;
+				this.actor.update(updateData);
+				
+				await this.render(true);
+			});
+			return;
+		}*/
 
 		// -------------------------------------------------------------
 		// Everything below here is only needed if the sheet is editable
-		if (!this.isEditable) return;
+		if (!this.isEditable)
+			return;
 
 		//Activate progression listeners
 		this.ListenForSheetButtons(html);
 		
 		this.UpdateAdvanceMaker();
 		
-		this.actor.update({});
-		this.document.prepareDerivedData();
-		
-		/*if(this.actor.system["needsRefresh"]) {
-			console.error("DOIN IT");
-			this.actor.system["needsRefresh"] = false;
-			this.RefreshSheet();
-		}*/
+		//this.actor.update({});
+		//this.document.prepareDerivedData();
 
 		/*// Active Effect management
 		html.on('click', '.effect-control', (ev) => {
@@ -395,7 +395,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		this.render();
 	}
 
-	//These listeners make the advance maker work.
+	//These listeners make the sheet work.
 	async ListenForSheetButtons(html) {
 		//fields
 		html.on('change', '#lang-primary', this.ChangeLangPrimary.bind(this));
@@ -427,10 +427,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		html.on('change','#advance-name', this._onAdvanceUpdate.bind(this));
 		html.on('blur','#advance-xp', this._onAdvanceUpdate.bind(this));
 		html.on('click', '#advance-finish', this._onAdvanceFinish.bind(this));
-		
-		//Lifepath stuff
-		html.on('change', '#affiliation-select', this.ChangeLifepath.bind(this));
-		html.on('change', '#subaffiliation-select', this.ChangeLifepath.bind(this));
 		
 		//EMBEDDED ITEM STUFF
 		// Render the item sheet for viewing/editing when you click on it.
@@ -470,19 +466,6 @@ export class BTPersonActorSheet extends ActorSheet {
 			if (confirmation) {
 				item.delete();
 			}
-		});
-		
-		html.on('setup', '#refresh', (event) => { console.error("HEY"); });
-		html.on('ready', '#refresh', (event) => { console.error("HEY"); });
-		html.on('DOMContentLoad', '#refresh', (event) => { console.error("HEY"); });
-		html.on('click', '#refresh', async (event) => {
-			/*const age = this.actor.system.details.age;
-			await this.ChangeAge({
-				currentTarget: {
-					value: age
-				}
-			});*/
-			//await this.close();
 		});
 	}
 
@@ -525,49 +508,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		advanceMaker.id = "";
 		
 		this.render();
-	}
-	
-	ChangeLifepath(event) {
-		const element = event.currentTarget;
-		const value = element.value;
-		const which = element.id.split('-select')[0];
-		
-		let updateData = {};
-		updateData["system.lifepath."+which] = value;
-		
-		if(which == "subaffiliation") {
-			switch(value) {
-				//Major Periphery State
-				case "circinus":
-				case "magistracy":
-				case "marian":
-				case "outworlds":
-				case "taurian":
-				case "aurigan":
-					updateData["system.lifepath.img"] = "systems/a-time-of-war/assets/affiliations/"+value+".png";
-					break;
-				default:
-					break;
-			}
-		}
-		else if(which == "affiliation") {
-			switch(value) {
-				//Great Houses
-				case "liao":
-				case "kurita":
-				case "steiner":
-				case "davion":
-				case "marik":
-					updateData["system.lifepath.img"] = "systems/a-time-of-war/assets/affiliations/"+value+".png";
-					break;
-				default:
-					break;
-			}
-		}
-		
-		document.getElementById("lifepath-img").src = "systems/a-time-of-war/assets/affiliations/"+value+".png";
-		
-		this.actor.update(updateData);
 	}
 	
 	ChangeLangPrimary(event) {
@@ -713,9 +653,11 @@ export class BTPersonActorSheet extends ActorSheet {
 		});
 		
 		await this.actor.update(updateData);
+		
+		//this.CalculateData(this.actor.type);
 	}
 	
-	AddNewSkill(event) {
+	async AddNewSkill(event) {
 		const element = event.currentTarget;
 		const dataset = element.dataset;
 		
@@ -741,15 +683,17 @@ export class BTPersonActorSheet extends ActorSheet {
 		element.value = "";
 		
 		if(baseSkill != undefined && baseSkill != "") {
-			this.actor.update({
+			await this.actor.update({
 				["system.skills."+baseSkill+"."+newSkillName]: updateData
 			});
 		}
 		else {
-			this.actor.update({
+			await this.actor.update({
 				["system.skills."+element.value]: updateData
 			});
 		}
+		
+		//this.CalculateData(this.actor.type);
 	}
 	
 	async ModifyTraitComponent(event) {
@@ -845,6 +789,8 @@ export class BTPersonActorSheet extends ActorSheet {
 		});
 		
 		await this.actor.update(updateData);
+		
+		//this.CalculateData(this.actor.type);
 	}
 	
 	async TraitToChatMessage(event) {
@@ -1308,4 +1254,240 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		return msg;
 	}
+	
+	/* * * DERIVED DATA * * */
+	/*async CalculateData(type) {
+		console.warn("CALLING THE CALC DATA STEP");
+		console.error(document.querySelector("input[data-baseskill='language'"));
+		
+		switch(type) {
+			case "pc":
+				await this.CalculatePCData();
+				break;
+			case "npc":
+				await this.CalculateNPCData();
+				break;
+			default:
+				console.error("Type", type, "not recognised!");
+				break;
+		}
+	}
+	
+	async CalculatePCData() {
+		const systemData = this.actor.system;
+		
+		//Reset all skills, attributes and traits to zero xp, so they can be recalculated using advances and modules.
+		const attributes = systemData.attributes;
+		Object.entries(attributes).forEach(attribute => {
+			attribute[1].xp = 0;
+		});
+		
+		const traits = systemData.traits;
+		Object.entries(traits).forEach(trait => {
+			trait[1].xp = 0;
+		});
+		
+		const skills = systemData.skills;
+		Object.entries(skills).forEach(skill => {
+			let name = skill[0];
+			let data = Object.entries(skill[1]);
+			
+			if(data.length == 0)
+				return;
+			
+			const isCustomSkill = data[0][0] != "xp";
+			if(isCustomSkill) {
+				name = data[0][0];
+				data = data[0][1];
+			}
+			else
+				data = skill[1];
+			
+			data.xp = 0;
+		});
+		
+		const advances = systemData.advances;
+		let context = { inventory: {} };
+		this.SortItemsToInventory(context);
+		const modules = context.inventory.modules;
+		
+		//Check modules for custom skills and traits and establish them before trying to set them.
+		for(var i = 0; i < modules.length; i++) {
+			const module = modules[i];
+			if(module.system.type == "subaffiliation" && module.img != "")
+				systemData.lifepath.img = module.img;
+			
+			const data = module.system;
+			if(data.skills != undefined) {
+				Object.entries(data.skills).forEach(en => {
+					console.warn("Adding", en[1].name);
+					const advance = en[1];
+					const id = advance.id;
+					const name = advance.name;
+					//const xp = parseInt(advance.xp);
+					const hasSubtitle = advance.hasSubtitle;
+					const subtitle = advance.subtitle;
+					
+					if(hasSubtitle) {// && skills[name][subtitle] == undefined) {
+						//Create a blank custom skill for each
+						switch(name) {
+							case "art":
+								this.actor.system.skills[name][subtitle] = {
+									id: id,
+									name: subtitle,
+									baseSkill: name,
+									xp: 0,
+									mod: 0,
+									level: -1,
+									link: "dex",
+									tn: 8,
+									type: "CB"
+								};
+								break;
+							case "career":
+								this.actor.system.skills[name][subtitle] = {
+									id: id,
+									name: subtitle,
+									baseSkill: name,
+									xp: 0,
+									mod: 0,
+									level: -1,
+									link: "int",
+									tn: 7,
+									type: "SB"
+								};
+								break;
+							case "interest":
+								this.actor.system.skills[name][subtitle] = {
+									id: id,
+									name: subtitle,
+									baseSkill: name,
+									xp: 0,
+									mod: 0,
+									level: -1,
+									link: "int",
+									tn: 8,
+									type: "CB"
+								};
+								break;
+							case "language":
+								this.actor.system.skills[name][subtitle] = {
+									id: id,
+									name: subtitle,
+									baseSkill: name,
+									xp: 0,
+									mod: 0,
+									level: -1,
+									link: "int+cha",
+									tn: 8,
+									type: "SA"
+								};
+								break;
+							case "protocol":
+								this.actor.system.skills[name][subtitle] = {
+									id: id,
+									name: subtitle,
+									baseSkill: name,
+									xp: 0,
+									mod: 0,
+									level: -1,
+									link: "wil+cha",
+									tn: 9,
+									type: "CA"
+								};
+								break;
+							case "science":
+								this.actor.system.skills[name][subtitle] = {
+									id: id,
+									name: subtitle,
+									baseSkill: name,
+									xp: 0,
+									mod: 0,
+									level: -1,
+									link: "int+wil",
+									tn: 9,
+									type: "CA"
+								};
+								break;
+							case "streetwise":
+								this.actor.system.skills[name][subtitle] = {
+									id: id,
+									name: subtitle,
+									baseSkill: name,
+									xp: 0,
+									mod: 0,
+									level: -1,
+									link: "cha",
+									tn: 8,
+									type: "CB"
+								};
+								break;
+							case "survival":
+								this.actor.system.skills[name][subtitle] = {
+									id: id,
+									name: subtitle,
+									baseSkill: name,
+									xp: 0,
+									mod: 0,
+									level: -1,
+									link: "bod+int",
+									tn: 9,
+									type: "CA"
+								};
+								break;
+							default:
+								break;
+						}
+						this.render();
+					}
+				});
+			}*/
+			
+			/*if(data.attributes != undefined) {
+				Object.entries(data.attributes).forEach(en => {
+					const id = entry[0];
+					const attribute = entry[1];
+					const name = attribute.name;
+					const xp = parseInt(data.xp);
+					this.actor.system.attributes[name].xp 
+				});
+			}*/
+			
+			/*if(data.traits != undefined) {
+				
+			}
+		}
+		
+		//Now we pump in the XP from modules
+		for(var i = 0; i < modules.length; i++) {
+			const module = modules[i];
+			const data = module.system;
+			if(data.skills != undefined) {
+				Object.entries(data.skills).forEach(en => {
+					console.warn("Adding", en[1].name);
+					const advance = en[1];
+					const id = advance.id;
+					const name = advance.name;
+					const xp = parseInt(advance.xp);
+					const hasSubtitle = advance.hasSubtitle;
+					const subtitle = advance.subtitle;
+					
+					let updateData = {};
+					if(hasSubtitle) {
+						this.actor.system.skills[name][subtitle].xp += xp;
+						updateData["system.skills."+name+"."+subtitle+".xp"] = this.actor.system.skills[name][subtitle].xp + xp;
+					}
+					else {
+						this.actor.system.skills[name].xp += xp;
+						updateData["system.skills."+name+".xp"] = this.actor.system.skills[name].xp + xp;
+					}
+					this.actor.update(updateData);
+				});
+			}
+		}
+	}
+
+	async CalculateNPCData() {
+		
+	}*/
 }

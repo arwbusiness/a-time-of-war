@@ -44,6 +44,17 @@ export class BTActor extends Actor {
 		this._prepareNpcData(actorData);
 		this._prepareVehicleData(actorData);
 	}
+	
+	/** @override */
+	_initialize() {
+		super._initialize();
+		
+		/*console.warn("HEY, THIS YOU?");
+		
+		let updateData = {};
+		updateData["system.needsRefresh"] = true;
+		this.update(updateData);*/
+	}
 
 	/**
 	* Prepare Character type specific data
@@ -53,7 +64,6 @@ export class BTActor extends Actor {
 			return;
 		
 		const systemData = actorData.system;
-		//systemData["needsRefresh"] = false;
 		
 		//Reset skills by setting their XP to 0.
 		const skills = Object.entries(systemData.skills);
@@ -71,8 +81,53 @@ export class BTActor extends Actor {
 			else
 				data = skill[1];
 			
+			console.log(name);
+			
 			data.xp = 0;
 		});
+		for(let item of this.items) {
+			if(item.type != "lifepath_module")
+				return;
+			
+			const data = item.system;
+			Object.entries(data.skills).forEach(entry => {
+				const skill = entry[1];
+				//Only hit custom skills
+				if(skill.hasSubtitle)
+				{
+					const name = skill.subtitle;
+					const baseSkill = skill.name;
+					try {
+						systemData.skills[baseSkill][name].xp = 0;
+					}
+					catch {
+						console.error(baseSkill, name, "was undefined");
+					}
+				}
+			});
+			
+			Object.entries(data.traits).forEach(entry => {
+				const trait = entry[1];
+				const hasSubtitle = trait.hasSubtitle;
+				const id = trait.id;
+				const name = trait.name;
+				const subtitle = trait.subtitle;
+				
+				try {
+					systemData.traits[id] = {
+						xp: 0,
+						subtitle: subtitle,
+						hasSubtitle: hasSubtitle,
+						id: id,
+						name: name
+					};
+				}
+				catch {
+					console.error("traitId", id, "was undefined");
+				}
+			});
+		}
+		console.warn("break here");
 		
 		//Reset attributes by setting their XP to 0.
 		const attributes = Object.entries(systemData.attributes);
@@ -112,76 +167,6 @@ export class BTActor extends Actor {
 						systemData.skills[baseSkill][name] = {};
 						
 						const element = document.querySelector('input[data-baseskill="' + baseSkill + '"]');
-						
-						/*if(element == null)
-							systemData["needsRefresh"] = true;
-						else
-							systemData["needsRefresh"] = false;*/
-						/*
-						if(element == null) {
-							let link = "";
-							let tn = "";
-							let type = "";
-							switch(baseSkill) {
-								case "art":
-									link = "dex";
-									tn = 8;
-									type = "CB";
-									break;
-								case "career":
-									link = "int";
-									tn = 7;
-									type = "SB";
-									break;
-								case "interest":
-									link = "int";
-									tn = 8;
-									type = "CB";
-									break;
-								case "language":
-									link = "int+cha";
-									tn = 8;
-									type = "SA";
-									break;
-								case "protocol":
-									link = "wil+cha";
-									tn = 9;
-									type = "CA";
-									break;
-								case "science":
-									link = "int+wil";
-									tn = 9;
-									type = "CA";
-									break;
-								case "streetwise":
-									link = "cha";
-									tn = 8;
-									type = "CB";
-									break;
-								case "survival":
-									link = "bod+int";
-									tn = 9;
-									type = "CA";
-									break;
-								default:
-									return;
-							}
-							
-							systemData.skills[baseSkill][name] = {
-								name: name,
-								baseSkill: baseSkill,
-								level: -1,
-								mod: 0,
-								link: link,
-								tn: tn,
-								type: type,
-								xp: xp
-							};
-							console.error(systemData.skills[baseSkill][name]);
-							
-							return;
-						}
-						*/
 						const dataset = element.dataset;
 						const link = dataset.link;
 						const tn = dataset.tn;
@@ -324,7 +309,7 @@ export class BTActor extends Actor {
 		systemData.attributes["int"].xp += parseInt(ageXp["int"]);
 		systemData.attributes["cha"].xp += parseInt(ageXp.cha);
 		
-		/* * * MODULE XP * * */
+		//* * * MODULE XP
 		//Ok, let's get the XP modifiers from modules
 		let moduleXP = 0;
 		for(let item of this.items) {
@@ -346,6 +331,7 @@ export class BTActor extends Actor {
 				const data = entry[1];
 				const name = data.name;
 				const xp = parseInt(data.xp);
+				console.log(name);
 				
 				if(data.hasSubtitle) {
 					const subtitle = data.subtitle;
@@ -366,9 +352,11 @@ export class BTActor extends Actor {
 							type: type,
 							xp: parseInt(xp)
 						};
+						console.warn(name, subtitle, "undefined");
 					}
 					else {
 						systemData.skills[name][subtitle].xp += parseInt(xp);
+						console.warn(name, subtitle, "not undefined");
 					}
 				}
 				else {

@@ -164,11 +164,6 @@ Handlebars.registerHelper('tryLocalize', function(key) {
 /*  Hooks	                                    */
 /* -------------------------------------------- */
 
-Hooks.once('ready', function () {
-  // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
-  Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
-});
-
 Hooks.once('setup', function () {
 	_configureTrackableAttributes();
 	
@@ -185,6 +180,34 @@ Hooks.once('setup', function () {
 		}
 	];
 });
+
+/**
+ * Once the entire VTT framework is initialized, check to see if we should perform a data migration.
+ * Small version changes (after the last dot) do not need a migration.
+ */
+Hooks.once("ready", function() {
+	/*console.warn("HOW MANY TIMES DOES THIS GET CALLED????");
+	const actors = Object.entries(game.actors)[1][1][0].documents;
+	for(var i = 0 ; i < actors.length; i++) {
+		const actor = game.actors.get(actors[i].id);
+		if(actor.type != "pc" && actor.type != "npc")
+			continue;
+		
+		console.warn(actor);
+		
+		//We're trying to initialise actor sheets with 'system.needsRefresh: true' to try to force an update before you can use your sheet, because it's the only way I can think of to fix the bug I've been facing.
+		actor.system["needsRefresh"] = true;
+		let updateData = {};
+		updateData["system.needsRefresh"] = true;
+		actor.update(updateData);
+	}*/
+});
+/*Hooks.once('ready', function () {
+  // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
+  Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
+  
+  
+});*/
 
 //Hooks.on('renderCustomActorSheet', function (app, html, data) {
 //Hooks.on("renderItemSheet",function(app,_html)
