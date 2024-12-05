@@ -149,12 +149,14 @@ export class BTVehicleActorSheet extends ActorSheet {
 		//this._prepareItems(context);
 		this.PrepareDerivedData(actorData, systemData);
 
-		// Prepare active effects
+		/*// Prepare active effects
 		context.effects = prepareActiveEffectCategories(
 		// A generator that returns all effects stored on the actor
 		// as well as any items
 			this.actor.allApplicableEffects()
-		);
+		);*/
+		
+		this.SortItemsToInventory(context);
 
 		return context;
 	}
@@ -162,104 +164,136 @@ export class BTVehicleActorSheet extends ActorSheet {
 	PrepareDerivedData(actorData, systemData) {
 		
 	}
-
-  /**
-   * Organize and classify Items for Actor sheets.
-   *
-   * @param {object} context The context object to mutate
-   */
-  _prepareItems(context) {
-    // Initialize containers.
-    const gear = [];
-    const features = [];
-    const spells = {
-      0: [],
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      7: [],
-      8: [],
-      9: [],
-    };
-
-    // Iterate through items, allocating to containers
-    for (let i of context.items) {
-      i.img = i.img || Item.DEFAULT_ICON;
-      // Append to gear.
-      if (i.type === 'item') {
-        gear.push(i);
-      }
-      // Append to features.
-      else if (i.type === 'feature') {
-        features.push(i);
-      }
-      // Append to spells.
-      else if (i.type === 'spell') {
-        if (i.system.spellLevel != undefined) {
-          spells[i.system.spellLevel].push(i);
-        }
-      }
-    }
-
-    // Assign and return
-    context.gear = gear;
-    context.features = features;
-    context.spells = spells;
-  }
-
-  /* -------------------------------------------- */
-
-  /** @override */
-  activateListeners(html) {
-    super.activateListeners(html);
 	
-	this.ActivateSheetListeners(html);
+	SortItemsToInventory(context = null) {
+		const weapons = [];
+		const equipment = [];
+		
+		for(let i of this.actor.items) {
+			//Near as I can tell, this lets the item retain its img or use the default icon if it doesn't have one of its own.
+			i.img = i.img || Item.DEFAULT_ICON;
+			
+			switch(i.type) {
+				case "vehicle_weapon":
+					weapons.push(i);
+					break;
+				case "vehicle_equipment":
+					equipment.push(i);
+					break;
+				default:
+					console.error("Item i {0} type {1} not recognised", i, i.type);
+					break;
+			}
+		}
+		
+		let inventory = {
+			weapons: {},
+			equipment: {}
+		};
+		
+		if(context != null) {
+			context.inventory = inventory;
+			
+			context.inventory["weapons"] = weapons;
+			context.inventory["equipment"] = equipment;
+			
+			return null;
+		}
+		else {
+			inventory["weapons"] = weapons;
+			inventory["equipment"] = equipment;
+			
+			return inventory;
+		}
+	}
+	
+	/** @override */
+	async _onDropItemCreate(itemData) {
+		//Forge an array from whatever is in itemData.
+		let items = itemData instanceof Array ? itemData : [itemData];
+		
+		//Initialise an empty array, toCreate, which we'll push into the embedded documents at the end.
+		const toCreate = [];
+		//For each "item" in the items arrays,
+		for (const item of items ) {
+			//Call our custom handler function, which tells us if it's ok to drop that item onto the sheet.
+			const result = await this.ValidateDroppedItem(item);
+			//If we get back a decent result, push that result into the toCreate array!
+			if( result )
+				toCreate.push(result);
+		}
+		
+		//Push the newly-made items onto the character sheet.
+		return this.actor.createEmbeddedDocuments("Item", toCreate);
+	}
+	
+	//Handler to determine if dropped items are valid
+	async ValidateDroppedItem(itemData) {
+		const valid = ['vehicle_weapon', 'vehicle_equipment'].includes(itemData.type);
+		if(!valid) {
+			return false;
+		}
+		else {
+			itemData.system.firedThisTurn = false;
+			itemData.system.cooling = false;
+		}
+		console.log(itemData);
+		
+		return itemData;
+	}
 
-    // Render the item sheet for viewing/editing prior to the editable check.
-    /*html.on('click', '.item-edit', (ev) => {
-      const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.items.get(li.data('itemId'));
-      item.sheet.render(true);
-    });
+	/* -------------------------------------------- */
 
-    // -------------------------------------------------------------
-    // Everything below here is only needed if the sheet is editable
-    if (!this.isEditable) return;
+	/** @override */
+	activateListeners(html) {
+		super.activateListeners(html);
 
-    // Add Inventory Item
-    html.on('click', '.item-create', this._onItemCreate.bind(this));
+		this.ActivateSheetListeners(html);
+		
+		if (!this.isEditable) return;
 
-    // Delete Inventory Item
-    html.on('click', '.item-delete', (ev) => {
-      const li = $(ev.currentTarget).parents('.item');
-      const item = this.actor.items.get(li.data('itemId'));
-      item.delete();
-      li.slideUp(200, () => this.render(false));
-    });
+		// Render the item sheet for viewing/editing prior to the editable check.
+		/*html.on('click', '.item-edit', (ev) => {
+		  const li = $(ev.currentTarget).parents('.item');
+		  const item = this.actor.items.get(li.data('itemId'));
+		  item.sheet.render(true);
+		});
 
-    // Active Effect management
-    html.on('click', '.effect-control', (ev) => {
-      const row = ev.currentTarget.closest('li');
-      const document =
-        row.dataset.parentId === this.actor.id
-          ? this.actor
-          : this.actor.items.get(row.dataset.parentId);
-      onManageActiveEffect(ev, document);
-    });
+		// -------------------------------------------------------------
+		// Everything below here is only needed if the sheet is editable
+		
 
-    // Drag events for macros.
-    if (this.actor.isOwner) {
-      let handler = (ev) => this._onDragStart(ev);
-      html.find('li.item').each((i, li) => {
-        if (li.classList.contains('inventory-header')) return;
-        li.setAttribute('draggable', true);
-        li.addEventListener('dragstart', handler, false);
-      });
-    }*/
-  }
+		// Add Inventory Item
+		html.on('click', '.item-create', this._onItemCreate.bind(this));
+
+		// Delete Inventory Item
+		html.on('click', '.item-delete', (ev) => {
+		  const li = $(ev.currentTarget).parents('.item');
+		  const item = this.actor.items.get(li.data('itemId'));
+		  item.delete();
+		  li.slideUp(200, () => this.render(false));
+		});
+
+		// Active Effect management
+		html.on('click', '.effect-control', (ev) => {
+		  const row = ev.currentTarget.closest('li');
+		  const document =
+			row.dataset.parentId === this.actor.id
+			  ? this.actor
+			  : this.actor.items.get(row.dataset.parentId);
+		  onManageActiveEffect(ev, document);
+		});
+
+		// Drag events for macros.
+		if (this.actor.isOwner) {
+		  let handler = (ev) => this._onDragStart(ev);
+		  html.find('li.item').each((i, li) => {
+			if (li.classList.contains('inventory-header')) return;
+			li.setAttribute('draggable', true);
+			li.addEventListener('dragstart', handler, false);
+		  });
+		}*/
+	}
   
 	ActivateSheetListeners(html) {
 		const actorData = this.document.toObject(false);
@@ -319,7 +353,10 @@ export class BTVehicleActorSheet extends ActorSheet {
 		let heat = systemData.stats.heat;
 		if(heat > 1) {
 			for(var i = 29; i >= 30-heat; i--) {
-				let hex = parseInt((256/30) * (i)).toString(16);
+				//let hex = parseInt((256/30) * (Math.floor(i))).toString(16);
+				//let hex = parseInt(256/30 * (i).toString(16));
+				let hex = parseInt((256/30)*i);
+				hex = hex.toString(16);
 				let colour = "#ff" + (hex < 10 ? "0" : "") + hex + "00";
 				const elem = document.getElementById("heat-"+i);
 				elem.style.backgroundColor = colour;
@@ -329,6 +366,14 @@ export class BTVehicleActorSheet extends ActorSheet {
 		//Prep armour and structure circles with their bound listeners.
 		html.on('click', '.circle-armour', this.ToggleArmourCircle.bind(this));
 		html.on('click', '.circle-structure', this.ToggleArmourCircle.bind(this));
+		
+		// Delete Inventory Item
+		html.on('click', '.item-delete', (event) => {
+			//Recursively look up whichever of the clicked button's various parents has the item class.
+			const li = $(event.currentTarget)[0];
+			const item = this.actor.items.get(li.id);
+			item.delete();
+		});
 	}
 	
 	ChangeVehicleType(event) {
@@ -479,7 +524,7 @@ export class BTVehicleActorSheet extends ActorSheet {
 			case "skill":
 				return this.RollSkill(request);
 			case "vehicle_weapon":
-				return this.RollAttack(request);
+				return this.RollAttack(dataset.id);
 			case "critical":
 				return this.RollCriticalSlot(request);
 			default:
@@ -521,19 +566,21 @@ export class BTVehicleActorSheet extends ActorSheet {
 		//NaturalAptitude calcs
 		const neededTP = ('piloting','gunnery','sensorops','computers').includes(which) ? 5 : 3;
 		let traitLevel = 0;
-		Object.entries(pilotData.system.traits).forEach(entry => {
-			const trait = entry[1];
-			const traitName = trait.name;
-			const subtitle = trait.subtitle;
-			const level = trait.level;
-			
-			if(traitName == "natural_aptitude") {
-				let subname = subtitle.replace("/","_").replace("'","").replace(" ","_").toLowerCase();
-				if(subname == name) {
-					traitLevel = level >= traitLevel ? level : traitLevel;
+		if(hasPilot) {
+			Object.entries(pilotData.system.traits).forEach(entry => {
+				const trait = entry[1];
+				const traitName = trait.name;
+				const subtitle = trait.subtitle;
+				const level = trait.level;
+				
+				if(traitName == "natural_aptitude") {
+					let subname = subtitle.replace("/","_").replace("'","").replace(" ","_").toLowerCase();
+					if(subname == name) {
+						traitLevel = level >= traitLevel ? level : traitLevel;
+					}
 				}
-			}
-		});
+			});
+		}
 		const hasNaturalAptitude = traitLevel >= neededTP;
 		
 		//Build the roll manually because we can't have nice things.
@@ -586,6 +633,7 @@ export class BTVehicleActorSheet extends ActorSheet {
 		
 		//Calculate the MoS/F:
 		const margin = (total >= tn ? "+" : "") + (total - tn);
+		const isSuccess = (total >= tn && !isFumble) || isStunning;
 		
 		//Establish the message data.
 		let msgData = {
@@ -602,7 +650,7 @@ export class BTVehicleActorSheet extends ActorSheet {
 			baseSkill: "none",
 			result: total,
 			margin: (isFumble ? (total-tn > -10 ? "-10" : margin) : (isStunning ? (total-tn < 10 ? "+10" : margin) : margin)),
-			isSuccess: (total >= tn && !isFumble) || isStunning,
+			isSuccess: isSuccess,
 			successOrFail: (!isFumble && !isStunning ? (margin < 0 ? "Failed" : "Succeeded") : isStunning ? "Succeeded" : "Failed"),
 			isFumble: isFumble,
 			isStunning: isStunning
@@ -614,215 +662,80 @@ export class BTVehicleActorSheet extends ActorSheet {
 		const render = await renderTemplate("systems/a-time-of-war/templates/chat/StatRoll.hbs", msgData);
 		const msg = await ChatMessage.create({
 			content: render,
-			sound: CONFIG.sounds.dice
+			sound: CONFIG.sounds.dice,
+			system: { "isSuccess": isSuccess }
 		});
 		
 		return msg;
 	}
 	
-	async RollAttack(id) {
-		if(id == undefined) {
-			console.error("Expected an attack weapon id or lpunch, rpunch, kick; got undefined");
-			return;
-		}
-		
-		if(id == "lpunch" || id == "rpunch" || id == "kick") {
-			//special handling
-		}
-		console.log("requested weapon id: {0}", id);
-		
-		//some kind of attack type submenu goes here, at the end
-		//this.RollSkill("gunnery");
-		//this.RollSkill("piloting");
-	}
-	
-	async TakeDamage(damage, facing) {
-		let type = this.actor.system.type;
-		if (type != "mech")
-		{
-			console.error("Haven't implemented anything for non-mechs yet.");
-			return null;
-		}
-		
-		const location = await this.RandomLocation(type, facing);
-		console.log(this.actor.system.locations);
-		console.log(this.actor.system.locations[type]);
-		console.log(this.actor.system.locations[type][location]);
-		console.log(this.actor.system.locations[type][location].armour);
-		console.log(this.actor.system.locations[type][location].armour.value);
-		const armour = parseInt(this.actor.system.locations[type][location].armour.value);
-		let structure = 0;
-		switch(location) {
-			case "rear_l":
-				structure = this.actor.system.locations[type]["torso_l"].structure.value;
-				break;
-			case "rear_c":
-				structure = this.actor.system.locations[type]["torso_c"].structure.value;
-				break;
-			case "rear_r":
-				structure = this.actor.system.locations[type]["torso_r"].structure.value;
-				break;
-			default:
-				structure = this.actor.system.locations[type][location].structure.value;
-		}
-		
-		let updateData = {};
-		let hasCrit = false;
-		let remainder = 0;
-		
-		if(armour - damage < 0) {
-			remainer = damage - armour;
-			hasCrit = true;
-			updateData["system.locations.mech." + location + ".armour.value"] = 0;
-			updateData["system.locations.mech." + location + ".structure.value"] = remainder > structure ? 0 : parseInt(structure - remainder);
-			RollCriticalSlot(location, "both");
+	async RollAttack(weaponId) {
+		let weapon = null;
+		if(weaponId == "lpunch" || weaponId == "rpunch" || weaponId == "kick") {
+			weapon = {
+				"system": {
+					"firedThisTurn": false,
+					"profile": {
+						"damage": weaponId == "kick" ? Math.ceil(this.actor.system.tonnage / 5) : Math.ceil(this.actor.system.tonnage / 10),
+						"heat": 0
+					}
+				}
+			};
 		}
 		else {
-			updateData["system.locations.mech." + location + ".armour.value"] = parseInt(armour - damage);
-		}
-		
-		console.log(updateData);
-		this.actor.update(updateData);
-	}
-	
-	async RandomLocation(type, facing) {
-		if(type != "mech") {
-			console.error("Haven't implemented any random location tables for non-mechs yet :(");
-			return null;
-		}
-		
-		const dice = await new Roll('2d6', {}).evaluate();
-		const roll = dice._total;
-		if(facing == "left") {
-			switch(roll) {
-				case 2:
-					this.RollCriticalSlot("torso_l", "both");
-				case 7:
-					return "torso_l";
-				case 3:
-				case 6:
-					return "leg_l";
-				case 4:
-				case 5:
-					return "arm_l";
-				case 8:
-					return "torso_c";
-				case 9:
-					return "torso_r";
-				case 10:
-					return "arm_r";
-				case 11:
-					return "leg_r";
-				case 12:
-					return "head";
-				default:
-					console.error("Something bad happened, {0} isn't on the hit chart", roll);
-					return null;
+			weapon = this.actor.items.get(weaponId);
+			if(weapon == null || weapon == undefined) {
+				console.error("Expected an attack weapon id or lpunch, rpunch, kick; got null or undefined");
+				return;
 			}
 		}
-		else if(facing == "right") {
-			switch(roll) {
-				case 2:
-					this.RollCriticalSlot("torso_r", "both");
-				case 7:
-					return "torso_r";
-				case 3:
-				case 6:
-					return "leg_r";
-				case 4:
-				case 5:
-					return "arm_r";
-				case 8:
-					return "torso_c";
-				case 9:
-					return "torso_l";
-				case 10:
-					return "arm_l";
-				case 11:
-					return "leg_l";
-				case 12:
-					return "head";
-				default:
-					console.error("Something bad happened, {0} isn't on the hit chart", roll);
-					return null;
-			}
+		
+		const targets = game.user.targets;
+		const targetToken = targets ? targets.values().next().value : undefined;
+		if(targetToken == null || targetToken == undefined) {
+			console.error("TargetToken", targetToken, "is null or undefined!");
+			ui.notifications.error("You must select a token to target in order to make an attack.");
 		}
-		else if(facing == "front") {
-			switch(roll) {
-				case 2:
-					this.RollCriticalSlot("torso_c", "both");
-				case 7:
-					return "torso_c";
-				case 3:
-				case 4:
-					return "arm_r";
-				case 5:
-					return "leg_r";
-				case 6:
-					return "torso_r";
-				case 8:
-					return "torso_l";
-				case 9:
-					return "leg_l";
-				case 10:
-				case 11:
-					return "arm_l";
-				case 12:
-					return "head";
-				default:
-					console.error("Something bad happened, {0} isn't on the hit chart", roll);
-					return null;
-			}
-		}
-		else if(facing == "rear") {
-			switch(roll) {
-				case 2:
-					this.RollCriticalSlot("torso_c", "both");
-				case 7:
-					return "rear_c";
-				case 3:
-				case 4:
-					return "arm_r";
-				case 5:
-					return "leg_r";
-				case 6:
-					return "rear_r";
-				case 8:
-					return "rear_l";
-				case 9:
-					return "leg_l";
-				case 10:
-				case 11:
-					return "arm_l";
-				case 12:
-					return "head";
-				default:
-					console.error("Something bad happened, {0} isn't on the hit chart", roll);
-					return null;
-			}
-		}
-	}
-	
-	RollCriticalSlot(location, destroy = "message") {
-		if(location == undefined || location == null || location == "") {
-			console.error("Expected an string vehicle location; got undefined");
-			return;
+		const target = game.actors.get(targetToken.actor.id);
+		if(target == null || target == undefined) {
+			console.error("Target", target, "is null or undefined!");
+			ui.notifications.error("You must select a token to target in order to make an attack.");
 		}
 		
-		//destroy is "message" by default so you can roll a random crit slot on your mech for fidgeting purposes
+		//some kind of attack type submenu goes here, at the end
+		let msg = null;
+		if((weaponId == "lpunch" || weaponId == "rpunch" || weaponId == "kick"))
+			msg = await this.RollSkill("piloting");
+		else
+			msg = await this.RollSkill("gunnery");
 		
-		const actorData = this.actor;
-		const systemData = actorData.system;
+		const isActive = msg != null;
 		
-		//If destroy is only "destroy" or "message", do the respective; if destroy is "both", do both in the correct order to produce a valid return value
-		if(destroy == "destroy" || destroy == "both") {
-			//let updateData = {};
-			//updateData["system.items[" + hitId + "]".status"] = "destroyed";
-			//this.actor.update(updateData);
-		}
-		if (destroy == "message") {
-			//produce a chat message
-			//return msg;
+		let updateData = {};
+		
+		//Trigger weapon cooldown at end phase
+		if(isActive)
+		{
+			updateData["system.firedThisTurn"] = true;
+			weapon.system.firedThisTurn = true;
+			weapon.update(updateData);
+			
+			//Apply self heat
+			//this.actor.system.stats.heat += parseInt(weapon.system.profile.heat);
+			updateData = {};
+			console.warn(this.actor.system.stats);
+			updateData["system.stats.heat"] = parseFloat(this.actor.system.stats.heat) + parseFloat(weapon.system.profile.heat);
+			console.warn(this.actor.system.stats);
+			this.actor.update(updateData);
+			
+			const hit = msg.system.isSuccess;
+			if(hit) {
+				let facing = "front";
+				//Do some magic to work out the facing based on relative position of attacker and target.
+				
+				
+				target.TakeDamage(weapon.system.profile.damage, facing);
+			}
 		}
 	}
 }

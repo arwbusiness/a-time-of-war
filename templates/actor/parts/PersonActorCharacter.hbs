@@ -72,6 +72,20 @@
 					</table>
 				</td>
 			</tr>
+			<tr>
+				<td class="resource-label">Flexible XPs:</td>
+				<td>
+					<table>
+					{{#each inventory.modules as |module key|}}
+						{{#unless (in module.system.flex "None" "none" "" undefined)}}
+						<tr>
+							<td>{{module.system.flex}}</td>
+						</tr>
+						{{/unless}}
+					{{/each}}
+					</table>
+				</td>
+			</tr>
 		</table>
 		
 		<img style="width:240px; height:240px; float:right;" id="lifepath-img" name="lifepath-img" src="{{system.lifepath.img}}" />

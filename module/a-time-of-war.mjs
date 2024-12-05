@@ -219,6 +219,41 @@ Hooks.once("ready", function() {
 	console.log(data);
 });*/
 
+Hooks.on('combatTurnChange', function(combat, prior, current) {
+	const currentActorId = combat.turns[current.turn].actorId;
+	let actor = game.actors.get(currentActorId);
+	
+	if(actor.type != "vehicle")
+		return;
+	
+	let updateData = {};
+	if(actor.system.stats.heat == null) {
+		updateData["system.stats.heat"] = 0;
+		actor.update(updateData);
+	}
+	
+	const items = Object.values(actor.items)[4];
+	for(let i in items) {
+		const item = actor.items.get(items[i]._id);
+		let cooling = item.system.cooling;
+		let firedThisTurn = item.system.firedThisTurn;
+		
+		updateData["system.cooling"] = firedThisTurn;
+		updateData["system.firedThisTurn"] = false;
+		item.update(updateData);
+	}
+	
+	//Heat resolution phase.
+	let cooling = 5;
+	if(actor.system.stats.heatsinks != undefined) {
+		cooling = actor.system.stats.heatsinks/(actor.system.stats.heatsinks_double ? 1 : 2);
+	}
+	updateData = {};
+	updateData["system.stats.heat"] = Math.max(0, actor.system.stats.heat - parseFloat(cooling));
+	actor.system.stats.heat = Math.max(0, actor.system.stats.heat - parseFloat(cooling));
+	actor.update(updateData);
+});
+
 function _configureTrackableAttributes() {
 	const person = {
 		bar: ["damage", "fatigue"],

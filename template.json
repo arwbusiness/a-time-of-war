@@ -226,7 +226,9 @@
       "stats": {
         "cost": 0,
         "bv": 0,
-		"heat": 0
+		"heat": 0,
+		"heatsinks": 10,
+		"heatsinks_double": false
       },
       "pilot_skills": {
         "gunnery": 4,
@@ -254,7 +256,8 @@
 					  "value": 9,
 					  "max": 9,
 					  "possible": 9
-				  }
+				  },
+				  "slots": {}
 			  },
 			  "rear_l": {
 				  "armour": {
@@ -287,7 +290,8 @@
 					  "value": 12,
 					  "max": 12,
 					  "possible": 12
-				  }
+				  },
+				  "slots": {}
 			  },
 			  "torso_r": {
 				  "armour": {
@@ -299,7 +303,8 @@
 					  "value": 12,
 					  "max": 12,
 					  "possible": 12
-				  }
+				  },
+				  "slots": {}
 			  },
 			  "torso_c": {
 				  "armour": {
@@ -311,7 +316,8 @@
 					  "value": 16,
 					  "max": 16,
 					  "possible": 16
-				  }
+				  },
+				  "slots": {}
 			  },
 			  "arm_l": {
 				  "armour": {
@@ -323,7 +329,8 @@
 					  "value": 8,
 					  "max": 8,
 					  "possible": 8
-				  }
+				  },
+				  "slots": {}
 			  },
 			  "arm_r": {
 				  "armour": {
@@ -335,7 +342,8 @@
 					  "value": 8,
 					  "max": 8,
 					  "possible": 8
-				  }
+				  },
+				  "slots": {}
 			  },
 			  "leg_l": {
 				  "armour": {
@@ -347,7 +355,8 @@
 					  "value": 12,
 					  "max": 12,
 					  "possible": 12
-				  }
+				  },
+				  "slots": {}
 			  },
 			  "leg_r": {
 				  "armour": {
@@ -359,7 +368,8 @@
 					  "value": 12,
 					  "max": 12,
 					  "possible": 12
-				  }
+				  },
+				  "slots": {}
 			  }
 		  },
 		  "ground": {
@@ -405,6 +415,7 @@
         "description": "",
         "model": "",
         "ref": "TM, pg. 147",
+		"location": "",
         "stats": {
           "type": "",
           "cost": 50,
@@ -432,13 +443,16 @@
     },
     "vehicle_weapon": {
       "templates": ["vehiclebase"],
+	  "firedThisTurn": false,
+	  "cooling": false,
       "profile": {
         "heat": 0,
         "damage": 0,
         "r_min": 0,
         "r_sht": 1,
         "r_med": 2,
-        "r_lng": 3
+        "r_lng": 3,
+		"flags": ""
       }
     },
     "vehicle_equipment": {

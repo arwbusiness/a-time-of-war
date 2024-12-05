@@ -1,0 +1,42 @@
+<!-- Attacks -->
+
+<div class="manifest">
+	<table style="table-layout:fixed">
+		<caption><h3>Weapons</h3></caption>
+		<tr style="text-align:left;">
+			<th></th>
+			<th>Name</th>
+			<th>Location</th>
+			<th>Flags</th>
+			<th>Damage</th>
+			<th>Heat</th>
+			<th>Min</th>
+			<th>Range</th>
+			<th></th>
+		</tr>
+		{{#each inventory.weapons as |weapon key|}}
+		<tr>
+			<td>
+				<div class="flexrow">
+					{{#if weapon.system.firedThisTurn}}
+					<img src="systems/a-time-of-war/icons/fired-this-turn.png" style="width:24px; height:24px;">
+					{{/if}}
+					{{#if weapon.system.cooling}}
+					<img src="systems/a-time-of-war/icons/cooling.png" style="width:24px; height:24px;">
+					{{/if}}
+				</div>
+			</td>
+			<td style="{{#if (or weapon.system.firedThisTurn weapon.system.cooling)}}text-decoration: line-through;{{/if}}" class="{{#unless (or weapon.system.firedThisTurn weapon.system.cooling)}}rollable{{/unless}}" data-rolltype="vehicle_weapon" data-id="{{weapon.id}}">{{weapon.name}}</td>
+			<td style="">{{weapon.system.location}}</td>
+			<td style="">{{weapon.system.profile.flags}}</td>
+			<td style="">{{weapon.system.profile.damage}}</td>
+			<td style="">{{weapon.system.profile.heat}}</td>
+			<td style="">{{weapon.system.profile.r_min}}</td>
+			<td style="">{{weapon.system.profile.r_sht}}/{{weapon.system.profile.r_med}}/{{weapon.system.profile.r_lng}}</td>
+			<td>
+				<input type="button" class="item-delete" value="X" id="{{weapon.id}}" />
+			</td>
+		</tr>
+		{{/each}}
+	</table>
+</div>

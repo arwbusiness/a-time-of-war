@@ -35,7 +35,6 @@ export class BTActor extends Actor {
 	*/
 	prepareDerivedData() {
 		const actorData = this;
-		//const systemData = actorData.system;
 		const flags = actorData.flags.bt || {};
 
 		// Make separate methods for each Actor type (character, npc, etc.) to keep
@@ -684,4 +683,190 @@ export class BTActor extends Actor {
 
     // Process additional Vehicle data here.
   }
+  
+	/* * *   Vehicle Stuff Starts Here   * * */
+	async TakeDamage(damage, facing) {
+		let type = this.system.type;
+		if (type != "mech")
+		{
+			console.error("Haven't implemented anything for non-mechs yet.");
+			return null;
+		}
+		
+		const location = await this.RandomLocation(type, facing);
+		const armour = parseInt(this.system.locations[type][location].armour.value);
+		let structure = 0;
+		switch(location) {
+			case "rear_l":
+				structure = this.system.locations[type]["torso_l"].structure.value;
+				break;
+			case "rear_c":
+				structure = this.system.locations[type]["torso_c"].structure.value;
+				break;
+			case "rear_r":
+				structure = this.system.locations[type]["torso_r"].structure.value;
+				break;
+			default:
+				structure = this.system.locations[type][location].structure.value;
+		}
+		
+		let updateData = {};
+		let hasCrit = false;
+		let remainder = 0;
+		
+		if(armour - damage < 0) {
+			remainder = damage - armour;
+			hasCrit = true;
+			updateData["system.locations.mech." + location + ".armour.value"] = 0;
+			updateData["system.locations.mech." + location + ".structure.value"] = remainder > structure ? 0 : parseInt(structure - remainder);
+			this.RollCriticalSlot(location, "both");
+		}
+		else {
+			updateData["system.locations.mech." + location + ".armour.value"] = parseInt(armour - damage);
+		}
+		
+		console.log(updateData);
+		this.update(updateData);
+	}
+	
+	async RandomLocation(type, facing) {
+		if(type != "mech") {
+			console.error("Haven't implemented any random location tables for non-mechs yet :(");
+			return null;
+		}
+		
+		const dice = await new Roll('2d6', {}).evaluate();
+		const roll = dice._total;
+		if(facing == "left") {
+			switch(roll) {
+				case 2:
+					this.RollCriticalSlot("torso_l", "both");
+				case 7:
+					return "torso_l";
+				case 3:
+				case 6:
+					return "leg_l";
+				case 4:
+				case 5:
+					return "arm_l";
+				case 8:
+					return "torso_c";
+				case 9:
+					return "torso_r";
+				case 10:
+					return "arm_r";
+				case 11:
+					return "leg_r";
+				case 12:
+					return "head";
+				default:
+					console.error("Something bad happened, {0} isn't on the hit chart", roll);
+					return null;
+			}
+		}
+		else if(facing == "right") {
+			switch(roll) {
+				case 2:
+					this.RollCriticalSlot("torso_r", "both");
+				case 7:
+					return "torso_r";
+				case 3:
+				case 6:
+					return "leg_r";
+				case 4:
+				case 5:
+					return "arm_r";
+				case 8:
+					return "torso_c";
+				case 9:
+					return "torso_l";
+				case 10:
+					return "arm_l";
+				case 11:
+					return "leg_l";
+				case 12:
+					return "head";
+				default:
+					console.error("Something bad happened, {0} isn't on the hit chart", roll);
+					return null;
+			}
+		}
+		else if(facing == "front") {
+			switch(roll) {
+				case 2:
+					this.RollCriticalSlot("torso_c", "both");
+				case 7:
+					return "torso_c";
+				case 3:
+				case 4:
+					return "arm_r";
+				case 5:
+					return "leg_r";
+				case 6:
+					return "torso_r";
+				case 8:
+					return "torso_l";
+				case 9:
+					return "leg_l";
+				case 10:
+				case 11:
+					return "arm_l";
+				case 12:
+					return "head";
+				default:
+					console.error("Something bad happened, {0} isn't on the hit chart", roll);
+					return null;
+			}
+		}
+		else if(facing == "rear") {
+			switch(roll) {
+				case 2:
+					this.RollCriticalSlot("torso_c", "both");
+				case 7:
+					return "rear_c";
+				case 3:
+				case 4:
+					return "arm_r";
+				case 5:
+					return "leg_r";
+				case 6:
+					return "rear_r";
+				case 8:
+					return "rear_l";
+				case 9:
+					return "leg_l";
+				case 10:
+				case 11:
+					return "arm_l";
+				case 12:
+					return "head";
+				default:
+					console.error("Something bad happened, {0} isn't on the hit chart", roll);
+					return null;
+			}
+		}
+	}
+	
+	RollCriticalSlot(location, destroy = "message") {
+		if(location == undefined || location == null || location == "") {
+			console.error("Expected an string vehicle location; got undefined");
+			return;
+		}
+		
+		//destroy is "message" by default so you can roll a random crit slot on your mech for fidgeting purposes
+		
+		const actorData = this;
+		const systemData = actorData.system;
+		
+		//If destroy is only "destroy" or "message", do the respective; if destroy is "both", do both in the correct order to produce a valid return value
+		if(destroy == "destroy" || destroy == "both") {
+			//let updateData = {};
+			//updateData["system.items[" + hitId + "]".status"] = "destroyed";
+			//this.update(updateData);
+		}
+		if (destroy == "message") {
+			//produce a chat message
+			//return msg;
+		}
+	}
 }

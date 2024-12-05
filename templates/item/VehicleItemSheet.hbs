@@ -1,0 +1,117 @@
+<form class="{{cssClass}}" autocomplete="off">
+	<header class="sheet-header">
+		<img
+			class="profile-img"
+			src="{{item.img}}"
+			data-edit="img"
+			title="{{item.name}}"
+		/>
+		<div class="header-fields">
+			<h1 class="charname"><input
+				name="name"
+				type="text"
+				value="{{item.name}}"
+				placeholder="Name"
+			/></h1>
+		</div>
+	</header>
+	<section class="sheet-body">
+		<div>
+		{{! Editors must receive enriched text data from getData to properly handle rolls }}
+		{{editor
+			enrichedDescription
+			target="system.description"
+			engine="prosemirror"
+			button=true
+			editable=editable
+		}}
+		</div>
+		<br>
+		<table>
+			<caption></caption>
+			<tr>
+				<th>Type</th>
+				<th>Model</th>
+				<th>Cost</th>
+				<th>Tonnage</th>
+				<th>Slots</th>
+				<th>Tech</th>
+				<th>Av</th>
+				<th>BV</th>
+				<th>Ref</th>
+			</tr>
+			<tr>
+				<td>
+					<select name="system.stats.type">
+					{{#select system.stats.type}}
+						<option value="ballistic">Ballistic</option>
+						<option value="energy">Energy</option>
+						<option value="missile">Missile</option>
+						<option value="melee">Melee</option>
+					{{/select}}
+					</select>
+				</td>
+				<td>
+					<input type="text" value="{{system.stats.model}}" name="system.stats.model" placeholder="Enter model here..." />
+				</td>
+				<td>
+					<input type="number" value="{{system.stats.cost}}" name="system.stats.cost" placeholder="Enter cost in C-bills here..." />
+				</td>
+				<td>
+					<input type="number" value="{{system.stats.tonnage}}" name="system.stats.tonnage" placeholder="Enter weight in tonnes here..." />
+				</td>
+				<td>
+					<input type="number" value="{{system.stats.slots}}" name="system.stats.slots" placeholder="Enter number of critical slots here..." />
+				</td>
+				<td>
+					<input type="text" value="{{system.stats.tech}}" name="system.stats.tech" placeholder="Enter tech code here..." />
+				</td>
+				<td>
+					<input type="text" value="{{system.stats.av}}" name="system.stats.av" placeholder="Enter availability code here..." />
+				</td>
+				<td>
+					<input type="number" value="{{system.stats.bv}}" name="system.stats.bv" placeholder="Enter BV here..." />
+				</td>
+				<td>
+					<input type="text" value="{{system.ref}}" name="system.ref" placeholder="Enter reference page number here..." />
+				</td>
+			</tr>
+		</table>
+		<br>
+		<table>
+			<caption></caption>
+			<tr>
+				<th>Damage</th>
+				<th>Heat</th>
+				<th>Min. Range</th>
+				<th>Short</th>
+				<th>Med</th>
+				<th>Long</th>
+				<th>Flags</th>
+			</tr>
+			<tr>
+				<td>
+					<input type="number" name="system.profile.damage" value="{{system.profile.damage}}" placeholder="Enter damage here..." />
+				</td>
+				<td>
+					<input type="number" name="system.profile.heat" value="{{system.profile.heat}}" placeholder="Enter heat here..." />
+				</td>
+				<td>
+					<input type="number" name="system.profile.r_min" value="{{system.profile.r_min}}" placeholder="0" />
+				</td>
+				<td>
+					<input type="number" name="system.profile.r_sht" value="{{system.profile.r_sht}}" placeholder="1" />
+				</td>
+				<td>
+					<input type="number" name="system.profile.r_med" value="{{system.profile.r_med}}" placeholder="2" />
+				</td>
+				<td>
+					<input type="number" name="system.profile.r_lng" value="{{system.profile.r_lng}}" placeholder="3" />
+				</td>
+				<td>
+					<input type="number" name="system.profile.flags" value="{{system.profile.flags}}" placeholder="Enter weapon flags here..." />
+				</td>
+			</tr>
+		</table>
+	</section>
+</form>

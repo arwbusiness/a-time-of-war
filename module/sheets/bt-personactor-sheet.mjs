@@ -233,9 +233,6 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		//Push the newly-made items onto the character sheet.
 		return this.actor.createEmbeddedDocuments("Item", toCreate);
-		/*let updateData = {};
-		updateData["system.needsRefresh"] = true;
-		this.actor.update(updateData);*/
 	}
 	
 	//Handler to determine if dropped items are valid
@@ -362,7 +359,7 @@ export class BTPersonActorSheet extends ActorSheet {
 			return;
 
 		//Activate progression listeners
-		this.ListenForSheetButtons(html);
+		this.ActivateSheetListeners(html);
 		
 		this.UpdateAdvanceMaker();
 		
@@ -396,7 +393,7 @@ export class BTPersonActorSheet extends ActorSheet {
 	}
 
 	//These listeners make the sheet work.
-	async ListenForSheetButtons(html) {
+	async ActivateSheetListeners(html) {
 		//fields
 		html.on('change', '#lang-primary', this.ChangeLangPrimary.bind(this));
 		html.on('change', '#age', this.ChangeAge.bind(this));

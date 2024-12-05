@@ -1,6 +1,6 @@
 <div class="heat-gauge">
-	<h3>Heat gauge: {{system.stats.heat}}</h3>
+	<h3><b>Heat:</b> {{system.stats.heat}}</h3>
 	{{#loop 30}}
-		<div id="heat-{{this}}" style="width:12px;height:12px;border:1px solid black;"></div>
+		<div id="heat-{{@index}}" style="width:12px;height:12px;border:1px solid black;"></div>
 	{{/loop}}
 </div>
