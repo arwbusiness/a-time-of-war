@@ -1,0 +1,280 @@
+<div class="mechlab">
+	<table>
+		<tr>
+			<!-- Settings -->
+			<td style="vertical-align:top; width:10%;">
+				<table>
+					<caption><h3>Settings</h3></caption>
+					<tr>
+						<td class="resource-label">{{#if (eq system.type "mech")}}Walk{{else}}Cruise{{/if}} Speed</td>
+						<td>
+							<input type="number" step="1" id="set-mp-walk" value="{{system.mp.walk}}" />
+						</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Engine Rating</td>
+						<td>{{system.engine.rating}}</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Engine Type</td>
+						<td>
+							<select id="select-engine-type" name="system.engine.type">
+							{{#select system.engine.type}}
+								<option value="ice">I.C.E.</option>
+								<option value="cell">Cell</option>
+								<option value="fission">Fission</option>
+								<option value="compact">Compact</option>
+								<option value="standard">Standard</option>
+								<option value="light">Light</option>
+								<option value="xl">X.L.</option>
+							{{/select}}
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Engine Weight</td>
+						<td>{{system.engine.weight}}</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Gyro Type</td>
+						<td>
+							<select id="select-gyro-type" name="system.engine.gyro_type">
+							{{#select system.engine.gyro_type}}
+								<option value="standard">Standard</option>
+								<option value="compact">Compact</option>
+								<option value="heavy">Heavy-Duty</option>
+								<option value="xl">X.L.</option>
+							{{/select}}
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Gyro Weight</td>
+						<td>{{system.engine.gyro_weight}}</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Cockpit Weight</td>
+						<td>{{#if (eq system.stats.cockpit_type "small")}}2{{else}}3{{/if}}</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Engine Heatsinks</td>
+						<td>{{system.stats.free_heatsinks}} 
+							<select id="select-heatsink-type" name="system.stats.heatsinks_double">
+							{{#select system.stats.heatsinks_double}}
+								<option value="false">Single</option>
+								<option value="true">Double</option>
+							{{/select}}
+							</select>
+						</td>
+					</tr>
+					{{#if (eq system.type "mech")}}
+					<tr>
+						<td class="resource-label">Jump Speed</td>
+						<td>
+							<input type="number" step="1" id="set-mp-jump" value="{{system.mp.jump}}" />
+						</td>
+						{{#if (gt system.mp.jump 0)}}
+						<td class="resource-label">Jumpjet Weight</td>
+						<td>{{times system.mp.jump 0.5}}</td>
+						{{/if}}
+					</tr>
+					{{/if}}
+					<tr>
+						<td class="resource-label">Maximum Armour Points</td>
+						<td>{{system.armour.maxarmour}}</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Internal Structure Weight</td>
+						<td>{{system.armour.structure_weight}}</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Armour Weight</td>
+						<td>
+							<input type="number" step="0.5" id="set-armour-weight" name="system.armour.tonnage" value="{{system.armour.tonnage}}" />
+						</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Armour Points (Used/Max)</td>
+						<td>{{system.armour.armourfactor.used}}/{{system.armour.armourfactor.max}}</td>
+					</tr>
+				</table>
+				<table>
+					<caption><h3>Statistics</h3></caption>
+					<tr>
+						<td class="resource-label">Non-Equipment Weight:</td>
+						<td>{{system.weight.other}}T</td>
+					</tr>
+					<tr>
+						<td class="resource-label">Equipment Weight:</td>
+						<td>{{system.weight.equipment}}T</td>
+					</tr>
+				</table>
+			</td>
+			<!-- Critical Slots -->
+			<td style="vertical-align:top;">
+				<h3>Critical Slots</h3>
+				<table>
+					{{#if (eq system.type "mech")}}
+					<tr> <!-- Top row -->
+						<td></td>
+						{{#each system.locations.mech as |location key|}}
+						{{#if (in key "rear_l")}}
+						<td style="vertical-align:top; text-align:center;">
+							<h10>{{localize key}} (<input style="width:12px; height:12px;" type="number" step=1 id="{{key}}" name="system.locations.mech.{{key}}.armour.assigned" class="armour-assigned" value="{{location.armour.assigned}}" />/{{location.armour.max}})</h10>
+						</td>
+						{{/if}}
+						{{#if (in key "head")}}
+						<td style="vertical-align:top; text-align:center;">
+							<h10>{{localize key}} (<input style="width:12px; height:12px;" type="number" step=1 id="{{key}}" name="system.locations.mech.{{key}}.armour.assigned" class="armour-assigned" value="{{location.armour.assigned}}" />/{{location.armour.max}})</h10>
+							<table style="margin:0px">
+							{{#each ../items as |item|}}
+							{{#if (eq item.system.location key)}}
+								<tr>
+									<div {{#if (eq item.system.stats.slots 1)}}style="border-bottom:1px solid black;"{{/if}} class="draggable crit-slot slotted vehicle-item {{item.system.stats.type}}" id="{{item._id}}">{{item.name}}</div>
+								</tr>
+								{{#if (gt item.system.stats.slots 1)}}
+								{{#loop (minus item.system.stats.slots 2)}}
+								<tr>
+									<div class="draggable crit-slot slotted vehicle-item {{item.system.stats.type}}" id="{{item._id}}">{{item.name}}</div>
+								</tr>
+								{{/loop}}
+								<tr>
+									<div style="border-bottom:1px solid black;" class="draggable crit-slot slotted vehicle-item {{item.system.stats.type}}" id="{{item._id}}">{{item.name}}</div>
+								</tr>
+								{{/if}}
+							{{/if}}
+							{{/each}}
+							{{#loop location.slots.free}}
+								<tr>
+									<td class="crit-slot" id="{{key}}">Empty slot</td>
+								</tr>
+							{{/loop}}
+								<tr><td>Life Support</td></tr>
+								<tr><td>Life Support</td></tr>
+								<tr><td>Sensors</td></tr>
+								<tr><td>Sensors</td></tr>
+								<tr><td>{{#if (eq system.stats.cockpit_type "small")}}Small Cockpit{{else}}Cockpit{{/if}}</td></tr>
+							</table>
+						</td>
+						{{/if}}
+						{{#if (in key "rear_r")}}
+						<td style="vertical-align:top; text-align:center;">
+							<h10>{{localize key}} (<input style="width:12px; height:12px;" type="number" step=1 id="{{key}}" name="system.locations.mech.{{key}}.armour.assigned" class="armour-assigned" value="{{location.armour.assigned}}" />/{{location.armour.max}})</h10>
+						</td>
+						{{/if}}
+						{{/each}}
+						<td></td>
+					</tr>
+					<tr> <!-- Centre row -->
+						{{#each system.locations.mech as |location key|}}
+						{{#if (in key "arm_l" "arm_r" "torso_l" "torso_r" "torso_c")}}
+						<td style="vertical-align:top; text-align:center;">
+							<h10>{{localize key}} (<input style="width:12px; height:12px;" type="number" step=1 id="{{key}}" name="system.locations.mech.{{key}}.armour.assigned" class="armour-assigned" value="{{location.armour.assigned}}" />/{{location.armour.max}})</h10>
+							<table style="margin:0px">
+							{{#each ../items as |item|}}
+							{{#if (eq item.system.location key)}}
+								<tr>
+									<div {{#if (eq item.system.stats.slots 1)}}style="border-bottom:1px solid black;"{{/if}} class="draggable crit-slot slotted vehicle-item {{item.system.stats.type}}" id="{{item._id}}">{{item.name}}</div>
+								</tr>
+								{{#if (gt item.system.stats.slots 1)}}
+								{{#loop (minus item.system.stats.slots 2)}}
+								<tr>
+									<div class="draggable crit-slot slotted vehicle-item {{item.system.stats.type}}" id="{{item._id}}">{{item.name}}</div>
+								</tr>
+								{{/loop}}
+								<tr>
+									<div style="border-bottom:1px solid black;" class="draggable crit-slot slotted vehicle-item {{item.system.stats.type}}" id="{{item._id}}">{{item.name}}</div>
+								</tr>
+								{{/if}}
+							{{/if}}
+							{{/each}}
+							{{#loop location.slots.free}}
+								<tr>
+									<td class="crit-slot" id="{{key}}">Empty slot</td>
+								</tr>
+							{{/loop}}
+							{{#if (eq key "torso_c")}}
+								{{#loop 6}}
+								<tr><td>Engine</td></tr>
+								{{/loop}}
+								{{#if (or (eq ../system.engine.gyro_type "standard") (eq ../system.engine.gyro_type "heavy"))}}
+								{{#loop 4}}
+								<tr><td>Gyro</td></tr>
+								{{/loop}}
+								{{else if (eq ../system.engine.gyro_type "compact")}}
+								{{#loop 2}}
+								<tr><td>Gyro</td></tr>
+								{{/loop}}
+								{{else if (eq ../system.engine.gyro_type "xl")}}
+								{{#loop 6}}
+								<tr><td>Gyro</td></tr>
+								{{/loop}}
+								{{/if}}
+							{{/if}}
+							</table>
+						</td>
+						{{/if}}
+						{{/each}}
+					</tr>
+					<tr> <!-- Bottom row -->
+						<td></td>
+						{{#each system.locations.mech as |location key|}}
+						{{#if (in key "leg_l" "leg_r")}}
+						<td style="vertical-align:top; text-align:center;">
+							<h10>{{localize key}} (<input style="width:12px; height:12px;" type="number" step=1 id="{{key}}" name="system.locations.mech.{{key}}.armour.assigned" class="armour-assigned" value="{{location.armour.assigned}}" />/{{location.armour.max}})</h10>
+							<table style="margin:0px">
+							{{#each ../items as |item|}}
+							{{#if (eq item.system.location key)}}
+								<tr>
+									<div {{#if (eq item.system.stats.slots 1)}}style="border-bottom:1px solid black;"{{/if}} class="draggable crit-slot slotted vehicle-item {{item.system.stats.type}}" id="{{item._id}}">{{item.name}}</div>
+								</tr>
+								{{#if (gt item.system.stats.slots 1)}}
+								{{#loop (minus item.system.stats.slots 2)}}
+								<tr>
+									<div class="draggable crit-slot slotted vehicle-item {{item.system.stats.type}}" id="{{item._id}}">{{item.name}}</div>
+								</tr>
+								{{/loop}}
+								<tr>
+									<div style="border-bottom:1px solid black;" class="draggable crit-slot slotted vehicle-item {{item.system.stats.type}}" id="{{item._id}}">{{item.name}}</div>
+								</tr>
+								{{/if}}
+							{{/if}}
+							{{/each}}
+							{{#loop location.slots.free}}
+								<tr>
+									<td class="crit-slot" id="{{key}}">Empty slot</td>
+								</tr>
+							{{/loop}}
+							</table>
+						</td>
+						{{/if}}
+						{{#if (in key "rear_c")}}
+						<td style="vertical-align:top; text-align:center;">
+							<h10>{{localize key}} (<input style="width:12px; height:12px;" type="number" step=1 id="{{key}}" name="system.locations.mech.{{key}}.armour.assigned" class="armour-assigned" value="{{location.armour.assigned}}" />/{{location.armour.max}})</h10>
+						</td>
+						{{/if}}
+						{{/each}}
+						<td></td>
+					</tr>
+					{{else}}
+						non-mech not implemented yet
+					{{/if}}
+				</table>
+			</td>
+			<!-- Unassigned Equipment -->
+			<td style="vertical-align:top; width:15%;" id="inventory">
+				<h3>Unassigned Equipment</h3>
+				<ul>
+					{{#each actor.items as |item|}}
+					{{#if (or (eq item.system.location "") (eq item.system.location undefined))}}
+					<li style="clear:right" class="draggable vehicle-item {{item.system.stats.type}}" id="{{item.id}}">
+						{{item.name}}, {{item.system.stats.tonnage}}T, {{item.system.stats.slots}} slots 
+						<input style="float:right; height:16.8px" type="button" class="item-delete" value="X" id="{{item.id}}" />
+					</li>
+					{{/if}}
+					{{/each}}
+				</ul>
+			</td>
+		</tr>
+	</table>
+</div>

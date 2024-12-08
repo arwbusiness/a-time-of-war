@@ -34,6 +34,28 @@
 									</div>
 								</td>
 							</tr>
+							<tr>
+								<td>
+									<table>
+										<tr>
+											<td>
+												<span class="resource-label">{{#if (eq system.type "mech")}}Walk{{else}}Cruise{{/if}} Speed: </span>{{system.mp.walk}}
+											</td>
+											<td>
+												<span class="resource-label">{{#if (eq system.type "mech")}}Run{{else}}Flank{{/if}} Speed: </span>{{system.mp.run}}
+											</td>
+											{{#if (eq system.type "mech")}}
+											<td>
+												<span class="resource-label">Jump Speed: </span>{{system.mp.jump}}
+											</td>
+											{{/if}}
+										</tr>
+									</table>
+								</td>
+								<td>
+									<span class="resource-label">Class: </span>{{system.details.class}}
+								</td>
+							</tr>
 						</table>
 					</td>
 				</tr>
@@ -95,11 +117,6 @@
 								<input style="height:100%" type="number" name="system.details.model" value="{{system.details.model}}" />
 							</td></tr>
 							<tr><td>
-								<span class="resource-label">Class:</span>
-							</td><td>
-								<span>{{system.details.class}}</span>
-							</td></tr>
-							<tr><td>
 								<span class="resource-label">Chassis:</span>
 							</td><td>
 								<input style="height:100%" type="number" name="system.details.chassis" value="{{system.details.chassis}}" />
@@ -156,22 +173,28 @@
 	</nav>
 	<section class="sheet-body">
 		<div class="tab gameplay" data-group="primary" data-tab="gameplay">
-			<table style="table-layout:fixed; width:100%;">
+			<table>
 				<tr>
-					<!--Manifest-->
-					<td style="width:30%; padding-right:10px;">
-						{{> "systems/a-time-of-war/templates/actor/parts/VehicleActorManifest.hbs"}}
+					<td>
+						<table>
+							<tr>
+								<td>
+									{{> "systems/a-time-of-war/templates/actor/parts/VehicleActorManifest.hbs"}}
+								</td>
+							</tr>
+							<tr class="armour-diagram">
+								{{> "systems/a-time-of-war/templates/actor/parts/VehicleActorArmourDiagram.hbs"}}
+							</tr>
+						</table>
 					</td>
-					<!--Armour diagrams-->
-					<td style="width:500px;">
-						{{> "systems/a-time-of-war/templates/actor/parts/VehicleActorArmourDiagram.hbs"}}
-					</td>
-					<!--Heat gauge-->
-					<td style="width:20%; padding-left:10px;">
+					<td style="vertical-align:top;">
 						{{> "systems/a-time-of-war/templates/actor/parts/VehicleActorHeatGauge.hbs"}}
 					</td>
 				</tr>
 			</table>
+		</div>
+		<div class="tab mechlab" data-group="primary" data-tab="mechlab">
+			{{> "systems/a-time-of-war/templates/actor/parts/VehicleActorMechlab.hbs"}}
 		</div>
 	</section>
 </form>

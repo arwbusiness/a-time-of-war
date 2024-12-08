@@ -83,6 +83,12 @@ Hooks.once('init', function () {
     label: 'BT.SheetLabels.LifepathModule',
   });
   
+  CONFIG.statusEffects.push({
+    id: "shutdown",
+    label: "Heat Shutdown",
+    icon: "systems/a-time-of-war/icons/statusEffects/shutdown.png"
+  });
+  
   // Preload Handlebars templates.
   return preloadHandlebarsTemplates();
 });
@@ -219,39 +225,81 @@ Hooks.once("ready", function() {
 	console.log(data);
 });*/
 
-Hooks.on('combatTurnChange', function(combat, prior, current) {
+Hooks.on('combatTurnChange', async function(combat, prior, current) {
+	//Vehicles have some specific phenomena to resolve when their turn starts, so we do it here.
 	const currentActorId = combat.turns[current.turn].actorId;
-	let actor = game.actors.get(currentActorId);
-	
-	if(actor.type != "vehicle")
-		return;
-	
-	let updateData = {};
-	if(actor.system.stats.heat == null) {
-		updateData["system.stats.heat"] = 0;
-		actor.update(updateData);
-	}
-	
-	const items = Object.values(actor.items)[4];
-	for(let i in items) {
-		const item = actor.items.get(items[i]._id);
-		let cooling = item.system.cooling;
-		let firedThisTurn = item.system.firedThisTurn;
+	if(game.actors.get(currentActorId).type == "vehicle")
+	{
+		let actor = game.actors.get(currentActorId);
+		//Get real actor (could be synthetic) using the token
+		let tokenId = current.tokenId;
+		let token = canvas.scene.tokens.get(tokenId);
+		if(!token.actorLink)
+			actor = token.actor;
 		
-		updateData["system.cooling"] = firedThisTurn;
-		updateData["system.firedThisTurn"] = false;
-		item.update(updateData);
+		//Fix heat if it's somehow null.
+		let updateData = {};
+		if(actor.system.stats.heat == null || actor.system.stats.heat == undefined) {
+			updateData["system.stats.heat"] = 0;
+			actor.update(updateData);
+		}
+		
+		//Movement mods need to go
+		/*updateData = {};
+		updateData["system.mods.movement"] = [];
+		actor.update(updateData);*/
+		
+		const items = Object.values(actor.items)[4];
+		for(let i in items) {
+			const item = actor.items.get(items[i]._id);
+			let cooling = item.system.cooling;
+			let firedThisTurn = item.system.firedThisTurn;
+			
+			updateData = {};
+			updateData["system.cooling"] = firedThisTurn;
+			updateData["system.firedThisTurn"] = false;
+			item.update(updateData);
+		}
 	}
 	
-	//Heat resolution phase.
-	let cooling = 5;
-	if(actor.system.stats.heatsinks != undefined) {
-		cooling = actor.system.stats.heatsinks/(actor.system.stats.heatsinks_double ? 1 : 2);
+	//Some stuff needs to be resolved when you end your turn, rather than when you start it. That happens here.
+	const previousActorId = combat.turns[prior.turn].actorId;
+	if(game.actors.get(previousActorId).type == "vehicle") {
+		let tokenId = prior.tokenId;
+		let token = canvas.scene.tokens.get(tokenId);
+		let actor = token.actorLink ? game.actors.get(combat.turns[prior.turn].actorId) : token.actor;
+	
+		//Heat resolution phase.
+		let cooling = 5;
+		if(actor.system.stats.heatsinks != undefined) {
+			cooling = actor.system.stats.heatsinks;
+			if(actor.system.stats.heatsinks_double == false || actor.system.stats.heatsinks_double == "false")
+				cooling /= 2;
+		}
+		let updateData = {};
+		const newHeat = Math.max(0, actor.system.stats.heat - parseFloat(cooling));
+		updateData["system.stats.heat"] = newHeat;
+		actor.update(updateData);
+		
+		//Now check for heat shutdown and ammo cookoff
+		if(newHeat >= 14) {
+			//At risk of shutdown.
+			let tn = 4 + Math.floor((newHeat-14)/2);
+			const success = await actor.sheet.RollSkill("computers", null, [ [ "computers", tn ] ]).isSuccess;
+			
+			if(success) {
+				ui.notifications.warn(actor.name + " engages the emergency heat shutdown override on their vehicle.");
+				actor.toggleStatusEffect("shutdown", { "active": false });
+			}
+			else {
+				ui.notifications.warn(actor.name + "'s vehicle shuts down due to overheating!");
+				actor.toggleStatusEffect("shutdown", { "active": true });
+			}
+		}
+		if(newHeat >= 19) {
+			//At risk of ammo cook-off.
+		}
 	}
-	updateData = {};
-	updateData["system.stats.heat"] = Math.max(0, actor.system.stats.heat - parseFloat(cooling));
-	actor.system.stats.heat = Math.max(0, actor.system.stats.heat - parseFloat(cooling));
-	actor.update(updateData);
 });
 
 function _configureTrackableAttributes() {

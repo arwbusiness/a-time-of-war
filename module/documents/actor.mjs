@@ -727,6 +727,13 @@ export class BTActor extends Actor {
 		
 		console.log(updateData);
 		this.update(updateData);
+		
+		if(this.system.locations[type][location].structure == 0) {
+			ui.notifications.warn(location, "destroyed!");
+			updateData = {};
+			updateData["system.locations." + type + "." + location + ".destroyed"] = true;
+			this.update(updateData);
+		}
 	}
 	
 	async RandomLocation(type, facing) {

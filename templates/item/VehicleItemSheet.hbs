@@ -28,13 +28,15 @@
 		</div>
 		<br>
 		<table>
-			<caption></caption>
 			<tr>
 				<th>Type</th>
 				<th>Model</th>
 				<th>Cost</th>
 				<th>Tonnage</th>
 				<th>Slots</th>
+				{{#if (eq system.stats.type "ammo")}}
+				<th>Shots</th>
+				{{/if}}
 				<th>Tech</th>
 				<th>Av</th>
 				<th>BV</th>
@@ -44,12 +46,45 @@
 				<td>
 					<select name="system.stats.type">
 					{{#select system.stats.type}}
+					{{#if (eq item.type "vehicle_weapon")}}
 						<option value="ballistic">Ballistic</option>
 						<option value="energy">Energy</option>
 						<option value="missile">Missile</option>
 						<option value="melee">Melee</option>
+					{{else if (eq item.type "vehicle_equipment")}}
+						<option value="equipment">Equipment</option>
+						<option value="heatsink">Heatsink</option>
+						<option value="ammo">Ammunition</option>
+					{{/if}}
 					{{/select}}
 					</select>
+					{{#if (eq system.stats.type "heatsink")}}
+					<select name="system.stats.subtype">
+					{{#select system.stats.subtype}}
+						<option value="single">Single</option>
+						<option value="double">Double</option>
+					{{/select}}
+					</select>
+					{{/if}}
+					{{#if (eq system.stats.type "ammo")}}
+					<select name="system.stats.subtype">
+					{{#select system.stats.subtype}}
+						<option value="lrm5">LRM-5</option>
+						<option value="lrm10">LRM-10</option>
+						<option value="lrm15">LRM-15</option>
+						<option value="lrm20">LRM-20</option>
+						<option value="srm2">SRM-2</option>
+						<option value="srm4">SRM-4</option>
+						<option value="srm6">SRM-6</option>
+						<option value="ac2">AC/2</option>
+						<option value="ac5">AC/5</option>
+						<option value="ac10">AC/10</option>
+						<option value="ac20">AC/20</option>
+						<option value="mg_half">Machine Gun ammo (100)</option>
+						<option value="mg_full">Machine Gun ammo (200)</option>
+					{{/select}}
+					</select>
+					{{/if}}
 				</td>
 				<td>
 					<input type="text" value="{{system.stats.model}}" name="system.stats.model" placeholder="Enter model here..." />
@@ -63,6 +98,11 @@
 				<td>
 					<input type="number" value="{{system.stats.slots}}" name="system.stats.slots" placeholder="Enter number of critical slots here..." />
 				</td>
+				{{#if (eq system.stats.type "ammo")}}
+				<td>
+					<input type="number" name="system.profile.shots" value="{{system.profile.shots}}" placeholder="Enter number of shots per ton here..." />
+				</td>
+				{{/if}}
 				<td>
 					<input type="text" value="{{system.stats.tech}}" name="system.stats.tech" placeholder="Enter tech code here..." />
 				</td>
@@ -77,6 +117,7 @@
 				</td>
 			</tr>
 		</table>
+		{{#if (eq item.type "vehicle_weapon")}}
 		<br>
 		<table>
 			<caption></caption>
@@ -113,5 +154,6 @@
 				</td>
 			</tr>
 		</table>
+		{{/if}}
 	</section>
 </form>

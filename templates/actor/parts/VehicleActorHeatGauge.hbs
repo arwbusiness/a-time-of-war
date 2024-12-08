@@ -1,6 +1,6 @@
-<div class="heat-gauge">
-	<h3><b>Heat:</b> {{system.stats.heat}}</h3>
+<div style="vertical-align:top; padding-left:10px; class="heat-gauge">
+	<h3 style="text-align:center;"><b>Heat:</b> {{system.stats.heat}}</h3>
 	{{#loop 30}}
-		<div id="heat-{{@index}}" style="width:12px;height:12px;border:1px solid black;"></div>
+		<div id="heat-{{@index}}" style="margin-left:35%; width:12px;height:12px;border:1px solid black;"></div>
 	{{/loop}}
 </div>

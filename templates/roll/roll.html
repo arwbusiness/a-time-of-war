@@ -2,32 +2,32 @@
 	<div class="dice-result">
 	
 		{{#if flavor}}
-		<h4 class="dice-total flavor">{{flavor}}</h4>
+		<h10 class="dice-total flavor">{{flavor}}</h10>
 		{{/if}}
 		
 		{{#if targetName}}
-		<h4 class="dice-total formula target">Target: {{target}}</h4>
+		<h10 class="dice-total formula target">Target: {{target}}</h10>
 		{{/if}}
 		
 		{{#if formula}}
-		<h4 class="dice-total formula">{{formula}}</h4>
+		<h10 class="dice-total formula">{{formula}}</h10>
 		{{/if}
 		
 		{{#if tooltip}} {{{tooltip}}} {{/if}}
 		
 		{{#if result}}
-        <h4 class="dice-total result">
+        <h10 class="dice-total result">
 			{{result}}
-        </h4>
+        </h10>
         {{/if}}
 		
         {{#if text}}
             <span class="text">{{text}}</span>
         {{/if}}
 		
-		<h4 class="dice-total margin">
+		<h10 class="dice-total margin">
 			{{margin successOrFail}}: {{margin}}
-		</h4>
+		</h10>
 		
 	</div>
 </div>

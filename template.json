@@ -212,6 +212,10 @@
       "type": "",
       "tonnage": 0,
       "pilot": "",
+	  "weight": {
+		  "equipment": 0,
+		  "other": 0
+	  }
       "details": {
         "manufacturer": "",
         "factory": "",
@@ -228,8 +232,28 @@
         "bv": 0,
 		"heat": 0,
 		"heatsinks": 10,
-		"heatsinks_double": false
+		"free_heatsinks": 0,
+		"heatsinks_double": false,
+		"cockpit_type": "standard"
       },
+	  "engine": {
+		"type": "standard",
+		"weight": 0.5,
+		"rating": "10",
+		"gyro_weight": 0,
+		"gyro_type": "standard"
+	  },
+	  "armour": {
+		"type": "standard",
+		"tonnage": 0,
+		"armourfactor": {
+			"used": 0,
+			"max": 0
+		},
+		"maxarmour": 0,
+		"structure_type": "standard",
+		"structure_weight": 0
+	  },
       "pilot_skills": {
         "gunnery": 4,
         "piloting": 3,
@@ -243,133 +267,153 @@
         "run": 0,
         "jump": 0
       },
+	  "mods": {
+		"gunnery": 0,
+		"computers": 0
+	  },
 	  "hasTurret": false,
 	  "locations": {
 		  "mech": {
-			  "head": {
-				  "armour": {
-					  "value": 18,
-					  "max": 18,
-					  "possible": 18
-				  },
-				  "structure": {
-					  "value": 9,
-					  "max": 9,
-					  "possible": 9
-				  },
-				  "slots": {}
-			  },
 			  "rear_l": {
 				  "armour": {
 					  "value": 5,
 					  "max": 5,
-					  "possible": 5
+					  "assigned": 5
+				  }
+			  },
+			  "head": {
+				  "armour": {
+					  "value": 18,
+					  "max": 18,
+					  "assigned": 0
+				  },
+				  "structure": {
+					  "value": 9,
+					  "max": 9
+				  },
+				  "slots": {
+					  "max": 1,
+					  "free": 1
 				  }
 			  },
 			  "rear_r": {
 				  "armour": {
 					  "value": 5,
 					  "max": 5,
-					  "possible": 5
+					  "assigned": 0
 				  }
 			  },
-			  "rear_c": {
+			  "arm_l": {
 				  "armour": {
-					  "value": 7,
-					  "max": 7,
-					  "possible": 7
+					  "value": 16,
+					  "max": 16,
+					  "assigned": 0
+				  },
+				  "structure": {
+					  "value": 8,
+					  "max": 8
+				  },
+				  "slots": {
+					  "max": 8,
+					  "free": 8
 				  }
 			  },
 			  "torso_l": {
 				  "armour": {
 					  "value": 16,
 					  "max": 16,
-					  "possible": 16
+					  "assigned": 0
 				  },
 				  "structure": {
 					  "value": 12,
+					  "max": 12
+				  },
+				  "slots": {
 					  "max": 12,
-					  "possible": 12
-				  },
-				  "slots": {}
-			  },
-			  "torso_r": {
-				  "armour": {
-					  "value": 16,
-					  "max": 16,
-					  "possible": 16
-				  },
-				  "structure": {
-					  "value": 12,
-					  "max": 12,
-					  "possible": 12
-				  },
-				  "slots": {}
+					  "free": 12
+				  }
 			  },
 			  "torso_c": {
 				  "armour": {
 					  "value": 18,
 					  "max": 18,
-					  "possible": 18
+					  "assigned": 0
 				  },
 				  "structure": {
 					  "value": 16,
-					  "max": 16,
-					  "possible": 16
+					  "max": 16
 				  },
-				  "slots": {}
+				  "slots": {
+					  "max": 2,
+					  "free": 2
+				  }
 			  },
-			  "arm_l": {
+			  "torso_r": {
 				  "armour": {
 					  "value": 16,
 					  "max": 16,
-					  "possible": 16
+					  "assigned": 0
 				  },
 				  "structure": {
-					  "value": 8,
-					  "max": 8,
-					  "possible": 8
+					  "value": 12,
+					  "max": 12
 				  },
-				  "slots": {}
+				  "slots": {
+					  "max": 12,
+					  "free": 12
+				  }
 			  },
 			  "arm_r": {
 				  "armour": {
 					  "value": 16,
 					  "max": 16,
-					  "possible": 16
+					  "assigned": 0
 				  },
 				  "structure": {
 					  "value": 8,
-					  "max": 8,
-					  "possible": 8
+					  "max": 8
 				  },
-				  "slots": {}
+				  "slots": {
+					  "max": 8,
+					  "free": 8
+				  }
 			  },
 			  "leg_l": {
 				  "armour": {
 					  "value": 22,
 					  "max": 22,
-					  "possible": 22
+					  "assigned": 0
 				  },
 				  "structure": {
 					  "value": 12,
-					  "max": 12,
-					  "possible": 12
+					  "max": 12
 				  },
-				  "slots": {}
+				  "slots": {
+					  "max": 2,
+					  "free": 2
+				  }
+			  },
+			  "rear_c": {
+				  "armour": {
+					  "value": 7,
+					  "max": 7,
+					  "assigned": 0
+				  }
 			  },
 			  "leg_r": {
 				  "armour": {
 					  "value": 22,
 					  "max": 22,
-					  "possible": 22
+					  "assigned": 0
 				  },
 				  "structure": {
 					  "value": 12,
-					  "max": 12,
-					  "possible": 12
+					  "max": 12
 				  },
-				  "slots": {}
+				  "slots": {
+					  "max": 2,
+					  "free": 2
+				  }
 			  }
 		  },
 		  "ground": {
@@ -418,6 +462,7 @@
 		"location": "",
         "stats": {
           "type": "",
+		  "subtype": "",
           "cost": 50,
           "tonnage": 0.5,
           "slots": 1,
@@ -452,7 +497,8 @@
         "r_sht": 1,
         "r_med": 2,
         "r_lng": 3,
-		"flags": ""
+		"flags": "",
+		"shots": 1
       }
     },
     "vehicle_equipment": {

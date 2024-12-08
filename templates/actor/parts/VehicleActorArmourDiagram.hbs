@@ -1,240 +1,152 @@
-<div class="armour-diagram">
+<td style="width:50%"> <!-- Armour -->
 	<h3>Armour</h3>
 	<table>
-		<tr>
-			<td></td>
-			<td>
-				<h4>Rear Left Torso ({{system.locations.mech.rear_l.armour.value}}/{{system.locations.mech.rear_l.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.rear_l.armour.max system.locations.mech.rear_l.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-rear_l-armour" />
+	{{#each system.locations as |loc key|}}
+		{{#if (eq @root.system.type @key)}}
+		
+		{{#if (eq @root.system.type "mech")}}
+			<tr> <!-- Top row -->
+				<td></td>
+				{{#each loc as |location key|}}
+				{{#if (in key "rear_l" "head" "rear_r")}}
+				<td>
+					<h10>{{localize key}} ({{location.armour.value}}/{{location.armour.assigned}})</h10>
+					<div style="width:52px; height:42px; border:1px solid black;">
+					{{#loop location.armour.assigned}}
+						{{#if (le (minus location.armour.assigned location.armour.value) @index)}}
+						<img class="clickable circle-blank-armour circle-armour" data-for="mech-{{key}}-armour" id="{{minus location.armour.assigned (plus @index 1)}}" />
+						{{else}}
+						<img class="clickable circle-filled-armour circle-armour" data-for="mech-{{key}}-armour" id="{{minus location.armour.assigned (plus @index 1)}}" />
+						{{/if}}
 					{{/loop}}
-					{{#loop system.locations.mech.rear_l.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-rear_l-armour" />
+					</div>
+				</td>
+				{{/if}}
+				{{/each}}
+				<td></td>
+			</tr>
+			
+			<tr> <!-- Centre row -->
+			{{#each loc as |location key|}}
+			{{#if (in key "arm_l" "torso_l" "torso_c" "torso_r" "arm_r")}}
+				<td>
+					<h10>{{localize key}} ({{location.armour.value}}/{{location.armour.assigned}})</h10>
+					<div style="width:52px; height:42px; border:1px solid black;">
+					{{#loop location.armour.assigned}}
+						{{#if (le (minus location.armour.assigned location.armour.value) @index)}}
+						<img class="clickable circle-blank-armour circle-armour" data-for="mech-{{key}}-armour" id="{{minus location.armour.assigned (plus @index 1)}}" />
+						{{else}}
+						<img class="clickable circle-filled-armour circle-armour" data-for="mech-{{key}}-armour" id="{{minus location.armour.assigned (plus @index 1)}}" />
+						{{/if}}
 					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Head ({{system.locations.mech.head.armour.value}}/{{system.locations.mech.head.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.head.armour.max system.locations.mech.head.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-head-armour" />
+					</div>
+				</td>
+			{{/if}}
+			{{/each}}
+			</tr>
+			
+			<tr> <!-- Bottom row -->
+				<td></td>
+				{{#each loc as |location key|}}
+				{{#if (in key "leg_l" "rear_c" "leg_r")}}
+				<td>
+					<h10>{{localize key}} ({{location.armour.value}}/{{location.armour.assigned}})</h10>
+					<div style="width:52px; height:42px; border:1px solid black;">
+					{{#loop location.armour.assigned}}
+						{{#if (le (minus location.armour.assigned location.armour.value) @index)}}
+						<img class="clickable circle-blank-armour circle-armour" data-for="mech-{{key}}-armour" id="{{minus location.armour.assigned (plus @index 1)}}" />
+						{{else}}
+						<img class="clickable circle-filled-armour circle-armour" data-for="mech-{{key}}-armour" id="{{minus location.armour.assigned (plus @index 1)}}" />
+						{{/if}}
 					{{/loop}}
-					{{#loop system.locations.mech.head.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-head-armour" />
-					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Rear Right Torso ({{system.locations.mech.rear_r.armour.value}}/{{system.locations.mech.rear_r.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.rear_r.armour.max system.locations.mech.rear_r.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-rear_r-armour" />
-					{{/loop}}
-					{{#loop system.locations.mech.rear_r.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-rear_r-armour" />
-					{{/loop}}
-				</div>
-			</td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>
-				<h4>Left Arm ({{system.locations.mech.arm_l.armour.value}}/{{system.locations.mech.arm_l.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.arm_l.armour.max system.locations.mech.arm_l.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-arm_l-armour" />
-					{{/loop}}
-					{{#loop system.locations.mech.arm_l.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-arm_l-armour" />
-					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Left Torso ({{system.locations.mech.torso_l.armour.value}}/{{system.locations.mech.torso_l.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.torso_l.armour.max system.locations.mech.torso_l.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-torso_l-armour" />
-					{{/loop}}
-					{{#loop system.locations.mech.torso_l.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-torso_l-armour" />
-					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Centre Torso ({{system.locations.mech.torso_c.armour.value}}/{{system.locations.mech.torso_c.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.torso_c.armour.max system.locations.mech.torso_c.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-torso_c-armour" />
-					{{/loop}}
-					{{#loop system.locations.mech.torso_c.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-torso_c-armour" />
-					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Right Torso ({{system.locations.mech.torso_r.armour.value}}/{{system.locations.mech.torso_r.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.torso_r.armour.max system.locations.mech.torso_r.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-torso_r-armour" />
-					{{/loop}}
-					{{#loop system.locations.mech.torso_r.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-torso_r-armour" />
-					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Right Arm ({{system.locations.mech.arm_r.armour.value}}/{{system.locations.mech.arm_r.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.arm_r.armour.max system.locations.mech.arm_r.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-arm_r-armour" />
-					{{/loop}}
-					{{#loop system.locations.mech.arm_r.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-arm_r-armour" />
-					{{/loop}}
-				</div>
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<h4>Left Leg ({{system.locations.mech.leg_l.armour.value}}/{{system.locations.mech.leg_l.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.leg_l.armour.max system.locations.mech.leg_l.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-leg_l-armour" />
-					{{/loop}}
-					{{#loop system.locations.mech.leg_l.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-leg_l-armour" />
-					{{/loop}}
-				</div>
-			</td>
-			<td></td>
-			<td>
-				<h4>Rear Torso ({{system.locations.mech.rear_c.armour.value}}/{{system.locations.mech.rear_c.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.rear_c.armour.max system.locations.mech.rear_c.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-rear_c-armour" />
-					{{/loop}}
-					{{#loop system.locations.mech.rear_c.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-rear_c-armour" />
-					{{/loop}}
-				</div>
-			</td>
-			<td></td>
-			<td>
-				<h4>Right Leg ({{system.locations.mech.leg_r.armour.value}}/{{system.locations.mech.leg_r.armour.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.leg_r.armour.max system.locations.mech.leg_r.armour.value)}}
-					<img class="clickable circle-filled-armour circle-armour" data-for="mech-leg_r-armour" />
-					{{/loop}}
-					{{#loop system.locations.mech.leg_r.armour.value}}
-						<img class="clickable circle-blank-armour circle-armour" data-for="mech-leg_r-armour" />
-					{{/loop}}
-				</div>
-			</td>
-		</tr>
+					</div>
+				</td>
+				{{/if}}
+				{{/each}}
+				<td></td>
+			</tr>
+		{{else}}
+			non-mechs not implemented yet
+		{{/if}}
+			
+		{{/if}}
+	{{/each}}
 	</table>
+</td>
+<td style="width:50%"> <!-- Structure -->
 	<h3>Internal Structure</h3>
 	<table>
-		<tr>
-			<td></td>
-			<td></td>
-			<td>
-				<h4>Head ({{system.locations.mech.head.structure.value}}/{{system.locations.mech.head.structure.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.head.structure.max system.locations.mech.head.structure.value)}}
-					<img class="clickable circle-filled-structure circle-structure" data-for="mech-head-structure" />
+	{{#each system.locations as |loc key|}}
+		{{#if (eq @root.system.type @key)}}
+		
+		{{#if (eq @root.system.type "mech")}}
+			<tr> <!-- Top row -->
+				<td></td>
+				<td></td>
+				{{#each loc as |location key|}}
+				{{#if (in key "head")}}
+				<td>
+					<h10>{{localize key}} ({{location.structure.value}}/{{location.structure.max}})</h10>
+					<div style="width:52px; height:42px; border:1px solid black;">
+					{{#loop location.structure.max}}
+						{{#if (le (minus location.structure.max location.structure.value) @index)}}
+						<img class="clickable circle-blank-structure circle-structure" data-for="mech-{{key}}-structure" id="{{minus location.structure.max (plus @index 1)}}" />
+						{{else}}
+						<img class="clickable circle-filled-structure circle-structure" data-for="mech-{{key}}-structure" id="{{minus location.structure.max (plus @index 1)}}" />
+						{{/if}}
 					{{/loop}}
-					{{#loop system.locations.mech.head.structure.value}}
-						<img class="clickable circle-blank-structure circle-structure" data-for="mech-head-structure" />
+					</div>
+				</td>
+				{{/if}}
+				{{/each}}
+				<td></td>
+				<td></td>
+			</tr>
+			
+			<tr> <!-- Centre row -->
+			{{#each loc as |location key|}}
+			{{#if (in key "arm_l" "torso_l" "torso_c" "torso_r" "arm_r")}}
+				<td>
+					<h10>{{localize key}} ({{location.structure.value}}/{{location.structure.max}})</h10>
+					<div style="width:52px; height:42px; border:1px solid black;">
+					{{#loop location.structure.max}}
+						{{#if (le (minus location.structure.max location.structure.value) @index)}}
+						<img class="clickable circle-blank-structure circle-structure" data-for="mech-{{key}}-structure" id="{{minus location.structure.max (plus @index 1)}}" />
+						{{else}}
+						<img class="clickable circle-filled-structure circle-structure" data-for="mech-{{key}}-structure" id="{{minus location.structure.max (plus @index 1)}}" />
+						{{/if}}
 					{{/loop}}
-				</div>
-			</td>
-			<td></td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>
-				<h4>Left Arm ({{system.locations.mech.arm_l.structure.value}}/{{system.locations.mech.arm_l.structure.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.arm_l.structure.max system.locations.mech.arm_l.structure.value)}}
-					<img class="clickable circle-filled-structure circle-structure" data-for="mech-arm_l-structure" />
+					</div>
+				</td>
+			{{/if}}
+			{{/each}}
+			</tr>
+			
+			<tr> <!-- Bottom row -->
+				<td></td>
+				{{#each loc as |location key|}}
+				{{#if (in key "leg_l" "leg_r")}}
+				<td>
+					<h10>{{localize key}} ({{location.structure.value}}/{{location.structure.max}})</h10>
+					<div style="width:52px; height:42px; border:1px solid black;">
+					{{#loop location.structure.max}}
+						{{#if (le (minus location.structure.max location.structure.value) @index)}}
+						<img class="clickable circle-blank-structure circle-structure" data-for="mech-{{key}}-structure" id="{{minus location.structure.max (plus @index 1)}}" />
+						{{else}}
+						<img class="clickable circle-filled-structure circle-structure" data-for="mech-{{key}}-structure" id="{{minus location.structure.max (plus @index 1)}}" />
+						{{/if}}
 					{{/loop}}
-					{{#loop system.locations.mech.arm_l.structure.value}}
-						<img class="clickable circle-blank-structure circle-structure" data-for="mech-arm_l-structure" />
-					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Left Torso ({{system.locations.mech.torso_l.structure.value}}/{{system.locations.mech.torso_l.structure.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.torso_l.structure.max system.locations.mech.torso_l.structure.value)}}
-					<img class="clickable circle-filled-structure circle-structure" data-for="mech-torso_l-structure" />
-					{{/loop}}
-					{{#loop system.locations.mech.torso_l.structure.value}}
-						<img class="clickable circle-blank-structure circle-structure" data-for="mech-torso_l-structure" />
-					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Center Torso ({{system.locations.mech.torso_c.structure.value}}/{{system.locations.mech.torso_c.structure.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.torso_c.structure.max system.locations.mech.torso_c.structure.value)}}
-					<img class="clickable circle-filled-structure circle-structure" data-for="mech-torso_c-structure" />
-					{{/loop}}
-					{{#loop system.locations.mech.torso_c.structure.value}}
-						<img class="clickable circle-blank-structure circle-structure" data-for="mech-torso_c-structure" />
-					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Right Torso ({{system.locations.mech.torso_r.structure.value}}/{{system.locations.mech.torso_r.structure.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.torso_r.structure.max system.locations.mech.torso_r.structure.value)}}
-					<img class="clickable circle-filled-structure circle-structure" data-for="mech-torso_r-structure" />
-					{{/loop}}
-					{{#loop system.locations.mech.torso_r.structure.value}}
-						<img class="clickable circle-blank-structure circle-structure" data-for="mech-torso_r-structure" />
-					{{/loop}}
-				</div>
-			</td>
-			<td>
-				<h4>Right Arm ({{system.locations.mech.arm_r.structure.value}}/{{system.locations.mech.arm_r.structure.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.arm_r.structure.max system.locations.mech.arm_r.structure.value)}}
-					<img class="clickable circle-filled-structure circle-structure" data-for="mech-arm_r-structure" />
-					{{/loop}}
-					{{#loop system.locations.mech.arm_r.structure.value}}
-						<img class="clickable circle-blank-structure circle-structure" data-for="mech-arm_r-structure" />
-					{{/loop}}
-				</div>
-			</td>
-		</tr>
-		<tr>
-			<td></td>
-			<td>
-				<h4>Left Leg ({{system.locations.mech.leg_l.structure.value}}/{{system.locations.mech.leg_l.structure.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.leg_l.structure.max system.locations.mech.leg_l.structure.value)}}
-					<img class="clickable circle-filled-structure circle-structure" data-for="mech-leg_l-structure" />
-					{{/loop}}
-					{{#loop system.locations.mech.leg_l.structure.value}}
-						<img class="clickable circle-blank-structure circle-structure" data-for="mech-leg_l-structure" />
-					{{/loop}}
-				</div>
-			</td>
-			<td></td>
-			<td>
-				<h4>Right Leg ({{system.locations.mech.leg_r.structure.value}}/{{system.locations.mech.leg_r.structure.max}})</h4>
-				<div style="width:82px; height:66px; border:1px solid black;">
-					{{#loop (minus system.locations.mech.leg_r.structure.max system.locations.mech.leg_r.structure.value)}}
-					<img class="clickable circle-filled-structure circle-structure" data-for="mech-leg_r-structure" />
-					{{/loop}}
-					{{#loop system.locations.mech.leg_r.structure.value}}
-						<img class="clickable circle-blank-structure circle-structure" data-for="mech-leg_r-structure" />
-					{{/loop}}
-				</div>
-			</td>
-			<td></td>
-		</tr>
+					</div>
+				</td>
+				<td></td>
+				{{/if}}
+				{{/each}}
+			</tr>
+		{{else}}
+			non-mechs not implemented yet
+		{{/if}}
+			
+		{{/if}}
+	{{/each}}
 	</table>
-</div>
+</td>

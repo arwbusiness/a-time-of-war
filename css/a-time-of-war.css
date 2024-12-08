@@ -1,5 +1,38 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");
 /* my custom shit */
+h10 {
+	font-weight:bold;
+	font-size:11.5px;
+}
+
+.vehicle-item {
+	color:white;
+}
+
+.vehicle-item.energy {
+	background-color:royalblue;
+}
+
+.vehicle-item.ballistic {
+	background-color:mediumpurple;
+}
+
+.vehicle-item.missile {
+	background-color:green;
+}
+
+.vehicle-item.melee {
+	background-color:goldenrod;
+}
+
+.vehicle-item.equipment {
+	background-color:darkred;
+}
+
+.crit-slot {
+	border:1px dashed grey;
+}
+
 .chatDice {
 	float:left;
 	font-weight:bold;
@@ -49,29 +82,29 @@
 .circle-structure { /* this class just counts internal structure circles */ }
 .circle-blank-armour {
 	content:url("../icons/circle-blank-armour.png");
-	width:16px;
-	height:16px;
+	width:10px;
+	height:10px;
 	float:left;
 	border:0px;
 }
 .circle-filled-armour {
 	content:url("../icons/circle-filled-armour.png");
-	width:16px;
-	height:16px;
+	width:10px;
+	height:10px;
 	float:left;
 	border:0px;
 }
 .circle-blank-structure {
 	content:url("../icons/circle-blank-structure.png");
-	width:16px;
-	height:16px;
+	width:10px;
+	height:10px;
 	float:left;
 	border:0px;
 }
 .circle-filled-structure {
 	content:url("../icons/circle-filled-structure.png");
-	width:16px;
-	height:16px;
+	width:10px;
+	height:10px;
 	float:left;
 	border:0px;
 }

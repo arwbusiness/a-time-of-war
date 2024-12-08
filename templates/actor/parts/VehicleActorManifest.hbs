@@ -1,42 +1,41 @@
 <!-- Attacks -->
-
-<div class="manifest">
+<div class="manifest" style="width:200%">
 	<table style="table-layout:fixed">
 		<caption><h3>Weapons</h3></caption>
 		<tr style="text-align:left;">
-			<th></th>
+			<th>Select</th>
 			<th>Name</th>
 			<th>Location</th>
-			<th>Flags</th>
 			<th>Damage</th>
 			<th>Heat</th>
 			<th>Min</th>
 			<th>Range</th>
-			<th></th>
+			<th>Flags</th>
 		</tr>
 		{{#each inventory.weapons as |weapon key|}}
+		{{#unless (eq weapon.system.location "")}}
 		<tr>
 			<td>
-				<div class="flexrow">
-					{{#if weapon.system.firedThisTurn}}
-					<img src="systems/a-time-of-war/icons/fired-this-turn.png" style="width:24px; height:24px;">
-					{{/if}}
-					{{#if weapon.system.cooling}}
-					<img src="systems/a-time-of-war/icons/cooling.png" style="width:24px; height:24px;">
-					{{/if}}
-				</div>
+			{{#unless (or weapon.system.firedThisTurn weapon.system.cooling)}}
+				<input type="checkbox" class="select-weapon" id="{{weapon.id}}" />
+			{{else}}
+				{{#if weapon.system.firedThisTurn}}
+				<img src="systems/a-time-of-war/icons/fired-this-turn.png" style="width:24px; height:24px;">
+				{{else if weapon.system.cooling}}
+				<img src="systems/a-time-of-war/icons/cooling.png" style="width:24px; height:24px;">
+				{{/if}}
+			{{/unless}}
 			</td>
 			<td style="{{#if (or weapon.system.firedThisTurn weapon.system.cooling)}}text-decoration: line-through;{{/if}}" class="{{#unless (or weapon.system.firedThisTurn weapon.system.cooling)}}rollable{{/unless}}" data-rolltype="vehicle_weapon" data-id="{{weapon.id}}">{{weapon.name}}</td>
-			<td style="">{{weapon.system.location}}</td>
-			<td style="">{{weapon.system.profile.flags}}</td>
+			<td style="">{{localize weapon.system.location}}</td>
 			<td style="">{{weapon.system.profile.damage}}</td>
 			<td style="">{{weapon.system.profile.heat}}</td>
 			<td style="">{{weapon.system.profile.r_min}}</td>
 			<td style="">{{weapon.system.profile.r_sht}}/{{weapon.system.profile.r_med}}/{{weapon.system.profile.r_lng}}</td>
-			<td>
-				<input type="button" class="item-delete" value="X" id="{{weapon.id}}" />
-			</td>
+			<td style="">{{weapon.system.profile.flags}}</td>
 		</tr>
+		{{/unless}}
 		{{/each}}
 	</table>
+	<input type="button" value="Fire" disabled="true" id="fire-multi" style="width:10%; font-weight:bold; font-size:15px;" /> <!-- style="width:10%; border:1px solid black; background-color:grey; color:lightblue"-->
 </div>

@@ -12,8 +12,9 @@ export class BTVehicleActorSheet extends ActorSheet {
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ['bt', 'sheet', 'actor', 'vehicle'],
-      width: 750,
+      width: 800,
       height: 650,
+	  //dragDrop: [{dragSelector: ".draggable", dropSelector: "crit-slot"}],
       tabs: [
         {
           navSelector: '.sheet-tabs',
@@ -162,7 +163,30 @@ export class BTVehicleActorSheet extends ActorSheet {
 	}
 	
 	PrepareDerivedData(actorData, systemData) {
+		//console.log(this);
+				
+		//Calc assigned armour factor
+		if(systemData.type != "" && systemData.type != undefined) {
+			let assigned = 0;
+			
+			Object.entries(systemData.locations[systemData.type]).forEach(entry => {
+				if(entry[1].armour.assigned != undefined)
+					assigned += parseInt(entry[1].armour.assigned);
+			});
+			systemData.armour.armourfactor.used = assigned;
+		}
 		
+		//this.actor.system.mp.run = Math.ceil(1.5 * this.actor.system.mp.walk);
+		
+		/*Object.entries(actorData.items).forEach(entry => {
+			const item = this.actor.items.get(entry[1]._id);
+			let updateData = {};
+			updateData["system.location"] = "";
+			item.update(updateData);
+			console.warn(this.actor.items.get(entry[1]._id));
+		});
+		console.warn("break");
+		console.warn(this.actor.items);*/
 	}
 	
 	SortItemsToInventory(context = null) {
@@ -172,6 +196,10 @@ export class BTVehicleActorSheet extends ActorSheet {
 		for(let i of this.actor.items) {
 			//Near as I can tell, this lets the item retain its img or use the default icon if it doesn't have one of its own.
 			i.img = i.img || Item.DEFAULT_ICON;
+			
+			//Only assigned equipment makes it in
+			if(i.location == "")
+				return;
 			
 			switch(i.type) {
 				case "vehicle_weapon":
@@ -247,69 +275,70 @@ export class BTVehicleActorSheet extends ActorSheet {
 	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
+		
+		//Prep heat.
+		let heat = this.actor.system.stats.heat;
+		if(heat > 1) {
+			for(var i = 29; i >= Math.max(0, 30-heat); i--) {
+				let hex = parseInt((256/30)*Math.min(29, i));
+				hex = hex.toString(16);
+				let colour = "#ff" + (hex < 10 ? "0" : "") + hex + "00";
+				const elem = document.getElementById("heat-"+Math.min(29, i));
+				elem.style.backgroundColor = colour;
+			}
+		}
+		
+		this.HeatEffects();
+		this.CalcCarriedWeight();
+		let equipped_sinks = 0;
+		for(let i of this.actor.items) {
+			if(i.system.stats.type == "heatsink" && i.system.location != "")
+				equipped_sinks += i.system.stats.subtype == "double" ? 2 : 1;
+		}
+		this.actor.system.stats.heatsinks = this.CalcFreeHeatSinks(this.actor.system.engine.rating) + equipped_sinks;
+		
+		if (!this.isEditable)
+			return;
 
 		this.ActivateSheetListeners(html);
-		
-		if (!this.isEditable) return;
-
-		// Render the item sheet for viewing/editing prior to the editable check.
-		/*html.on('click', '.item-edit', (ev) => {
-		  const li = $(ev.currentTarget).parents('.item');
-		  const item = this.actor.items.get(li.data('itemId'));
-		  item.sheet.render(true);
-		});
-
-		// -------------------------------------------------------------
-		// Everything below here is only needed if the sheet is editable
-		
-
-		// Add Inventory Item
-		html.on('click', '.item-create', this._onItemCreate.bind(this));
-
-		// Delete Inventory Item
-		html.on('click', '.item-delete', (ev) => {
-		  const li = $(ev.currentTarget).parents('.item');
-		  const item = this.actor.items.get(li.data('itemId'));
-		  item.delete();
-		  li.slideUp(200, () => this.render(false));
-		});
-
-		// Active Effect management
-		html.on('click', '.effect-control', (ev) => {
-		  const row = ev.currentTarget.closest('li');
-		  const document =
-			row.dataset.parentId === this.actor.id
-			  ? this.actor
-			  : this.actor.items.get(row.dataset.parentId);
-		  onManageActiveEffect(ev, document);
-		});
-
-		// Drag events for macros.
-		if (this.actor.isOwner) {
-		  let handler = (ev) => this._onDragStart(ev);
-		  html.find('li.item').each((i, li) => {
-			if (li.classList.contains('inventory-header')) return;
-			li.setAttribute('draggable', true);
-			li.addEventListener('dragstart', handler, false);
-		  });
-		}*/
 	}
   
 	ActivateSheetListeners(html) {
-		const actorData = this.document.toObject(false);
+		const actorData = this.actor;
 		const systemData = actorData.system;
+		
+		let inCombat = false;
+		const combats = Object.values(game.combats)[1][0].combats;
+		for(var i = 0; i < combats.length && !inCombat; i++)
+			for(var t = 0; t < combats[i].turns.length && !inCombat; t++)
+				if((combats[i].turns[t].token.actor.id == actorData.id))
+					inCombat = true;
 
 		// Rollable abilities.
 		html.on('click', '.rollable', this._onRoll.bind(this));
 		
+		//Dragging items
+		if(!inCombat) {
+			html.find('.draggable.vehicle-item').each((i, li) => {
+				li.setAttribute('draggable', true);
+			});
+			html.on('dragstart', '.draggable', this.DragStartItem.bind(this));
+			html.on('drop', '.slotted', this.DragDropItem.bind(this));
+			html.on('drop', '.crit-slot', this.DragDropItem.bind(this));
+			html.on('drop', '#inventory', this.UnassignItem.bind(this));
+			html.on('contextmenu', '.slotted', this.UnassignItem.bind(this));
+		}
+		
 		//Bind buttons and stuff.
-		html.on('change', '#vehicle-type', this.ChangeVehicleType.bind(this));
+		if(!inCombat)
+			html.on('change', '#vehicle-type', this.ChangeVehicleType.bind(this));
 		html.on('dblclick', '#pilot-fake', this.TogglePilotSheet.bind(this));
 		
 		//Check the pilot id, update with the current version of the actor if found and hide the real pilot elements.
 		this.RefreshPilot(html, actorData, systemData);
 		html.on('click', '#refresh-pilot', this.RefreshPilotManual.bind(this));
-		html.on('click', '#delete-pilot', this.DeletePilot.bind(this));
+		if(!inCombat)
+			html.on('click', '#delete-pilot', this.DeletePilot.bind(this));
 		
 		//Try to make the lists default pick the thing they're supposed to, because they just default to the first option in the list otherwise.
 		let typeList = document.getElementById("vehicle-type");
@@ -347,33 +376,119 @@ export class BTVehicleActorSheet extends ActorSheet {
 		const weight = systemData.tonnage;
 		let updateData = {};
 		updateData["system.details.class"] = weight <= 35 ? "Light" : weight <= 55 ? "Medium" : weight <= 75 ? "Heavy" : "Assault";
-		this.actor.update(updateData);
-		
-		//Prep heat.
-		let heat = systemData.stats.heat;
-		if(heat > 1) {
-			for(var i = 29; i >= 30-heat; i--) {
-				//let hex = parseInt((256/30) * (Math.floor(i))).toString(16);
-				//let hex = parseInt(256/30 * (i).toString(16));
-				let hex = parseInt((256/30)*i);
-				hex = hex.toString(16);
-				let colour = "#ff" + (hex < 10 ? "0" : "") + hex + "00";
-				const elem = document.getElementById("heat-"+i);
-				elem.style.backgroundColor = colour;
-			}
-		}
 		
 		//Prep armour and structure circles with their bound listeners.
 		html.on('click', '.circle-armour', this.ToggleArmourCircle.bind(this));
 		html.on('click', '.circle-structure', this.ToggleArmourCircle.bind(this));
 		
 		// Delete Inventory Item
-		html.on('click', '.item-delete', (event) => {
-			//Recursively look up whichever of the clicked button's various parents has the item class.
-			const li = $(event.currentTarget)[0];
-			const item = this.actor.items.get(li.id);
-			item.delete();
-		});
+		if(!inCombat)
+			html.on('click', '.item-delete', (event) => {
+				//Recursively look up whichever of the clicked button's various parents has the item class.
+				const li = $(event.currentTarget)[0];
+				const item = this.actor.items.get(li.id);
+				item.delete();
+			});
+		
+		//Multi-fire buttons
+		this.actor.system["selected-weapons"] = {};
+		html.on('change', '.select-weapon', this.SelectWeapon.bind(this));
+		html.on('click', '#fire-multi', this.FireMultiple.bind(this));
+		
+		if(!inCombat) {
+			//Set speed inputs in MechLab
+			html.on('change', '#select-engine-type', this.SelectEngineType(this));
+			html.on('change', '#select-gyro-type', this.SelectGyroType(this));
+			html.on('change', '#set-mp-walk', this.SetMP.bind(this));
+			html.on('change', '#set-mp-jump', this.SetMP.bind(this));
+			
+			//Tonnage changes armour and structure
+			html.on('change', '#vehicle-tonnage', this.SetTonnage.bind(this));
+			html.on('change', '#set-armour-weight', this.SetArmourWeight.bind(this));
+			html.on('change', '.armour-assigned', this.SetArmourAssigned.bind(this));
+		}
+	}
+	
+	async DragStartItem(event) {
+		this.actor["draggedItem"] = event.target.id;
+	}
+	
+	async DragDropItem(event) {
+		const element = event.target;
+		let data = {};
+		try {
+			data["uuid"] = this.actor["draggedItem"];
+		}
+		catch (err) {
+			return false;
+		}
+		this.actor["draggedItem"] = null;
+		
+		if(element.classList.contains("slotted") || element.classList.contains("crit-slot")) {
+			const draggedItemId = data.uuid;
+			const item = this.actor.items.get(draggedItemId);
+			const slots = item.system.stats.slots;
+			const previousLocation = item.system.location;
+			const newLocation = element.id;
+			
+			if(element.classList.contains("slotted")) {
+				const ev = {
+					"currentTarget": {
+						"id": draggedItemId
+					}
+				};
+				await this.UnassignItem(ev);
+			}
+			
+			const vehicleType = this.actor.system.type;
+			const prevMax = previousLocation != "" ? this.actor.system.locations[vehicleType][previousLocation].slots.max : 999;
+			const prevFree = previousLocation != "" ? this.actor.system.locations[vehicleType][previousLocation].slots.free : 999;
+			const newMax = this.actor.system.locations[vehicleType][newLocation].slots.max;
+			const newFree = this.actor.system.locations[vehicleType][newLocation].slots.free;
+			
+			if(newFree - slots < 0) {
+				ui.notifications.error("Not enough free slots at location");
+				return;
+			}
+			
+			//Change the Item's Location
+			let updateData = {};
+			updateData["system.location"] = newLocation;
+			await item.update(updateData);
+			console.log(this.actor.items.get(item.id));
+			
+			//Update the number of free slots
+			updateData = {};
+			let target = "system.locations." + vehicleType + "." + newLocation + ".slots.free";
+			updateData[target] = Math.max(0, newFree - slots);
+			if(previousLocation != "") {
+				target = "system.locations." + vehicleType + "." + previousLocation + ".slots.free";
+				updateData[target] = Math.min(prevMax, slots + prevFree);
+			}
+			await this.actor.update(updateData);
+		}
+		else {
+			ui.notifications.error("Can't assign equipment: invalid target location.");
+			return;
+		}
+	}
+	
+	async UnassignItem(event) {
+		const element = event.currentTarget;
+		const id = this.actor.draggedItem != null ? this.actor.draggedItem : element.id;
+		const item = this.actor.items.get(id);
+		const location = item.system.location;
+		const vehicleType = this.actor.system.type;
+		
+		let updateData = {};
+		updateData["system.location"] = "";
+		item.update(updateData);
+		
+		updateData = {};
+		const max = this.actor.system.locations[vehicleType][location].slots.max;
+		const free = this.actor.system.locations[vehicleType][location].slots.free;
+		updateData["system.locations." + vehicleType + "." + location + ".slots.free"] = Math.min(max, parseInt(free + item.system.stats.slots));
+		this.actor.update(updateData);
 	}
 	
 	ChangeVehicleType(event) {
@@ -457,7 +572,7 @@ export class BTVehicleActorSheet extends ActorSheet {
 	ToggleArmourCircle(event) {
 		const element = event.currentTarget;
 		
-		const actorData = this.document.toObject(false);
+		const actorData = this.actor;
 		const systemData = actorData.system;
 		
 		const split = element.dataset.for.split('-');
@@ -468,43 +583,565 @@ export class BTVehicleActorSheet extends ActorSheet {
 		}
 		const location = split[1];
 		const type = split[2];
-		console.log("Clicked circle is {0}-{1}-{2}-{3}", systemData.type, location, type);
+		
+		const target = "system.locations." + systemData.type + "." + location + "." + type + ".value";
+		let updateData = {};
+		updateData[target] = element.classList.contains("circle-blank-" + type) ? parseInt(element.id) : parseInt(element.id) + 1;
+		this.actor.update(updateData);
+	}
+	
+	SelectWeapon(event) {
+		const element = event.currentTarget;
+		const id = element.id;
+		
+		let checked = false;
+		const weapons = document.getElementsByClassName("select-weapon");
+		for(var i = 0; (i < weapons.length) && !checked ; i++) {
+			if(weapons[i].checked)
+				checked = true;
+		}
+		
+		document.getElementById("fire-multi").disabled = !checked;
+	}
+	
+	async FireMultiple(event) {
+		const element = event.currentTarget;
+		const selected = document.getElementsByClassName("select-weapon");
+		console.warn(selected);
+		
+		//you do the query here and pass the modifiers to each attack afterwards
+		const modifiers = await this.QueryModifiers();
+		
+		for(var i = 0; i < selected.length; i++) {
+			if(selected[i].checked)
+				await this.RollAttack(selected[i].id, modifiers);
+			
+			selected[i].checked = false;
+		}
+	}
+	
+	async SelectEngineType(event) {
+		let updateData = {};
+		updateData["system.engine.weight"] = this.CalcEngineWeight(this.actor.system.mp.walk * this.actor.system.tonnage);
+		await this.actor.update(updateData);
+	}
+	
+	async SelectGyroType(event) {
+		let updateData = {};
+		let gyro_mult = 0;
+		switch(this.actor.system.engine.gyro_type) {
+			case "compact":
+				gyro_mult = 1.5;
+				break;
+			case "xl":
+				gyro_mult = 0.5;
+				break;
+			case "heavy":
+				gyro_mult = 2;
+				break;
+			case "standard":
+			default:
+				gyro_mult = 1;
+				break;
+		}
+		let gyro_weight = parseFloat(Math.ceil(this.actor.system.engine.rating / 100) * gyro_mult);
+		const remainder = gyro_weight - Math.floor(gyro_weight);
+		if(remainder > 0)
+		{
+			if(remainder <= 0.5)
+				gyro_weight = Math.floor(gyro_weight) + 0.5;
+			else if(remainder > 0.5)
+				gyro_weight = Math.ceil(gyro_weight);
+		}
+		updateData["system.engine.gyro_weight"] = parseFloat(gyro_weight);
+		await this.actor.update(updateData);
+	}
+	
+	async SetMP(event) {
+		const element = event.currentTarget;
+		const which = element.id.split("set-mp-")[1];
+		const oldSpeed = which == "walk" ? this.actor.system.mp.walk : this.actor.system.mp.jump;
+		const newSpeed = element.value;
+		const vehicleType = this.actor.system.type;
+		
+		//Validating
+		if(which == "jump")
+		{
+			if(vehicleType != "mech") {
+				ui.notifications.error("I'm not sure how you managed to get this error, but only mechs can have a jump speed.");
+				document.getElementById("set-mp-"+which).value = oldSpeed;
+				return;
+			}
+			if(newSpeed > this.actor.system.mp.walk) {
+				ui.notifications.error("Jump speed cannot exceed walk speed!");
+				document.getElementById("set-mp-"+which).value = oldSpeed;
+				return;
+			}
+		}
+		if(parseFloat(newSpeed) && newSpeed.includes(".")) {
+			ui.notifications.error("Walk speed must be a non-decimal integer number!");
+			document.getElementById("set-mp-"+which).value = oldSpeed;
+			return;
+		}
+		if(newSpeed == 0 && which != "jump" && vehicleType != "building") {
+			ui.notifications.error("Non-building vehicles must have a base speed greater than zero!");
+			document.getElementById("set-mp-"+which).value = oldSpeed;
+			return;
+		}
 		
 		let updateData = {};
-		const state = element.classList.contains("circle-filled-" + type) && !element.classList.contains("circle-blank-" + type) ? "destroyed" : "intact";
-		const value = systemData.locations[split[0]][location][type].value;
+		updateData["system.mp." + which] = newSpeed;
+		if(which == "walk") {
+			updateData["system.mp.run"] = Math.ceil(1.5 * newSpeed);
+			const rating = newSpeed * this.actor.system.tonnage;
+			updateData["system.engine.rating"] = rating;
+			updateData["system.engine.gyro_weight"] = parseInt(Math.ceil(rating / 100));
+			updateData["system.engine.weight"] = this.CalcEngineWeight(newSpeed * this.actor.system.tonnage);
+			this.CalcFreeHeatSinks(rating);
+			if(newSpeed < this.actor.system.mp.jump)
+				updateData["system.mp.jump"] = newSpeed;
+		}
+		await this.actor.update(updateData);
+		document.getElementById("set-mp-"+which).value = newSpeed;
+	}
+	
+	CalcEngineWeight(rating) {
+		const type = this.actor.system.engine.type;
+		let weight = 999;
 		
-		updateData["system.locations."+systemData.type+"."+location+"."+type+".value"] = value + (state == "intact" ? -1 : +1);
+		if(type == "ice") {
+			weight = 0.5;
+		}
+		else if(type == "cell") {
+			weight = 0.5;
+		}
+		else if(type == "fission") {
+			weight = 0.5;
+		}
+		else if(type == "compact") {
+			weight = 0.5;
+		}
+		else if(type == "standard" || type == "xl") {
+			weight = rating >= 10 && rating <= 25 ? 0.5 :
+					 rating >= 30 && rating <= 45 ? 1 :
+					 rating >= 50 && rating <= 60 ? 1.5 :
+					 rating >= 65 && rating <= 75 ? 2 :
+					 rating >= 80 && rating <= 85 ? 2.5 :
+					 rating >= 90 && rating <= 100 ? 3 :
+					 rating >= 105 && rating <= 110 ? 3.5 :
+					 rating >= 115 && rating <= 125 ? 4 :
+					 rating >= 130 && rating <= 135 ? 4.5 :
+					 rating >= 140 && rating <= 145 ? 5 :
+					 rating >= 150 && rating <= 155 ? 5.5 :
+					 rating >= 160 && rating <= 170 ? 6 :
+					 rating >= 175 && rating <= 180 ? 7 :
+					 rating >= 185 && rating <= 190 ? 7.5 :
+					 rating >= 195 && rating <= 195 ? 8 :
+					 rating >= 200 && rating <= 205 ? 8.5 :
+					 rating >= 210 && rating <= 210 ? 9 :
+					 rating >= 215 && rating <= 215 ? 9.5 :
+					 rating >= 220 && rating <= 225 ? 10 :
+					 rating >= 230 && rating <= 230 ? 10.5 :
+					 rating >= 235 && rating <= 235 ? 11 :
+					 rating >= 240 && rating <= 240 ? 11.5 :
+					 rating >= 245 && rating <= 245 ? 12 :
+					 rating >= 250 && rating <= 250 ? 12.5 :
+					 rating >= 255 && rating <= 255 ? 13 :
+					 rating >= 260 && rating <= 260 ? 13.5 :
+					 rating >= 265 && rating <= 265 ? 14 :
+					 rating >= 270 && rating <= 270 ? 14.5 :
+					 rating >= 275 && rating <= 275 ? 15.5 :
+					 rating >= 280 && rating <= 280 ? 16 :
+					 rating >= 285 && rating <= 285 ? 16.5 :
+					 rating >= 290 && rating <= 290 ? 17.5 :
+					 rating >= 295 && rating <= 295 ? 18 :
+					 rating >= 300 && rating <= 300 ? 19 :
+					 rating >= 305 && rating <= 305 ? 19.5 :
+					 rating >= 310 && rating <= 310 ? 20.5 :
+					 rating >= 315 && rating <= 315 ? 21.5 :
+					 rating >= 320 && rating <= 320 ? 22.5 :
+					 rating >= 325 && rating <= 325 ? 23.5 :
+					 rating >= 330 && rating <= 330 ? 24.5 :
+					 rating >= 335 && rating <= 335 ? 25.5 :
+					 rating >= 340 && rating <= 340 ? 27 :
+					 rating >= 345 && rating <= 345 ? 28.5 :
+					 rating >= 350 && rating <= 350 ? 29.5 :
+					 rating >= 355 && rating <= 355 ? 31.5 :
+					 rating >= 360 && rating <= 360 ? 33 :
+					 rating >= 365 && rating <= 365 ? 34.5 :
+					 rating >= 370 && rating <= 370 ? 36.5 :
+					 rating >= 375 && rating <= 375 ? 38.5 :
+					 rating >= 380 && rating <= 380 ? 41 :
+					 rating >= 385 && rating <= 385 ? 43.5 :
+					 rating >= 390 && rating <= 390 ? 46 :
+					 rating >= 395 && rating <= 395 ? 49 :
+					 rating == 400 					? 52.5 : 999;
+		}
+		else if(type == "light") {
+			weight = 0.5;
+		}
+		
+		if(type == "xl") {
+			const oldWeight = weight;
+			weight /= 2;
+			const remainder = weight - Math.floor(weight);
+			if(remainder == 0.25)
+				weight = Math.floor(weight) + 0.5;
+			else if(remainder == 0.75)
+				weight = Math.ceil(weight);
+		}
+		
+		if(weight == 999)
+			console.error("Engine type:", type, "not recognised!");
+		return weight;
+	}
+	
+	SetTonnage(event) {
+		const element = event.currentTarget;
+		const value = element.value;
+		
+		//Weight of the internal structure is 10% of the mech's tonnage, rounding up to the nearest half-ton.
+		let weight = value * 0.1;
+		let remainder = parseFloat("0." + ("" + weight).split('.')[1]);
+		if(remainder != 0 && remainder != 0.5) {
+			if(remainder < 0.5)
+				weight = Math.floor(weight) + 0.5;
+			else if(remainder > 0.5)
+				weight = Math.ceil(weight);
+		}
+		
+		//Endo Steel structure halves the weight of the internal structure, rounding up to the nearest half-ton.
+		if(this.actor.system.armour.structure_type == "endo") {
+			weight /= 2;
+			let remainder = weight - Math.floor(weight);
+			if(remainder == 0.75)
+				weight = Math.ceil(weight);
+			else if(remainder == 0.25)
+				weight = Math.floor(weight) + 0.5;
+		}
+		
+		let updateData = {};
+		updateData["system.armour.structure_weight"] = weight;
+		
+		//Different vehicles have different structure values per location.
+		const vehicleType = this.actor.system.type;
+		if(vehicleType == "mech") {
+			updateData["system.locations.mech.head.structure.max"] = 3;
+			switch(this.actor.system.tonnage) {
+				case 20:
+					updateData["system.locations.mech.torso_c.structure.max"] = 6;
+					updateData["system.locations.mech.torso_l.structure.max"] = 5;
+					updateData["system.locations.mech.torso_r.structure.max"] = 5;
+					updateData["system.locations.mech.arm_l.structure.max"] = 3;
+					updateData["system.locations.mech.arm_r.structure.max"] = 3;
+					updateData["system.locations.mech.leg_l.structure.max"] = 4;
+					updateData["system.locations.mech.leg_r.structure.max"] = 4;
+					break;
+				case 25:
+					updateData["system.locations.mech.torso_c.structure.max"] = 8;
+					updateData["system.locations.mech.torso_l.structure.max"] = 6;
+					updateData["system.locations.mech.torso_r.structure.max"] = 6;
+					updateData["system.locations.mech.arm_l.structure.max"] = 4;
+					updateData["system.locations.mech.arm_r.structure.max"] = 4;
+					updateData["system.locations.mech.leg_l.structure.max"] = 6;
+					updateData["system.locations.mech.leg_r.structure.max"] = 6;
+					break;
+				case 30:
+					updateData["system.locations.mech.torso_c.structure.max"] = 10;
+					updateData["system.locations.mech.torso_l.structure.max"] = 7;
+					updateData["system.locations.mech.torso_r.structure.max"] = 7;
+					updateData["system.locations.mech.arm_l.structure.max"] = 5;
+					updateData["system.locations.mech.arm_r.structure.max"] = 5;
+					updateData["system.locations.mech.leg_l.structure.max"] = 7;
+					updateData["system.locations.mech.leg_r.structure.max"] = 7;
+					break;
+				case 35:
+					updateData["system.locations.mech.torso_c.structure.max"] = 11;
+					updateData["system.locations.mech.torso_l.structure.max"] = 8;
+					updateData["system.locations.mech.torso_r.structure.max"] = 8;
+					updateData["system.locations.mech.arm_l.structure.max"] = 6;
+					updateData["system.locations.mech.arm_r.structure.max"] = 6;
+					updateData["system.locations.mech.leg_l.structure.max"] = 8;
+					updateData["system.locations.mech.leg_r.structure.max"] = 8;
+					break;
+				case 40:
+					updateData["system.locations.mech.torso_c.structure.max"] = 12;
+					updateData["system.locations.mech.torso_l.structure.max"] = 10;
+					updateData["system.locations.mech.torso_r.structure.max"] = 10;
+					updateData["system.locations.mech.arm_l.structure.max"] = 6;
+					updateData["system.locations.mech.arm_r.structure.max"] = 6;
+					updateData["system.locations.mech.leg_l.structure.max"] = 10;
+					updateData["system.locations.mech.leg_r.structure.max"] = 10;
+					break;
+				case 45:
+					updateData["system.locations.mech.torso_c.structure.max"] = 14;
+					updateData["system.locations.mech.torso_l.structure.max"] = 11;
+					updateData["system.locations.mech.torso_r.structure.max"] = 11;
+					updateData["system.locations.mech.arm_l.structure.max"] = 7;
+					updateData["system.locations.mech.arm_r.structure.max"] = 7;
+					updateData["system.locations.mech.leg_l.structure.max"] = 11;
+					updateData["system.locations.mech.leg_r.structure.max"] = 11;
+					break;
+				case 50:
+					updateData["system.locations.mech.torso_c.structure.max"] = 16;
+					updateData["system.locations.mech.torso_l.structure.max"] = 12;
+					updateData["system.locations.mech.torso_r.structure.max"] = 12;
+					updateData["system.locations.mech.arm_l.structure.max"] = 8;
+					updateData["system.locations.mech.arm_r.structure.max"] = 8;
+					updateData["system.locations.mech.leg_l.structure.max"] = 12;
+					updateData["system.locations.mech.leg_r.structure.max"] = 12;
+					break;
+				case 55:
+					updateData["system.locations.mech.torso_c.structure.max"] = 18;
+					updateData["system.locations.mech.torso_l.structure.max"] = 13;
+					updateData["system.locations.mech.torso_r.structure.max"] = 13;
+					updateData["system.locations.mech.arm_l.structure.max"] = 9;
+					updateData["system.locations.mech.arm_r.structure.max"] = 9;
+					updateData["system.locations.mech.leg_l.structure.max"] = 13;
+					updateData["system.locations.mech.leg_r.structure.max"] = 13;
+					break;
+				case 60:
+					updateData["system.locations.mech.torso_c.structure.max"] = 20;
+					updateData["system.locations.mech.torso_l.structure.max"] = 14;
+					updateData["system.locations.mech.torso_r.structure.max"] = 14;
+					updateData["system.locations.mech.arm_l.structure.max"] = 10;
+					updateData["system.locations.mech.arm_r.structure.max"] = 10;
+					updateData["system.locations.mech.leg_l.structure.max"] = 14;
+					updateData["system.locations.mech.leg_r.structure.max"] = 14;
+					break;
+				case 65:
+					updateData["system.locations.mech.torso_c.structure.max"] = 21;
+					updateData["system.locations.mech.torso_l.structure.max"] = 15;
+					updateData["system.locations.mech.torso_r.structure.max"] = 15;
+					updateData["system.locations.mech.arm_l.structure.max"] = 10;
+					updateData["system.locations.mech.arm_r.structure.max"] = 10;
+					updateData["system.locations.mech.leg_l.structure.max"] = 15;
+					updateData["system.locations.mech.leg_r.structure.max"] = 15;
+					break;
+				case 70:
+					updateData["system.locations.mech.torso_c.structure.max"] = 22;
+					updateData["system.locations.mech.torso_l.structure.max"] = 15;
+					updateData["system.locations.mech.torso_r.structure.max"] = 15;
+					updateData["system.locations.mech.arm_l.structure.max"] = 11;
+					updateData["system.locations.mech.arm_r.structure.max"] = 11;
+					updateData["system.locations.mech.leg_l.structure.max"] = 15;
+					updateData["system.locations.mech.leg_r.structure.max"] = 15;
+					break;
+				case 75:
+					updateData["system.locations.mech.torso_c.structure.max"] = 23;
+					updateData["system.locations.mech.torso_l.structure.max"] = 16;
+					updateData["system.locations.mech.torso_r.structure.max"] = 16;
+					updateData["system.locations.mech.arm_l.structure.max"] = 12;
+					updateData["system.locations.mech.arm_r.structure.max"] = 12;
+					updateData["system.locations.mech.leg_l.structure.max"] = 16;
+					updateData["system.locations.mech.leg_r.structure.max"] = 16;
+					break;
+				case 80:
+					updateData["system.locations.mech.torso_c.structure.max"] = 25;
+					updateData["system.locations.mech.torso_l.structure.max"] = 17;
+					updateData["system.locations.mech.torso_r.structure.max"] = 17;
+					updateData["system.locations.mech.arm_l.structure.max"] = 13;
+					updateData["system.locations.mech.arm_r.structure.max"] = 13;
+					updateData["system.locations.mech.leg_l.structure.max"] = 17;
+					updateData["system.locations.mech.leg_r.structure.max"] = 17;
+					break;
+				case 85:
+					updateData["system.locations.mech.torso_c.structure.max"] = 27;
+					updateData["system.locations.mech.torso_l.structure.max"] = 18;
+					updateData["system.locations.mech.torso_r.structure.max"] = 18;
+					updateData["system.locations.mech.arm_l.structure.max"] = 14;
+					updateData["system.locations.mech.arm_r.structure.max"] = 14;
+					updateData["system.locations.mech.leg_l.structure.max"] = 18;
+					updateData["system.locations.mech.leg_r.structure.max"] = 18;
+					break;
+				case 90:
+					updateData["system.locations.mech.torso_c.structure.max"] = 29;
+					updateData["system.locations.mech.torso_l.structure.max"] = 19;
+					updateData["system.locations.mech.torso_r.structure.max"] = 19;
+					updateData["system.locations.mech.arm_l.structure.max"] = 15;
+					updateData["system.locations.mech.arm_r.structure.max"] = 15;
+					updateData["system.locations.mech.leg_l.structure.max"] = 19;
+					updateData["system.locations.mech.leg_r.structure.max"] = 19;
+					break;
+				case 95:
+					updateData["system.locations.mech.torso_c.structure.max"] = 30;
+					updateData["system.locations.mech.torso_l.structure.max"] = 20;
+					updateData["system.locations.mech.torso_r.structure.max"] = 20;
+					updateData["system.locations.mech.arm_l.structure.max"] = 16;
+					updateData["system.locations.mech.arm_r.structure.max"] = 16;
+					updateData["system.locations.mech.leg_l.structure.max"] = 20;
+					updateData["system.locations.mech.leg_r.structure.max"] = 20;
+					break;
+				case 100:
+					updateData["system.locations.mech.torso_c.structure.max"] = 31;
+					updateData["system.locations.mech.torso_l.structure.max"] = 21;
+					updateData["system.locations.mech.torso_r.structure.max"] = 21;
+					updateData["system.locations.mech.arm_l.structure.max"] = 17;
+					updateData["system.locations.mech.arm_r.structure.max"] = 17;
+					updateData["system.locations.mech.leg_l.structure.max"] = 21;
+					updateData["system.locations.mech.leg_r.structure.max"] = 21;
+					break;
+				default:
+					console.error("Yeah, I dunno how you broke this one. Tonnage was invalid.");
+					return;
+			}
+			updateData["system.locations.mech.head.structure.max"] = 3;
+			updateData["system.locations.mech.head.armour.max"] = 9;
+			updateData["system.locations.mech.torso_c.armour.max"] = 2 * updateData["system.locations.mech.torso_c.structure.max"];
+			updateData["system.locations.mech.torso_l.armour.max"] = 2 * updateData["system.locations.mech.torso_l.structure.max"];
+			updateData["system.locations.mech.torso_r.armour.max"] = 2 * updateData["system.locations.mech.torso_r.structure.max"];
+			updateData["system.locations.mech.rear_c.armour.max"] = 2 * updateData["system.locations.mech.torso_c.structure.max"];
+			updateData["system.locations.mech.rear_l.armour.max"] = 2 * updateData["system.locations.mech.torso_l.structure.max"];
+			updateData["system.locations.mech.rear_r.armour.max"] = 2 * updateData["system.locations.mech.torso_r.structure.max"];
+			updateData["system.locations.mech.arm_l.armour.max"] = 2 * updateData["system.locations.mech.arm_l.structure.max"];
+			updateData["system.locations.mech.arm_r.armour.max"] = 2 * updateData["system.locations.mech.arm_r.structure.max"];
+			updateData["system.locations.mech.leg_l.armour.max"] = 2 * updateData["system.locations.mech.leg_l.structure.max"];
+			updateData["system.locations.mech.leg_r.armour.max"] = 2 * updateData["system.locations.mech.leg_r.structure.max"];
+			updateData["system.armour.maxarmour"] = updateData["system.locations.mech.leg_r.armour.max"]
+												  + updateData["system.locations.mech.leg_l.armour.max"]
+												  + updateData["system.locations.mech.arm_r.armour.max"]
+												  + updateData["system.locations.mech.arm_l.armour.max"]
+												  + updateData["system.locations.mech.torso_r.armour.max"]
+												  + updateData["system.locations.mech.torso_l.armour.max"]
+												  + updateData["system.locations.mech.torso_c.armour.max"]
+												  + updateData["system.locations.mech.head.armour.max"];
+		}
+		
+		this.actor.update(updateData);
+	}
+	
+	SetArmourWeight(event) {
+		const element = event.currentTarget;
+		const value = element.value;
+		
+		let updateData = {};
+		let remainder = value - Math.floor(value);
+		if(remainder != 0 && remainder != 0.5)
+		{
+			if(remainder < 0.5)
+				updateData["system.armour.tonnage"] = Math.floor(value) + 0.5;
+			else if(remainder > 0.5)
+				updateData["system.armour.tonnage"] = Math.ceil(value);
+		}
+		else {
+			updateData["system.armour.tonnage"] = parseFloat(value);
+		}
+		
+		//Set up the max armour factor.
+		let armourfactor = updateData["system.armour.tonnage"];
+		armourfactor *= (this.actor.system.armour.type == "ff" ? 17.92 : 16);
+		updateData["system.armour.armourfactor.max"] = Math.floor(armourfactor);
+		
+		this.actor.update(updateData);
+	}
+	
+	async SetArmourAssigned(event) {
+		const element = event.currentTarget;
+		const which = element.id;
+		const vehicleType = this.actor.system.type;
+		let updateData = {};
+		
+		const oldValue = updateData["system.locations." + vehicleType + "." + which + ".armour.assigned"];
+		const value = Math.min(which == "head" ? 9 : this.actor.system.locations[vehicleType][which.replace("rear","torso")].structure.max*2, parseInt(Math.round(element.value)));
+		const diff = value - oldValue;
+		
+		updateData["system.locations." + vehicleType + "." + which + ".armour.assigned"] = value;
+		updateData["system.locations." + vehicleType + "." + which + ".armour.value"] = value;
+		updateData["system.armour.armourfactor.used"] = this.actor.system.armour.armourfactor.used + diff;
+		
+		if(["torso_c", "rear_c", "torso_l", "rear_l", "torso_r", "rear_r"].includes(which)) {
+			const altWhich = which.includes("rear") ? which.replace("rear","torso") : which.replace("torso", "rear");
+			const totalMax = this.actor.system.locations[vehicleType][which].structure.max * 2;
+			const altMax = totalMax - value;
+			updateData["system.locations." + vehicleType + "." + altWhich + ".armour.max"] = altMax;
+			if(this.actor.system.locations[vehicleType][altWhich].armour.assigned > altMax)
+				updateData["system.locations." + vehicleType + "." + altWhich + ".armour.assigned"] = altMax;
+			updateData["system.locations." + vehicleType + "." + which + ".armour.max"] = totalMax - altMax;
+		}
+		
+		await this.actor.update(updateData);
+	}
+	
+	async QueryModifiers() {
+		let modifiers = [];
+		
+		//console.warn(this.actor.system["mods"]["heat"]);
+		//console.warn(this.actor.system["mods"]["movement"]);
+		
+		return modifiers;
+	}
+	
+	HeatEffects() {
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		
+		const heat = systemData.stats.heat;
+		
+		//Movement effect.
+		let mp = 0;
+		if(heat >= 5)
+			mp++;
+		if(heat >= 10)
+			mp++;
+		if(heat >= 15)
+			mp++;
+		if(heat >= 20)
+			mp++;
+		if(heat >= 25)
+			mp++;
+		const oldWalk = systemData.mp.walk;
+		systemData.mp.walk = Math.max(1, oldWalk - mp);
+		systemData.mp.run = Math.ceil(1.5 * systemData.mp.walk);
+		
+		//TN effect.
+		let acc = 0;
+		if(heat >= 8)
+			acc++;
+		if(heat >= 13)
+			acc++;
+		if(heat >= 17)
+			acc++;
+		if(heat >= 24)
+			acc++;
+		systemData.mods["gunnery"] = acc;
+	}
+
+	CalcFreeHeatSinks(rating) {
+		let updateData = {};
+		let free_sinks = Math.min(10, Math.floor(rating / 25));
+		updateData["system.stats.free_heatsinks"] = free_sinks;
+		this.actor.update(updateData);
+		return free_sinks;
+	}
+	
+	CalcCarriedWeight() {
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		let updateData = {};
+		
+		const cockpit_weight = parseFloat(systemData.stats.cockpit_type == "small" ? 2 : 3);
+		const gyro_weight = systemData.engine.gyro_weight != undefined ? parseFloat(systemData.engine.gyro_weight) : 0;
+		const engine_weight = systemData.engine.weight != undefined ? parseFloat(systemData.engine.weight) : 0;
+		const structure_weight = systemData.armour.structure_weight != undefined ? parseFloat(systemData.armour.structure_weight) : 0;
+		const armour_weight = systemData.armour.tonnage != undefined ? parseFloat(systemData.armour.tonnage) : 0;
+		
+		const weightOther = cockpit_weight + gyro_weight + engine_weight + structure_weight + armour_weight;
+		updateData["system.weight.other"] = weightOther;
+		
+		let weightEquipment = 0;
+		for(let i of this.actor.items) {
+			weightEquipment += i.system.stats.tonnage;
+		}
+		updateData["system.weight.equipment"] = weightEquipment;
 		
 		this.actor.update(updateData);
 	}
 
-  /**
-   * Handle creating a new Owned Item for the actor using initial data defined in the HTML dataset
-   * @param {Event} event   The originating click event
-   * @private
-   */
-  /*async _onItemCreate(event) {
-    event.preventDefault();
-    const header = event.currentTarget;
-    // Get the type of item to create.
-    const type = header.dataset.type;
-    // Grab any data associated with this control.
-    const data = duplicate(header.dataset);
-    // Initialize a default name.
-    const name = `New ${type.capitalize()}`;
-    // Prepare the item object.
-    const itemData = {
-      name: name,
-      type: type,
-      system: data,
-    };
-    // Remove the type from the dataset since it's in the itemData.type prop.
-    delete itemData.system['type'];
-
-    // Finally, create the item!
-    return await Item.create(itemData, { parent: this.actor });
-  }*/
+	ValidateBuild() {
+		const systemData = this.actor.system;
+		const otherWeight = systemData.weight.other;
+		const equipmentWeight = systemData.weight.equipment;
+	}
 
 	/**
 	* Handle clickable rolls.
@@ -533,7 +1170,7 @@ export class BTVehicleActorSheet extends ActorSheet {
 		}
 	}
 	
-	async RollSkill(which) {
+	async RollSkill(which, target = null, modifiers = []) {
 		if(which == undefined) {
 			console.error("Expected a string skill name; got undefined");
 			return;
@@ -624,16 +1261,29 @@ export class BTVehicleActorSheet extends ActorSheet {
 		total += untrained ? linkMod : skill;
 		
 		//Let modifiers kick in.
-		let modifiers = {};
+		//Populate modifiers with those applied to the systemData.
+		for(var i = 0; i < Object.entries(systemData.mods).length; i++) {
+			modifiers[Object.entries(modifiers).length] = Object.entries(systemData.mods)[i];
+		}
 		Object.entries(modifiers).forEach(entry => {
-			let modifier = entry[1];
-			console.log(modifier);
-			//total += modifier;
+			let affected = entry[1][0];
+			let modifier = entry[1][1];
+			
+			if(affected == which) {
+				tn += parseInt(modifier);
+			}
 		});
 		
 		//Calculate the MoS/F:
 		const margin = (total >= tn ? "+" : "") + (total - tn);
 		const isSuccess = (total >= tn && !isFumble) || isStunning;
+		
+		//Get bio data for the target's pilot, if there's a target.
+		let targetPilot = null;
+		if(target == undefined)
+			target = null;
+		else
+			targetPilot = game.actors.get(target.system.pilot);
 		
 		//Establish the message data.
 		let msgData = {
@@ -653,7 +1303,9 @@ export class BTVehicleActorSheet extends ActorSheet {
 			isSuccess: isSuccess,
 			successOrFail: (!isFumble && !isStunning ? (margin < 0 ? "Failed" : "Succeeded") : isStunning ? "Succeeded" : "Failed"),
 			isFumble: isFumble,
-			isStunning: isStunning
+			isStunning: isStunning,
+			target: target,
+			targetPilot: targetPilot
 		}
 		//Apply the chat roll mode.
 		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
@@ -669,7 +1321,7 @@ export class BTVehicleActorSheet extends ActorSheet {
 		return msg;
 	}
 	
-	async RollAttack(weaponId) {
+	async RollAttack(weaponId, modifiers = []) {
 		let weapon = null;
 		if(weaponId == "lpunch" || weaponId == "rpunch" || weaponId == "kick") {
 			weapon = {
@@ -695,26 +1347,27 @@ export class BTVehicleActorSheet extends ActorSheet {
 		if(targetToken == null || targetToken == undefined) {
 			console.error("TargetToken", targetToken, "is null or undefined!");
 			ui.notifications.error("You must select a token to target in order to make an attack.");
+			return;
 		}
-		const target = game.actors.get(targetToken.actor.id);
+		const target = targetToken.actor;
 		if(target == null || target == undefined) {
 			console.error("Target", target, "is null or undefined!");
 			ui.notifications.error("You must select a token to target in order to make an attack.");
+			return;
 		}
+		
+		let updateData = {};
 		
 		//some kind of attack type submenu goes here, at the end
 		let msg = null;
 		if((weaponId == "lpunch" || weaponId == "rpunch" || weaponId == "kick"))
-			msg = await this.RollSkill("piloting");
+			msg = await this.RollSkill("piloting", target);
 		else
-			msg = await this.RollSkill("gunnery");
-		
-		const isActive = msg != null;
-		
-		let updateData = {};
+			msg = await this.RollSkill("gunnery", target);
 		
 		//Trigger weapon cooldown at end phase
-		if(isActive)
+		const attackIsLive = msg != null;
+		if(attackIsLive)
 		{
 			updateData["system.firedThisTurn"] = true;
 			weapon.system.firedThisTurn = true;
@@ -728,13 +1381,15 @@ export class BTVehicleActorSheet extends ActorSheet {
 			console.warn(this.actor.system.stats);
 			this.actor.update(updateData);
 			
+			//Determine if you need to roll to shutdown, or if your armour cooks off.
+			
 			const hit = msg.system.isSuccess;
 			if(hit) {
 				let facing = "front";
 				//Do some magic to work out the facing based on relative position of attacker and target.
 				
 				
-				target.TakeDamage(weapon.system.profile.damage, facing);
+				await target.TakeDamage(weapon.system.profile.damage, facing);
 			}
 		}
 	}

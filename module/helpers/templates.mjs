@@ -17,7 +17,8 @@ export const preloadHandlebarsTemplates = async function () {
 		'systems/a-time-of-war/templates/actor/parts/PersonActorOptions.hbs',
 		'systems/a-time-of-war/templates/actor/parts/VehicleActorArmourDiagram.hbs',
 		'systems/a-time-of-war/templates/actor/parts/VehicleActorHeatGauge.hbs',
-		'systems/a-time-of-war/templates/actor/parts/VehicleActorManifest.hbs'
+		'systems/a-time-of-war/templates/actor/parts/VehicleActorManifest.hbs',
+		'systems/a-time-of-war/templates/actor/parts/VehicleActorMechlab.hbs'
 		/*,
 		// Actor partials.
 		'systems/a-time-of-war/templates/actor/parts/actor-features.hbs',
