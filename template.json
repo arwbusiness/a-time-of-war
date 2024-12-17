@@ -72,19 +72,7 @@
 	  },
 		"lifepath": {
 			"img": "",
-			"affiliation": "",
-			"subaffiliation": "",
-			"early_childhood": "",
-			"late_childhood": "",
-			"schooling": {
-				"lp-schooling-1": ""
-			},
-			"adult_life": {
-				
-			},
-			"modules": {
-				
-			}
+			"finalised": false
 		},
 		"inventory": {
 			"weapon": {},
@@ -460,6 +448,8 @@
         "model": "",
         "ref": "TM, pg. 147",
 		"location": "",
+		"per_tonnage": false,
+		"state": "",
         "stats": {
           "type": "",
 		  "subtype": "",

@@ -3,6 +3,9 @@
 		<table style="width:65%; table-layout:fixed; float:left">
 			<caption>
 				<h3>Life Path</h3>
+				{{#unless system.lifepath.finalised}}
+				<input type="button" id="lifepath-finalise" value="Finish (Lock Lifepath Choices)" />
+				{{/unless}}
 			</caption>
 			<tr>
 				<td class="resource-label">Affiliation:</td>
@@ -72,6 +75,7 @@
 					</table>
 				</td>
 			</tr>
+			{{#unless system.lifepath.finalised}}
 			<tr>
 				<td class="resource-label">Flexible XPs:</td>
 				<td>
@@ -86,6 +90,21 @@
 					</table>
 				</td>
 			</tr>
+			<tr>
+				<td class="resource-label">Prerequisites:</td>
+				<td>
+					<table>
+					{{#each inventory.modules as |module key|}}
+						{{#unless (in module.system.prereqs "None" "none" "" undefined)}}
+						<tr>
+							<td>{{module.system.prereqs}}</td>
+						</tr>
+						{{/unless}}
+					{{/each}}
+					</table>
+				</td>
+			</tr>
+			{{/unless}}
 		</table>
 		
 		<img style="width:240px; height:240px; float:right;" id="lifepath-img" name="lifepath-img" src="{{system.lifepath.img}}" />
@@ -102,7 +121,7 @@
 				<th style="width:17%"><!--Subtitle--></th>
 				<th style="width:5%">Level</th>
 				<th style="width:44.91%">Description</th>
-				<th style="width:4%">XP Until Next</th>
+				<th style="width:8%">XP / Until Next</th>
 				<th style="width:8%"></th>
 			</tr>
 		</thead>
@@ -127,7 +146,7 @@
 					<textarea class="modify-trait-component" type="text" value="{{trait.description}}" data-traitid="{{trait.id}}@description" placeholder="Enter a trait description here" contenteditable="true" style="max-width:100%">{{trait.description}}</textarea>
 				</td>
 				<td style="text-align:center">
-					{{calcXPForNextTP trait.xp}}
+					{{trait.xp}} / {{calcXPForNextTP trait.xp}}
 				</td>
 				<td>
 					<input type="button" id="{{trait.id}}-delete" class="delete-trait" value="Delete" />

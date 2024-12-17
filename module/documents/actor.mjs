@@ -63,6 +63,7 @@ export class BTActor extends Actor {
 			return;
 		
 		const systemData = actorData.system;
+		const flags = actorData.flags.bt || {};
 		
 		//Reset skills by setting their XP to 0.
 		const skills = Object.entries(systemData.skills);
@@ -80,10 +81,10 @@ export class BTActor extends Actor {
 			else
 				data = skill[1];
 			
-			console.log(name);
-			
 			data.xp = 0;
 		});
+		
+		//Do some shit with lifepath modules. I think this is defining any stats that might otherwise be undefined.
 		for(let item of this.items) {
 			if(item.type != "lifepath_module")
 				return;
@@ -100,7 +101,7 @@ export class BTActor extends Actor {
 						systemData.skills[baseSkill][name].xp = 0;
 					}
 					catch {
-						console.error(baseSkill, name, "was undefined");
+						console.warn(baseSkill, name, "was undefined");
 					}
 				}
 			});
@@ -122,11 +123,10 @@ export class BTActor extends Actor {
 					};
 				}
 				catch {
-					console.error("traitId", id, "was undefined");
+					console.warn("traitId", id, "was undefined");
 				}
 			});
 		}
-		console.warn("break here");
 		
 		//Reset attributes by setting their XP to 0.
 		const attributes = Object.entries(systemData.attributes);
@@ -330,7 +330,6 @@ export class BTActor extends Actor {
 				const data = entry[1];
 				const name = data.name;
 				const xp = parseInt(data.xp);
-				console.log(name);
 				
 				if(data.hasSubtitle) {
 					const subtitle = data.subtitle;
@@ -386,7 +385,10 @@ export class BTActor extends Actor {
 			}
 			
 			if(data.type == "affiliation" || data.type == "subaffiliation") {
-				systemData.lifepath.img = item.img;
+				if(item.img != "icons/svg/item-bag.svg")
+				{
+					systemData.lifepath.img = item.img;
+				}
 			}
 			
 			moduleXP += parseInt(data.cost);
@@ -616,8 +618,7 @@ export class BTActor extends Actor {
 			return;
 
 		const systemData = actorData.system;
-
-		//systemData.xp = systemData.cr * systemData.cr * 100;
+		const flags = actorData.flags.bt || {};
 	}
 
 	/**
@@ -650,27 +651,19 @@ export class BTActor extends Actor {
    * Prepare character roll data.
    */
   _getPCRollData(data) {
-    if (this.type !== 'pc') return;
+    if (this.type !== 'pc')
+		return;
 
-    // Copy the ability scores to the top level, so that rolls can use
-    // formulas like `@str.mod + 4`.
-    /*if (data.abilities) {
-      for (let [k, v] of Object.entries(data.abilities)) {
-        data[k] = foundry.utils.deepClone(v);
-      }
-    }
-
-    // Add level for easier access, or fall back to 0.
-    if (data.attributes.level) {
-      data.lvl = data.attributes.level.value ?? 0;
-    }*/
+	//OH, I SEE!
+	//You can pass what are essentially dataset attributes to whatever is calling getRollData() by modifying the 'data' object that's passed in as a parameter.
   }
 
   /**
    * Prepare NPC roll data.
    */
   _getNPCRollData(data) {
-    if (this.type !== 'npc') return;
+    if (this.type !== 'npc')
+		return;
 
     // Process additional NPC data here.
   }
@@ -679,14 +672,19 @@ export class BTActor extends Actor {
    * Prepare Vehicle roll data.
    */
   _getVehicleRollData(data) {
-    if (this.type !== 'vehicle') return;
+    if (this.type !== 'vehicle')
+		return;
 
     // Process additional Vehicle data here.
   }
   
 	/* * *   Vehicle Stuff Starts Here   * * */
 	async TakeDamage(damage, facing) {
-		let type = this.system.type;
+		let type = this.type;
+		if(type != "vehicle")
+			return;
+		
+		type = this.system.type;
 		if (type != "mech")
 		{
 			console.error("Haven't implemented anything for non-mechs yet.");
@@ -726,13 +724,13 @@ export class BTActor extends Actor {
 		}
 		
 		console.log(updateData);
-		this.update(updateData);
+		await this.update(updateData);
 		
 		if(this.system.locations[type][location].structure == 0) {
 			ui.notifications.warn(location, "destroyed!");
 			updateData = {};
 			updateData["system.locations." + type + "." + location + ".destroyed"] = true;
-			this.update(updateData);
+			await this.update(updateData);
 		}
 	}
 	

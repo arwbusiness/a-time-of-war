@@ -6,26 +6,29 @@
 			data-edit="img"
 			title="{{item.name}}"
 		/>
-		<div class="header-fields">
-			<h1 class="charname"><input
-				name="name"
-				type="text"
-				value="{{item.name}}"
-				placeholder="Name"
-			/></h1>
-		</div>
+		<table>
+			<tr>
+				<td>
+					<div class="header-fields">
+						<h1 class="charname"><input
+							name="name"
+							type="text"
+							value="{{item.name}}"
+							placeholder="Name"
+						/></h1>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<span class="resource-label">Cost/BV per Tonnage</span>
+					<input type="checkbox" id="per-tonnage" {{#if system.per_tonnage}}checked{{/if}}/>
+				</td>
+			</tr>
+		</table>
 	</header>
 	<section class="sheet-body">
-		<div>
-		{{! Editors must receive enriched text data from getData to properly handle rolls }}
-		{{editor
-			enrichedDescription
-			target="system.description"
-			engine="prosemirror"
-			button=true
-			editable=editable
-		}}
-		</div>
+		<textarea id="description" value="{{item.system.description}}" placeholder="Enter description here...">{{item.system.description}}</textarea>
 		<br>
 		<table>
 			<tr>
@@ -53,6 +56,7 @@
 						<option value="melee">Melee</option>
 					{{else if (eq item.type "vehicle_equipment")}}
 						<option value="equipment">Equipment</option>
+						<option value="jumpjet">Jumpjet</option>
 						<option value="heatsink">Heatsink</option>
 						<option value="ammo">Ammunition</option>
 					{{/if}}
@@ -122,7 +126,7 @@
 		<table>
 			<caption></caption>
 			<tr>
-				<th>Damage</th>
+				<th>Damage</th>{{#if (eq system.stats.type "missile")}}/msl{{else if (eq system.stats.type "ballistic")}}/shot{{/if}}
 				<th>Heat</th>
 				<th>Min. Range</th>
 				<th>Short</th>

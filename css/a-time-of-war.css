@@ -6,6 +6,7 @@ h10 {
 }
 
 .vehicle-item {
+	border:none;
 	color:white;
 }
 
@@ -29,7 +30,32 @@ h10 {
 	background-color:darkred;
 }
 
+.vehicle-item.heatsink {
+	background-color:darkgrey
+}
+
+.vehicle-item.jumpjet {
+	background-color:darkgreen;
+}
+
+.vehicle-item.ammo {
+	background-color: blueslate;
+}
+
+.vehicle-item.damaged {
+	background-color: yellow !important;
+}
+
+.vehicle-item.destroyed {
+	background-color: black !important;
+	color: white !important;
+}
+
 .crit-slot {
+	
+}
+
+.empty {
 	border:1px dashed grey;
 }
 

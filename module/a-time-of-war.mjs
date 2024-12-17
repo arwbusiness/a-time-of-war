@@ -22,8 +22,7 @@ Hooks.once('init', function () {
   // accessible in global contexts.
   game.bt = {
     BTActor,
-    BTItem,
-    rollItemMacro,
+    BTItem
   };
 
   // Add custom constants for configuration.
@@ -174,15 +173,20 @@ Hooks.once('setup', function () {
 	_configureTrackableAttributes();
 	
 	CONFIG.statusEffects = [
-		/*{
+		{
 			id:'dead',
 			label:'EFFECT.StatusDead',
 			icon:'icons/svg/skull.svg'
-		},*/
+		},
 		{
 			id:'stunned',
 			label:'EFFECT.StatusStunned',
 			icon:'icons/stunned.png'
+		},
+		{
+			id:'shutdown',
+			label:'EFFECT.StatusShutdown',
+			icon:'icons/shutdown.png'
 		}
 	];
 });
@@ -192,38 +196,19 @@ Hooks.once('setup', function () {
  * Small version changes (after the last dot) do not need a migration.
  */
 Hooks.once("ready", function() {
-	/*console.warn("HOW MANY TIMES DOES THIS GET CALLED????");
-	const actors = Object.entries(game.actors)[1][1][0].documents;
-	for(var i = 0 ; i < actors.length; i++) {
-		const actor = game.actors.get(actors[i].id);
-		if(actor.type != "pc" && actor.type != "npc")
-			continue;
-		
-		console.warn(actor);
-		
-		//We're trying to initialise actor sheets with 'system.needsRefresh: true' to try to force an update before you can use your sheet, because it's the only way I can think of to fix the bug I've been facing.
-		actor.system["needsRefresh"] = true;
-		let updateData = {};
-		updateData["system.needsRefresh"] = true;
-		actor.update(updateData);
-	}*/
+	
 });
-/*Hooks.once('ready', function () {
-  // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
-  Hooks.on('hotbarDrop', (bar, data, slot) => createItemMacro(data, slot));
-  
-  
-});*/
 
-//Hooks.on('renderCustomActorSheet', function (app, html, data) {
-//Hooks.on("renderItemSheet",function(app,_html)
-/*Hooks.on("updateActor", function (system="a-time-of-war") {
-	console.log("HEY");
-});*/
-
-/*Hooks.on('renderCustomActorSheet', function (app, html, data) {
-	console.log(data);
-});*/
+Hooks.on("preCreateActor", function(document, data, options, userId) {
+	console.log("Document:", document);
+	console.log("Data:", data);
+	
+	if(document.type == "pc") {
+		let updateData = {};
+		updateData["prototypeToken.actorLink"] = true;
+		document.updateSource(updateData);
+	}
+});
 
 Hooks.on('combatTurnChange', async function(combat, prior, current) {
 	//Vehicles have some specific phenomena to resolve when their turn starts, so we do it here.
@@ -318,78 +303,8 @@ function _configureTrackableAttributes() {
 			value: []
 		},
 		"vehicle": {
-			bar: [],
+			bar: ["stats.heat"],
 			value: ["mp.walk", "mp.run", "mp.jump"]
 		}
 	};
-}
-
-/* -------------------------------------------- */
-/*  Hotbar Macros                               */
-/* -------------------------------------------- */
-
-/**
- * Create a Macro from an Item drop.
- * Get an existing item macro if one exists, otherwise create a new one.
- * @param {Object} data     The dropped data
- * @param {number} slot     The hotbar slot to use
- * @returns {Promise}
- */
-async function createItemMacro(data, slot) {
-  // First, determine if this is a valid owned item.
-  if (data.type !== 'Item') return;
-  if (!data.uuid.includes('Actor.') && !data.uuid.includes('Token.')) {
-    return ui.notifications.warn(
-      'You can only create macro buttons for owned Items'
-    );
-  }
-  // If it is, retrieve it based on the uuid.
-  const item = await Item.fromDropData(data);
-
-  // Create the macro command using the uuid.
-  const command = `game.bt.rollItemMacro("${data.uuid}");`;
-  let macro = game.macros.find(
-    (m) => m.name === item.name && m.command === command
-  );
-  if (!macro) {
-    macro = await Macro.create({
-      name: item.name,
-      type: 'script',
-      img: item.img,
-      command: command,
-      flags: { 'bt.itemMacro': true },
-    });
-  }
-  game.user.assignHotbarMacro(macro, slot);
-  return false;
-}
-
-/**
- * Create a Macro from an Item drop.
- * Get an existing item macro if one exists, otherwise create a new one.
- * @param {string} itemUuid
- */
-function rollItemMacro(itemUuid) {
-  // Reconstruct the drop data so that we can load the item.
-  const dropData = {
-    type: 'Item',
-    uuid: itemUuid,
-  };
-  // Load the item from the uuid.
-  Item.fromDropData(dropData).then((item) => {
-    // Determine if the item loaded and if it's an owned item.
-    if (!item || !item.parent) {
-      const itemName = item?.name ?? itemUuid;
-      return ui.notifications.warn(
-        `Could not find item ${itemName}. You may need to delete and recreate this macro.`
-      );
-    }
-
-    // Trigger the item roll
-    item.roll();
-  });
-}
-
-function roll() {
-	
 }

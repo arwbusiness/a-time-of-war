@@ -175,18 +175,6 @@ export class BTVehicleActorSheet extends ActorSheet {
 			});
 			systemData.armour.armourfactor.used = assigned;
 		}
-		
-		//this.actor.system.mp.run = Math.ceil(1.5 * this.actor.system.mp.walk);
-		
-		/*Object.entries(actorData.items).forEach(entry => {
-			const item = this.actor.items.get(entry[1]._id);
-			let updateData = {};
-			updateData["system.location"] = "";
-			item.update(updateData);
-			console.warn(this.actor.items.get(entry[1]._id));
-		});
-		console.warn("break");
-		console.warn(this.actor.items);*/
 	}
 	
 	SortItemsToInventory(context = null) {

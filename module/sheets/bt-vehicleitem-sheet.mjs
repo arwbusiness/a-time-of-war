@@ -93,7 +93,7 @@ export class BTVehicleItemSheet extends ItemSheet {
 		// Everything below here is only needed if the sheet is editable
 		if (!this.isEditable) return;
 
-		//this.ActivateSheetListeners(html);
+		this.ActivateSheetListeners(html);
 
 		// Roll handlers, click handlers, etc. would go here.
 
@@ -103,32 +103,30 @@ export class BTVehicleItemSheet extends ItemSheet {
 		);*/
 	}
 	
-	/*ActivateSheetListeners(html) {
-		this.form.ondrop = ev => this._onDrop(ev);
+	ActivateSheetListeners(html) {
+		html.on('blur', '#description', this.ChangeTextArea.bind(this));
+		html.on('change', '#per-tonnage', this.ChangePerTonnage.bind(this));
 	}
 	
-	async _onDragItemStart(event) {
-		const data = await this.getData();
-		event.dataTransfer.setData("text/plain", JSON.stringify({
-			type: "Item",
-			data: item
-		}));
-	}
-	
-	async _onDrop(event) {
-		let data;
-		try {
-			data = JSON.parse(event.dataTransfer.getData('text/plain'));
-		}
-		catch(err) {
-			return false;
-		}
+	ChangeTextArea(event) {
+		const element = event.currentTarget;
+		const id = element.id;
+		const value = element.value;
 		
-		if(data.type == "Item") {
-			console.log(data);
-			return true;
-		}
-		else
-			return false;
-	}*/
+		let updateData = {};
+		updateData["system." + id] = value;
+		this.item.update(updateData);
+		//No need to re-render.
+	}
+	
+	async ChangePerTonnage(event) {
+		event.preventDefault();
+		
+		const element = event.currentTarget;
+		const value = element.checked;
+		
+		let updateData = {};
+		updateData["system.per_tonnage"] = value;
+		await this.item.update(updateData);
+	}
 }

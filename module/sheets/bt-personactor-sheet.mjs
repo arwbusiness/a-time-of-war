@@ -111,12 +111,15 @@ export class BTPersonActorSheet extends ActorSheet {
 		Handlebars.registerHelper('calcXPForNextTP', function(xp) {
 			if(xp == 0)
 				return 100;
-			
 			const level_sub = Math.floor(xp/100); //2 for 299
 			const level_over = level_sub + 1;
 			const remainder = xp - level_sub * 100 //(299 - 200 = 99)
 			
-			return 100-remainder;
+			let ret = 100-remainder;
+			if(xp < 0)
+				ret *= -1;
+			
+			return ret;
 		});
 		
 		/* * * DATA CALL IS HERE * * */
@@ -336,22 +339,6 @@ export class BTPersonActorSheet extends ActorSheet {
 	/** @override */
 	activateListeners(html) {
 		super.activateListeners(html);
-		
-		/*console.warn(this.actor.system["needsRefresh"]);
-		if(this.actor.system["needsRefresh"]) {
-			html.on('click', '#refresh', async (event) => {
-				const actorId = this.id;
-				await this.close();
-		
-				this.actor.system["needsRefresh"] = false;
-				let updateData = {};
-				updateData["system.needsRefresh"] = false;
-				this.actor.update(updateData);
-				
-				await this.render(true);
-			});
-			return;
-		}*/
 
 		// -------------------------------------------------------------
 		// Everything below here is only needed if the sheet is editable
@@ -359,12 +346,16 @@ export class BTPersonActorSheet extends ActorSheet {
 			return;
 
 		//Activate progression listeners
-		this.ActivateSheetListeners(html);
-		
-		this.UpdateAdvanceMaker();
-		
-		//this.actor.update({});
-		//this.document.prepareDerivedData();
+		switch(this.document.type) {
+			case "npc":
+				this.ActivateSheetListenersNPC(html);
+				break;
+			case "pc":
+			default:
+				this.ActivateSheetListeners(html);
+				this.UpdateAdvanceMaker();
+				break;
+		}
 
 		/*// Active Effect management
 		html.on('click', '.effect-control', (ev) => {
@@ -397,6 +388,13 @@ export class BTPersonActorSheet extends ActorSheet {
 		//fields
 		html.on('change', '#lang-primary', this.ChangeLangPrimary.bind(this));
 		html.on('change', '#age', this.ChangeAge.bind(this));
+		html.on('click', '#lifepath-finalise', (event) => {
+			console.log("HEY");
+			let updateData = {};
+			updateData["system.lifepath.finalised"] = true;
+			console.log(updateData);
+			this.actor.update(updateData);
+		});
 		
 		// Rollable buttons.
 		html.on('click', '.rollable', this._onRoll.bind(this));
@@ -464,6 +462,10 @@ export class BTPersonActorSheet extends ActorSheet {
 				item.delete();
 			}
 		});
+	}
+
+	async ActivateSheetListenersNPC(html) {
+		
 	}
 
 	//Handler method for creating new items on the sheet using the "Add New" button instead of drag-and-drop.
@@ -977,6 +979,9 @@ export class BTPersonActorSheet extends ActorSheet {
 		const actorData = this.document.toObject(false);
 		const systemData = actorData.system;
 		const advanceMaker = systemData.advanceMaker;
+		
+		if(document.getElementById("advance-xp") == undefined)
+			return;
 		
 		document.getElementById("advance-xp").value = advanceMaker.xp;
 		document.getElementById("advance-type").value = advanceMaker.type;

@@ -73,11 +73,13 @@
 						<td>
 							<input type="number" step="1" id="set-mp-jump" value="{{system.mp.jump}}" />
 						</td>
-						{{#if (gt system.mp.jump 0)}}
+					</tr>
+					<!--{{#if (gt system.mp.jump 0)}}
+					<tr>
 						<td class="resource-label">Jumpjet Weight</td>
 						<td>{{times system.mp.jump 0.5}}</td>
-						{{/if}}
 					</tr>
+					{{/if}}-->
 					{{/if}}
 					<tr>
 						<td class="resource-label">Maximum Armour Points</td>
@@ -146,7 +148,7 @@
 							{{/each}}
 							{{#loop location.slots.free}}
 								<tr>
-									<td class="crit-slot" id="{{key}}">Empty slot</td>
+									<td class="crit-slot empty" id="{{key}}">Empty slot</td>
 								</tr>
 							{{/loop}}
 								<tr><td>Life Support</td></tr>
@@ -190,7 +192,7 @@
 							{{/each}}
 							{{#loop location.slots.free}}
 								<tr>
-									<td class="crit-slot" id="{{key}}">Empty slot</td>
+									<td class="crit-slot empty" id="{{key}}">Empty slot</td>
 								</tr>
 							{{/loop}}
 							{{#if (eq key "torso_c")}}
@@ -242,7 +244,7 @@
 							{{/each}}
 							{{#loop location.slots.free}}
 								<tr>
-									<td class="crit-slot" id="{{key}}">Empty slot</td>
+									<td class="crit-slot empty" id="{{key}}">Empty slot</td>
 								</tr>
 							{{/loop}}
 							</table>
