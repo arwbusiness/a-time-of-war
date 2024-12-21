@@ -1,6 +1,7 @@
 // Import document classes.
 import { BTActor } from './documents/actor.mjs';
 import { BTItem } from './documents/item.mjs';
+import { BTToken } from './documents/token.mjs';
 // Import sheet classes.
 import { BTPersonActorSheet } from './sheets/bt-personactor-sheet.mjs';
 import { BTVehicleActorSheet } from './sheets/bt-vehicleactor-sheet.mjs';
@@ -8,7 +9,9 @@ import { BTPersonItemSheet } from './sheets/bt-personitem-sheet.mjs';
 import { BTVehicleItemSheet } from './sheets/bt-vehicleitem-sheet.mjs';
 import { BTLifepathModuleItemSheet } from './sheets/bt-lifepathmoduleitem-sheet.mjs';
 import { BTPropertySheet } from './sheets/bt-property-sheet.mjs';
-
+// Import combat engine stuff.
+import { BTCombatTracker } from "./ui/combat-tracker.mjs";
+import { BTCombatTrackerConfig } from "./sheets/bt-combat-config-sheet.mjs";
 // Import helper/utility classes and constants.
 import { preloadHandlebarsTemplates } from './helpers/templates.mjs';
 import { BT } from './helpers/config.mjs';
@@ -41,6 +44,8 @@ Hooks.once('init', function () {
   // Define custom Document classes
   CONFIG.Actor.documentClass = BTActor;
   CONFIG.Item.documentClass = BTItem;
+  CONFIG.Token.objectClass = BTToken;
+  CONFIG.ui.combat = BTCombatTracker;
 
   // Active Effects are never copied to the Actor,
   // but will still apply to the Actor from within the Item
@@ -80,12 +85,6 @@ Hooks.once('init', function () {
     types: ["lifepath_module"],
     makeDefault: true,
     label: 'BT.SheetLabels.LifepathModule',
-  });
-  
-  CONFIG.statusEffects.push({
-    id: "shutdown",
-    label: "Heat Shutdown",
-    icon: "systems/a-time-of-war/icons/statusEffects/shutdown.png"
   });
   
   // Preload Handlebars templates.
@@ -175,18 +174,38 @@ Hooks.once('setup', function () {
 	CONFIG.statusEffects = [
 		{
 			id:'dead',
-			label:'EFFECT.StatusDead',
+			label:'EFFECT.Status.dead',
 			icon:'icons/svg/skull.svg'
 		},
 		{
 			id:'stunned',
-			label:'EFFECT.StatusStunned',
-			icon:'icons/stunned.png'
+			label:'BT.Status.stunned',
+			icon:'icons/statusEffects/stunned.png'
+		},
+		{
+			id:'bleeding',
+			label:'BT.Status.bleeding',
+			icon:'icons/statusEffects/bleeding.png'
+		},
+		{
+			id:'knockdown',
+			label:'BT.Status.knockdown',
+			icon:'icons/statusEffects/knockdown.png'
+		},
+		{
+			id:'unconscious',
+			label:'BT.Status.unconscious',
+			icon:'icons/statusEffects/unconscious.png'
 		},
 		{
 			id:'shutdown',
-			label:'EFFECT.StatusShutdown',
-			icon:'icons/shutdown.png'
+			label:'BT.Status.shutdown',
+			icon:'icons/statusEffects/shutdown.png'
+		},
+		{
+			id:'hasActed',
+			label:'BT.Status.hasActed',
+			icon:'icons/statusEffects/hasActed.png'
 		}
 	];
 });
@@ -199,20 +218,111 @@ Hooks.once("ready", function() {
 	
 });
 
+//Hooks.on("renderActor");
+//Hooks.on("renderActorDirectory");
+
+//Establish default settings for prototype tokens so I have to do less work.
 Hooks.on("preCreateActor", function(document, data, options, userId) {
 	console.log("Document:", document);
-	console.log("Data:", data);
+	
+	let updateData = {};
+	const target = "prototypeToken.";
+	
+	updateData[target+"sight.enabled"] = true;
+	updateData[target+"sight.range"] = 250;
 	
 	if(document.type == "pc") {
-		let updateData = {};
-		updateData["prototypeToken.actorLink"] = true;
-		document.updateSource(updateData);
+		updateData[target+"actorLink"] = true;
+		updateData[target+"lockRotation"] = true;
 	}
+	else if(document.type == "vehicle") {
+		updateData[target+"lockRotation"] = false;
+	}
+	else if(document.type == "npc") {
+		updateData[target+"lockRotation"] = true;
+	}
+	
+	document.updateSource(updateData);
 });
 
+Hooks.on("preCreateCombat", function(document, data, options, userId) {
+	console.log(document);
+});
+
+Hooks.on('changeSidebarTab', function(app) {
+	//We're interested in changing how the combat tab displays stuff, so...
+	if(app.id != "combat")
+		return;
+	
+	const element = app._element[0];
+	const children = element.children;
+});
+
+Hooks.on('renderCombatTracker', function(document,html,data) {
+	/*console.log(document);
+	console.log(html);
+	console.log(data);*/
+});
+
+Hooks.on("renderCombatTrackerConfig", async(app, html) => {
+	console.log(app);
+	
+	const data = {
+		canConfigure: true
+	};
+	html = await renderTemplate("systems/a-time-of-war/templates/sheets/combat-config.html", data);
+	console.log(html);
+	
+	html.render(true);
+	
+	//await super.renderCombatTrackerConfig(app, html);
+});
+/*Hooks.on("renderCombatTrackerConfig",async(app,$html)=>{
+	const html=$html[0],appWindow=htmlClosest(html,"#combat-config");
+	appWindow&&(appWindow.style.height="");
+	const template2=await(async()=>{
+		const markup=await renderTemplate("systems/pf2e/templates/sidebar/encounter-tracker/config.hbs",
+		{
+			values:{
+				deathIcon:game.settings.get("pf2e","deathIcon"),
+				actorsDeadAtZero:game.settings.get("pf2e","automation.actorsDeadAtZero"),deadAtZeroOptions:[{
+					value:"both",
+					label:"PF2E.SETTINGS.Automation.ActorsDeadAtZero.Both"
+				},
+				{
+					value:"npcsOnly",
+					label:"PF2E.SETTINGS.Automation.ActorsDeadAtZero.NPCsOnly"
+				},
+				{
+					value:"neither",
+					label:"PF2E.SETTINGS.Automation.ActorsDeadAtZero.Neither"
+				}]
+			}
+		}),
+		tempElem=document.createElement("div");
+		return tempElem.innerHTML=markup, tempElem.firstElementChild instanceof HTMLTemplateElement?tempElem.firstElementChild:null
+	})();
+	htmlQueryAll(html,".form-group").at(-1)?.after(...template2?.content.children??[]),app.activateListeners($html)
+});*/
+
+//Vehicles have some specific phenomena to resolve when their turn starts, so we do it here.
 Hooks.on('combatTurnChange', async function(combat, prior, current) {
-	//Vehicles have some specific phenomena to resolve when their turn starts, so we do it here.
-	const currentActorId = combat.turns[current.turn].actorId;
+	//If there's no turns, don't bother trying to do anything and save some lines of code.
+	if(combat?.turns)
+		return;
+	
+	/** New combat stuff */
+	
+	if(settings.isTactical) {
+		console.log("In tactical.");
+	}
+	else {
+		console.log("Not in tactical.");
+	}
+	
+	/** */
+	
+	const currentActorId = combat?.turns[current.turn].actorId;
 	if(game.actors.get(currentActorId).type == "vehicle")
 	{
 		let actor = game.actors.get(currentActorId);

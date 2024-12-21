@@ -217,7 +217,7 @@
 	"leg_l": "Left Leg",
 	"leg_r": "Right Leg",
 	"ice": "I.C.E.",
-	"cell": "Cell",
+	"cell": "Fuel Cell",
 	"fission": "Fission",
 	"compact": "Compact",
 	"standard": "Standard",
@@ -245,22 +245,8 @@
 		"knockdown": "Knocked Down",
 		"unconscious": "Unconscious",
 		"dead": "Dead",
-		"destroyed": "Destroyed",
-		"incapacitated": "Incapacitated"
-	},
-	"BTActor": {
-		"pc": {
-			"attributes": {
-				"str": "STR",
-				"bod": "BOD",
-				"rfl": "RFL",
-				"dex": "DEX",
-				"wil": "WIL",
-				"int": "INT",
-				"cha": "CHA",
-				"edg": "EDG"
-			}
-		}
+		"shutdown": "Shutdown",
+		"hasActed": "Turn Resolved"
 	}
   },
 
