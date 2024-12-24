@@ -122,8 +122,49 @@ export class BTPersonActorSheet extends ActorSheet {
 			return ret;
 		});
 		
-		/* * * DATA CALL IS HERE * * */
-		//this.CalculateData(context.actor.type);
+		//Speeds
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		
+		let walk = 1;
+		let run = 1;
+		let sprint = 1;
+		let climb = 1;
+		let crawl = 1;
+		let swim = 1;
+		
+		walk = Math.max(1, systemData.attributes.str.level + systemData.attributes.rfl.level);
+		
+		run = Math.max(1, 10 + walk);
+		if(systemData.skills["running"]?.level != undefined)
+			run += systemData.skills["running"].level;
+		
+		sprint = Math.max(1, run * 2);
+		
+		climb = Math.max(1, Math.ceil(walk/2));
+		if(systemData.skills["climbing"]?.level != undefined)
+			climb += systemData.skills["climbing"].level;
+		else
+			climb = Math.max(1, climb/2);
+		
+		crawl = Math.max(1, Math.ceil(walk/4));
+		
+		swim = walk;
+		if(systemData.skills["swimming"]?.level != undefined)
+			swim += systemData.skills["swimming"].level;
+		else
+			swim = Math.max(1, swim/2);
+		
+		let updateData = {};
+		updateData["system.mp.walk"] = walk;
+		updateData["system.mp.run"] = run;
+		updateData["system.mp.sprint"] = sprint;
+		updateData["system.mp.climb"] = climb;
+		updateData["system.mp.crawl"] = crawl;
+		updateData["system.mp.swim"] = swim;
+		
+		//Commit the changes. Dunno why this doesn't cause an infinite loop like everywhere fucking else I tried it, but whatever.
+		this.actor.update(updateData);
 	}
 	
 	/**
@@ -132,8 +173,69 @@ export class BTPersonActorSheet extends ActorSheet {
 	* @param {object} context The context object to mutate
 	*/
 	_prepareNPCData(context) {
-		// This is where you can enrich character-specific editor fields
-		// or setup anything else that's specific to this type
+		//Speeds
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		
+		let walk = 1;
+		let run = 1;
+		let sprint = 1;
+		let climb = 1;
+		let crawl = 1;
+		let swim = 1;
+		
+		walk = Math.max(1, systemData.attributes.str + systemData.attributes.rfl);
+		
+		run = Math.max(1, 10 + walk);
+		if(systemData.skills["Running"]?.modifier != undefined)
+			run += systemData.skills["Running"].modifier;
+		
+		sprint = Math.max(1, run * 2);
+		
+		climb = Math.max(1, Math.ceil(walk/2));
+		if(systemData.skills["Climbing"]?.modifier != undefined)
+			climb += systemData.skills["Climbing"].modifier;
+		else
+			climb = Math.max(1, climb/2);
+		
+		crawl = Math.max(1, Math.ceil(walk/4));
+		
+		swim = walk;
+		if(systemData.skills["Swimming"]?.modifier != undefined)
+			swim += systemData.skills["Swimming"].modifier;
+		else
+			swim = Math.max(1, swim/2);
+		
+		let updateData = {};
+		updateData["system.mp.walk"] = walk;
+		updateData["system.mp.run"] = run;
+		updateData["system.mp.sprint"] = sprint;
+		updateData["system.mp.climb"] = climb;
+		updateData["system.mp.crawl"] = crawl;
+		updateData["system.mp.swim"] = swim;
+		
+		//Skill TNs
+		for(let [i, skill] of Object.entries(systemData.skills)) {
+			const guid = i;
+			let tn = 7;
+			switch(skill.type) {
+				case "CA":
+					tn = 9;
+					break;
+				case "SA":
+				case "CB":
+					tn = 8;
+					break;
+				case "SB":
+				default:
+					tn = 7;
+					break;
+			}
+			updateData["system.skills." + guid + ".tn"] = tn;
+		}
+		
+		//Commit the changes. Dunno why this doesn't cause an infinite loop like everywhere fucking else I tried it, but whatever.
+		this.actor.update(updateData);
 	}
 	
 	SortItemsToInventory(context = null) {
@@ -465,7 +567,354 @@ export class BTPersonActorSheet extends ActorSheet {
 	}
 
 	async ActivateSheetListenersNPC(html) {
+		// Rollable buttons.
+		html.on('click', '.rollable', await this.NPCRoll.bind(this));
 		
+		//EMBEDDED ITEM STUFF
+		// Render the item sheet for viewing/editing when you click on it.
+		html.on('click', '.item-edit', (event) => {
+			const li = $(event.currentTarget).parents(".item")[0];
+			const item = this.actor.items.get(li.dataset.id);
+			item.sheet.render(true);
+		});
+
+		// Add Inventory Item
+		html.on('click', '.item-create', this.CreateNewItem.bind(this));
+
+		// Delete Inventory Item
+		html.on('click', '.item-delete', (event) => {
+			//Recursively look up whichever of the clicked button's various parents has the item class.
+			const li = $(event.currentTarget).parents(".item")[0];
+			const item = this.actor.items.get(li.dataset.id);
+			item.delete();
+		});
+		
+		//Dual attribute roll button.
+		html.on('click', '.dual-attribute-roll', this._onDualAttributeRollToggle.bind(this));
+		document.getElementById("dual-attribute-roll").value = "";
+		
+		//Check to set damage and fatigue max
+		html.on('change', '.set-max', async (event) => {
+			const element = event.currentTarget;
+			const which = element.id;
+			
+			const tough = this.actor.system.tough;
+			const fit = this.actor.system.fit;
+			
+			let value = element.value * 2;
+			if((which == 'bod' && tough) || (which == 'wil' && fit))
+				value *= 2;
+			
+			let updateData = {};
+			const target = which == 'bod' ? "system.healthmax" : "system.fatiguemax";
+			updateData[target] = value;
+			if(which == 'bod') {
+				updateData["system.healthmax"] = value;
+				updateData["system.damage.max"] = value;
+			}
+			else if(which == 'wil') {
+				updateData["system.fatiguemax"] = value;
+				updateData["system.fatigue.max"] = value;
+			}
+			
+			await this.actor.update(updateData);
+		});
+		html.on('change', '#set-max-type', async (event) => {
+			const element = event.currentTarget;
+			const which = element.name == "system.tough" ? 'bod' : 'wil';
+			
+			let value = this.actor.system.attributes[which] * 2;
+			if(element.checked)
+				value *= 2;
+			
+			let updateData = {};
+			const target = which == 'bod' ? "system.healthmax" : "system.fatiguemax";
+			updateData[target] = value;
+			if(which == 'bod') {
+				updateData["system.healthmax"] = value;
+				updateData["system.damage.max"] = value;
+			}
+			else if(which == 'wil') {
+				updateData["system.fatiguemax"] = value;
+				updateData["system.fatigue.max"] = value;
+			}
+			
+			await this.actor.update(updateData);
+		});
+		
+		//Handle adding, modifying and removing NPC traits
+		html.on('change', '#add-new-trait', async (event) => {
+			const element = event.currentTarget;
+			const value = element.value;
+			
+			let updateData = {};
+			updateData["system.traits." + this.UUID()] = {
+				name: value,
+				description: "",
+				locked: "false"
+			};
+			
+			await this.actor.update(updateData);
+		});
+		html.on('click', '.lock-trait', async (event) => {
+			const element = event.currentTarget;
+			const setValue = element.dataset.setvalue;
+			const id = element.id;
+			
+			let updateData = {};
+			updateData["system.traits." + id + ".locked"] = setValue;
+			
+			await this.actor.update(updateData);
+		});
+		html.on('click', '.delete-trait', async (event) => {
+			const element = event.currentTarget;
+			const targetId = element.id;
+			
+			let traits = foundry.utils.duplicate(this.actor.system.traits);
+			let updateData = {};
+			updateData["system.traits"] = [];
+			await this.actor.update(updateData);
+			
+			updateData = {};
+			let i = 1;
+			Object.entries(traits).forEach(entry => {
+				const data = entry[1];
+				const id = entry[0];
+				const locked = data.locked;
+				const name = data.name;
+				const description = data.description;
+				
+				if(id != targetId) {
+					updateData["system.traits." + id] = {
+						name: name,
+						description: description,
+						locked: locked
+					};
+				}
+			});
+			
+			await this.actor.update(updateData);
+		});
+		html.on('click', '.trait-to-chat', async (event) => {
+			const element = event.currentTarget;
+			const id = element.id;
+			const data = this.actor.system.traits[id];
+			const actorData = this.getData().actor;
+			
+			const flavour = "";
+			let msgData = {
+				name: data.name,
+				flavour: flavour,
+				speaker: actorData.name,
+				subtitle: "",
+				description: data.description,
+				level: ""
+			};
+			msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
+			
+			const render = await renderTemplate("systems/a-time-of-war/templates/chat/Trait.hbs", msgData);
+			const msg = await ChatMessage.create({
+				content: render//,
+				//sound: CONFIG.sounds.dice
+			});
+			
+			return msg;
+		});
+		
+		//Handle adding, modifying and removing NPC skills
+		html.on('change', '#add-new-skill', async (event) => {
+			const element = event.currentTarget;
+			const value = element.value;
+			
+			let updateData = {};
+			updateData["system.skills." + this.UUID()] = {
+				name: value,
+				modifier: 0,
+				tn: 7,
+				type: "SB",
+				locked: false,
+				naturalAptitude: false
+			};
+			
+			await this.actor.update(updateData);
+		});
+		html.on('click', '.lock-attribute', async (event) => {
+			const element = event.currentTarget;
+			const setValue = element.dataset.setvalue;
+			
+			let updateData = {};
+			updateData["system.attributes.locked"] = setValue;
+			
+			await this.actor.update(updateData); 
+		});
+		html.on('click', '.lock-skill', async (event) => {
+			const element = event.currentTarget;
+			const setValue = element.dataset.setvalue;
+			const id = element.id;
+			
+			let updateData = {};
+			updateData["system.skills." + id + ".locked"] = setValue;
+			
+			await this.actor.update(updateData);
+		});
+		html.on('click', '.delete-skill', async (event) => {
+			const element = event.currentTarget;
+			const targetId = element.id;
+			
+			let skills = foundry.utils.duplicate(this.actor.system.skills);
+			let updateData = {};
+			updateData["system.skills"] = [];
+			await this.actor.update(updateData);
+			
+			updateData = {};
+			let i = 1;
+			Object.entries(skills).forEach(entry => {
+				const data = entry[1];
+				const id = entry[0];
+				const locked = data.locked;
+				const tn = data.tn;
+				const type = data.type;
+				const name = data.name;
+				const modifier = data.modifier;
+				const naturalAptitude = data.naturalAptitude;
+				
+				if(id != targetId) {
+					updateData["system.skills." + id] = {
+						name: name,
+						modifier: modifier,
+						tn: tn,
+						type: type,
+						locked: locked,
+						naturalAptitude: naturalAptitude
+					};
+				}
+			});
+			
+			await this.actor.update(updateData);
+		});
+	}
+	
+	async NPCRoll(event) {
+		const element = event.currentTarget;
+		const id = element.id;
+		const dataset = element.dataset;
+		const actorData = this.actor;
+		const systemData = actorData.system;
+		const rollData = actorData.getRollData();
+		
+		let tn = 12;
+		let rollMod = 0;
+		let hasNaturalAptitude = false;
+		let actionType = "SB";
+		let name = "";
+		
+		//What's the type?
+		if(dataset.rolltype == "attribute") {
+			name = dataset.link;
+			rollMod += parseInt(systemData.attributes[id]);
+			
+			//Is it a dual attribute roll?
+			const dar = document.getElementById("dual-attribute-roll");
+			if(!dar.classList.contains("hidden")) {
+				name = name + "+" + dar.value;
+				rollMod += parseInt(systemData.attributes[dar.value]);
+				tn = 18;
+			}
+		
+			dar.value = "";
+			dar.classList.add("hidden");
+			document.getElementById("dual-attribute-divider").classList.remove("hidden");
+			document.getElementsByClassName("dual-attribute-roll")[0].checked = false;
+		}
+		else if(dataset.rolltype == "skill") {
+			let skill = systemData.skills[id];
+			tn = skill.tn;
+			rollMod = parseInt(skill.modifier);
+			hasNaturalAptitude = skill.naturalAptitude;
+			actionType = skill.type;
+			name = skill.name;
+		}
+		
+		//Build the roll manually because we can't have nice things.
+		let dice = {};
+		let num = hasNaturalAptitude ? 3 : 2;
+		let lowest = hasNaturalAptitude ? 7 : 0;
+		let lowestIndex = 0;
+		let total = 0;
+		let sixes = 0;
+		for(var i = 0; i < num; i++) {
+			let roll = await new Roll('1d6', rollData).evaluate();
+			const value = roll.dice[0].results[0].result;
+			dice[i] = value;
+			total += value;
+				
+			//Calculate the index and value of the lowest die roll
+			if(value < lowest) {
+				lowestIndex = i;
+				lowest = value;
+			}
+			
+			//If you get two 6s, it explodes and further 6s explode; ergo while you're on 2d6, a 12 explodes, but while you're on 3d6, an 18 (6+6+6) would explode.
+			if(value == 6 && sixes < 5) {
+				sixes++;
+				if(sixes >= 2)
+					num++;
+			}
+		}
+		const isStunning = sixes >= 2;
+		const isFumble = total == 2;
+		
+		//If the pilot has natural aptitude, drop the lowest die and record the value.
+		if(hasNaturalAptitude)
+			total -= dice[lowestIndex];
+		else
+			lowestIndex = -1;
+		
+		//Add the rollmod:
+		total += rollMod;
+		
+		//Let modifiers kick in.
+		let modifiers = {};
+		Object.entries(modifiers).forEach(entry => {
+			let modifier = entry[1];
+			console.log(modifier);
+			//total += modifier;
+		});
+		
+		//Calculate the MoS/F:
+		const margin = (total >= tn ? "+" : "") + (total - tn);
+		
+		//Establish the message data.
+		let msgData = {
+			name: name,
+			dice: dice,
+			lowest: lowestIndex,
+			rollMod: rollMod,
+			speaker: actorData.name,
+			untrained: false,
+			tn: tn,
+			actionType: actionType,
+			rollType: dataset.rolltype,
+			img: actorData.img,
+			baseSkill: "none",
+			result: total,
+			margin: (isFumble ? (total-tn > -10 ? "-10" : margin) : (isStunning ? (total-tn < 10 ? "+10" : margin) : margin)),
+			isSuccess: (total >= tn && !isFumble) || isStunning,
+			successOrFail: (!isFumble && !isStunning ? (margin < 0 ? "Failed" : "Succeeded") : isStunning ? "Succeeded" : "Failed"),
+			isFumble: isFumble,
+			isStunning: isStunning
+		}
+		//Apply the chat roll mode.
+		msgData = ChatMessage.applyRollMode(msgData, game.settings.get("core", "rollMode"));
+		
+		//Render the message and send it to the chat window.
+		const render = await renderTemplate("systems/a-time-of-war/templates/chat/StatRoll.hbs", msgData);
+		const msg = await ChatMessage.create({
+			content: render,
+			sound: CONFIG.sounds.dice
+		});
+		
+		return msg;
 	}
 
 	//Handler method for creating new items on the sheet using the "Add New" button instead of drag-and-drop.
@@ -630,7 +1079,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		//Make a dupe list and cleanse+update the real one.
 		let skills = foundry.utils.duplicate(this.actor.system.skills[baseSkill]);
-		const updateTarget = "system.skills."+baseSkill;
+		const updateTarget = "system.skills." + baseSkill;
 		let updateData = {};
 		updateData[updateTarget] = [];
 		await this.actor.update(updateData);
@@ -639,7 +1088,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		Object.entries(skills).forEach(skill => {
 			const data = skill[1];
 			if(skill[0] != skillName) {
-				updateData[updateTarget+"."+skill[0]] = {
+				updateData[updateTarget + "." + skill[0]] = {
 					xp: data.xp,
 					mod: data.mod,
 					level: data.level,
@@ -647,7 +1096,7 @@ export class BTPersonActorSheet extends ActorSheet {
 					tn: data.tn,
 					type: data.type,
 					baseSkill: baseSkill
-				}
+				};
 			}
 		});
 		
@@ -866,7 +1315,7 @@ export class BTPersonActorSheet extends ActorSheet {
 					baseSkill: baseSkill,
 					traitId: traitId,
 					free: free
-				}
+				};
 			}
 		});
 		
@@ -1157,7 +1606,7 @@ export class BTPersonActorSheet extends ActorSheet {
 		const actionType = skill.type;
 		
 		//NaturalAptitude calcs
-		const neededTP = actionType.slice(1,1) == "A" ? 5 : 3;
+		const neededTP = actionType.slice(1,2) == "A" ? 5 : 3;
 		let traitLevel = 0;
 		Object.entries(systemData.traits).forEach(entry => {
 			const trait = entry[1];
@@ -1167,7 +1616,8 @@ export class BTPersonActorSheet extends ActorSheet {
 			
 			if(traitName == "natural_aptitude") {
 				let subname = subtitle.replace("/","_").replace("'","").replace(" ","_").toLowerCase();
-				if(subname == name) {
+				//if(subname == name || subname == baseSkill) {
+				if(subname == name || subname == (baseSkill + "_" + name.toLowerCase())) {
 					traitLevel = level >= traitLevel ? level : traitLevel;
 				}
 			}
@@ -1256,240 +1706,4 @@ export class BTPersonActorSheet extends ActorSheet {
 		
 		return msg;
 	}
-	
-	/* * * DERIVED DATA * * */
-	/*async CalculateData(type) {
-		console.warn("CALLING THE CALC DATA STEP");
-		console.error(document.querySelector("input[data-baseskill='language'"));
-		
-		switch(type) {
-			case "pc":
-				await this.CalculatePCData();
-				break;
-			case "npc":
-				await this.CalculateNPCData();
-				break;
-			default:
-				console.error("Type", type, "not recognised!");
-				break;
-		}
-	}
-	
-	async CalculatePCData() {
-		const systemData = this.actor.system;
-		
-		//Reset all skills, attributes and traits to zero xp, so they can be recalculated using advances and modules.
-		const attributes = systemData.attributes;
-		Object.entries(attributes).forEach(attribute => {
-			attribute[1].xp = 0;
-		});
-		
-		const traits = systemData.traits;
-		Object.entries(traits).forEach(trait => {
-			trait[1].xp = 0;
-		});
-		
-		const skills = systemData.skills;
-		Object.entries(skills).forEach(skill => {
-			let name = skill[0];
-			let data = Object.entries(skill[1]);
-			
-			if(data.length == 0)
-				return;
-			
-			const isCustomSkill = data[0][0] != "xp";
-			if(isCustomSkill) {
-				name = data[0][0];
-				data = data[0][1];
-			}
-			else
-				data = skill[1];
-			
-			data.xp = 0;
-		});
-		
-		const advances = systemData.advances;
-		let context = { inventory: {} };
-		this.SortItemsToInventory(context);
-		const modules = context.inventory.modules;
-		
-		//Check modules for custom skills and traits and establish them before trying to set them.
-		for(var i = 0; i < modules.length; i++) {
-			const module = modules[i];
-			if(module.system.type == "subaffiliation" && module.img != "")
-				systemData.lifepath.img = module.img;
-			
-			const data = module.system;
-			if(data.skills != undefined) {
-				Object.entries(data.skills).forEach(en => {
-					console.warn("Adding", en[1].name);
-					const advance = en[1];
-					const id = advance.id;
-					const name = advance.name;
-					//const xp = parseInt(advance.xp);
-					const hasSubtitle = advance.hasSubtitle;
-					const subtitle = advance.subtitle;
-					
-					if(hasSubtitle) {// && skills[name][subtitle] == undefined) {
-						//Create a blank custom skill for each
-						switch(name) {
-							case "art":
-								this.actor.system.skills[name][subtitle] = {
-									id: id,
-									name: subtitle,
-									baseSkill: name,
-									xp: 0,
-									mod: 0,
-									level: -1,
-									link: "dex",
-									tn: 8,
-									type: "CB"
-								};
-								break;
-							case "career":
-								this.actor.system.skills[name][subtitle] = {
-									id: id,
-									name: subtitle,
-									baseSkill: name,
-									xp: 0,
-									mod: 0,
-									level: -1,
-									link: "int",
-									tn: 7,
-									type: "SB"
-								};
-								break;
-							case "interest":
-								this.actor.system.skills[name][subtitle] = {
-									id: id,
-									name: subtitle,
-									baseSkill: name,
-									xp: 0,
-									mod: 0,
-									level: -1,
-									link: "int",
-									tn: 8,
-									type: "CB"
-								};
-								break;
-							case "language":
-								this.actor.system.skills[name][subtitle] = {
-									id: id,
-									name: subtitle,
-									baseSkill: name,
-									xp: 0,
-									mod: 0,
-									level: -1,
-									link: "int+cha",
-									tn: 8,
-									type: "SA"
-								};
-								break;
-							case "protocol":
-								this.actor.system.skills[name][subtitle] = {
-									id: id,
-									name: subtitle,
-									baseSkill: name,
-									xp: 0,
-									mod: 0,
-									level: -1,
-									link: "wil+cha",
-									tn: 9,
-									type: "CA"
-								};
-								break;
-							case "science":
-								this.actor.system.skills[name][subtitle] = {
-									id: id,
-									name: subtitle,
-									baseSkill: name,
-									xp: 0,
-									mod: 0,
-									level: -1,
-									link: "int+wil",
-									tn: 9,
-									type: "CA"
-								};
-								break;
-							case "streetwise":
-								this.actor.system.skills[name][subtitle] = {
-									id: id,
-									name: subtitle,
-									baseSkill: name,
-									xp: 0,
-									mod: 0,
-									level: -1,
-									link: "cha",
-									tn: 8,
-									type: "CB"
-								};
-								break;
-							case "survival":
-								this.actor.system.skills[name][subtitle] = {
-									id: id,
-									name: subtitle,
-									baseSkill: name,
-									xp: 0,
-									mod: 0,
-									level: -1,
-									link: "bod+int",
-									tn: 9,
-									type: "CA"
-								};
-								break;
-							default:
-								break;
-						}
-						this.render();
-					}
-				});
-			}*/
-			
-			/*if(data.attributes != undefined) {
-				Object.entries(data.attributes).forEach(en => {
-					const id = entry[0];
-					const attribute = entry[1];
-					const name = attribute.name;
-					const xp = parseInt(data.xp);
-					this.actor.system.attributes[name].xp 
-				});
-			}*/
-			
-			/*if(data.traits != undefined) {
-				
-			}
-		}
-		
-		//Now we pump in the XP from modules
-		for(var i = 0; i < modules.length; i++) {
-			const module = modules[i];
-			const data = module.system;
-			if(data.skills != undefined) {
-				Object.entries(data.skills).forEach(en => {
-					console.warn("Adding", en[1].name);
-					const advance = en[1];
-					const id = advance.id;
-					const name = advance.name;
-					const xp = parseInt(advance.xp);
-					const hasSubtitle = advance.hasSubtitle;
-					const subtitle = advance.subtitle;
-					
-					let updateData = {};
-					if(hasSubtitle) {
-						this.actor.system.skills[name][subtitle].xp += xp;
-						updateData["system.skills."+name+"."+subtitle+".xp"] = this.actor.system.skills[name][subtitle].xp + xp;
-					}
-					else {
-						this.actor.system.skills[name].xp += xp;
-						updateData["system.skills."+name+".xp"] = this.actor.system.skills[name].xp + xp;
-					}
-					this.actor.update(updateData);
-				});
-			}
-		}
-	}
-
-	async CalculateNPCData() {
-		
-	}*/
 }

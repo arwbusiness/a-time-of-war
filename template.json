@@ -25,7 +25,6 @@
           "walk": 1,
           "run": 1,
           "sprint": 1,
-          "jump": 1,
           "climb": 1,
           "swim": 1,
           "crawl": 1
@@ -33,6 +32,13 @@
 		"weight": {
 			"carried": 0,
 			"max": 100
+		},
+		"inventory": {
+			"weapon": {},
+			"armour": {},
+			"equipment": {},
+			"property": {},
+			"modules": {}
 		}
       }
     },
@@ -40,8 +46,24 @@
       "templates": ["person"],
       "healthmax": 8,
       "fatiguemax": 8,
-      "general_skill": 0,
-      "custom_skills": {}
+      "skills": {
+		  
+	  },
+	  "tough": false,
+	  "fit": false,
+	  "attributes": {
+		  "locked": false,
+		  "str": 4,
+		  "bod": 4,
+		  "dex": 4,
+		  "rfl": 4,
+		  "wil": 4,
+		  "int": 4,
+		  "cha": 4
+	  },
+	  "traits": {
+		  
+	  }
     },
     "pc": {
       "templates": ["person"],
@@ -73,13 +95,6 @@
 		"lifepath": {
 			"img": "",
 			"finalised": false
-		},
-		"inventory": {
-			"weapon": {},
-			"armour": {},
-			"equipment": {},
-			"property": {},
-			"modules": {}
 		},
       "attributes": {
         "str": { "level": 0, "xp": 0, "mod": -4 },

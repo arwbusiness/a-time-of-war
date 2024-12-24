@@ -12,6 +12,7 @@ export const preloadHandlebarsTemplates = async function () {
 		'systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPCSkills3.hbs',
 		'systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPCSkillsCustom.hbs',
 		'systems/a-time-of-war/templates/actor/parts/PersonActorCharacter.hbs',
+		'systems/a-time-of-war/templates/actor/parts/PersonActorCharacterNPC.hbs',
 		'systems/a-time-of-war/templates/actor/parts/PersonActorEquipment.hbs',
 		'systems/a-time-of-war/templates/actor/parts/PersonActorProgression.hbs',
 		'systems/a-time-of-war/templates/actor/parts/PersonActorOptions.hbs',

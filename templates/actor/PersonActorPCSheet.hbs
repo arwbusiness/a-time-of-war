@@ -95,7 +95,7 @@
 
 				<div class="resource flex-group-center">
 					<label for="system.luck.value" class="resource-label">Luck</label>
-					<div style="padding-left:120px; padding-right:120px;" class="resource flexrow flex-center flex-between">
+					<div style="padding-left:110px; padding-right:110px;" class="resource flexrow flex-center flex-between">
 						<input type="number" name="system.luck.value" value="{{system.luck.value}}"/>
 						<span style="padding-top:4px"> / </span>
 						<label style="padding-top:4px" for="system.luck.max">{{system.luck.max}}</label>
@@ -142,11 +142,7 @@
 	<section class="sheet-body">
 
 		<div class="tab gameplay" data-group="primary" data-tab="gameplay">
-		{{#if (eq data.type "pc")}}
-			{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPC.hbs"}}
-		{{else if (eq data.type "npc")}}
-			{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayNPC.hbs"}}
-		{{/if}}
+		{{> "systems/a-time-of-war/templates/actor/parts/PersonActorGameplayPC.hbs"}}
 		</div>
 
 		<div class="tab character" data-group="primary" data-tab="character">

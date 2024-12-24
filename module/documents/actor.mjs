@@ -420,12 +420,12 @@ export class BTActor extends Actor {
 		systemData.luck.max = parseInt(systemData.attributes.edg.level);
 		
 		//MP will be here somewhere. Will do it in a moment.
-		systemData.mp.walk = Math.max(1, systemData.attributes.str.level + systemData.attributes.rfl.level);
+		/*systemData.mp.walk = Math.max(1, systemData.attributes.str.level + systemData.attributes.rfl.level);
 		systemData.mp.run = Math.max(1, 10 + systemData.attributes.str.level + systemData.attributes.rfl.level + Math.max(0,systemData.skills.running.level));
 		systemData.mp.sprint = Math.max(1, systemData.mp.run * 2);
 		systemData.mp.climb = Math.max(1, Math.ceil(systemData.mp.walk/2)+Math.max(0,systemData.skills.climbing) / (systemData.skills.climbing.level == -1 ? 2 : 1));
 		systemData.mp.crawl = Math.max(1, Math.ceil(systemData.mp.walk/4));
-		systemData.mp.swim = Math.max(1, Math.ceil(systemData.mp.walk + Math.max(0,systemData.skills.swimming.level)) / (systemData.skills.swimming.level == -1 ? 2 : 1));
+		systemData.mp.swim = Math.max(1, Math.ceil(systemData.mp.walk + Math.max(0,systemData.skills.swimming.level)) / (systemData.skills.swimming.level == -1 ? 2 : 1));*/
 		
 		//Don't forget to add a theoretical encumbrance.
 		

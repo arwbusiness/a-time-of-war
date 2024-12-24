@@ -1,5 +1,23 @@
 <div class="attributes" style="width:100%; border:10px;">
 
+	<h3 style="float:center">Speed</h3>
+	<table>
+		<tr>
+			<th>Walk</th>
+			<th>Run</th>
+			<th>Sprint</th>
+			<th>Climb</th>
+			<th>Swim</th>
+			<th>Crawl</th>
+		</tr>
+		<tr style="text-align:center;">
+		{{#each system.mp as |speed key|}}
+			<td>{{speed}}</td>
+		{{/each}}
+		</tr>
+	</table>
+	<br>
+
 	<h3 style="float:center">Attributes</h3>
 	<table>
 		<tr>
